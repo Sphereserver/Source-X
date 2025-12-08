@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 _SAN_COMMON_FLAGS=handle_abort=true:abort_on_error=false
 #ASAN_MORE=check_initialization_order=1

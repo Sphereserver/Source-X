@@ -31,15 +31,8 @@ private:
 
 public:
     static const char *m_sClassName;
-    explicit CResourceScript(lpctstr pszFileName)
-    {
-        _Init();
-        _SetFilePath(pszFileName);
-    }
-    CResourceScript()
-    {
-        _Init();
-    }
+    explicit CResourceScript(lpctstr pszFileName);
+    CResourceScript();
     virtual ~CResourceScript() = default;
 
 private:    bool _CheckForChange();
@@ -49,10 +42,7 @@ public:
     CResourceScript(const CResourceScript& copy) = delete;
     CResourceScript& operator=(const CResourceScript& other) = delete;
 
-    bool IsFirstCheck() const noexcept
-    {
-        return (m_dwSize == UINT32_MAX && !m_dateChange.IsTimeValid());
-    }
+    bool IsFirstCheck() const noexcept;
     void ReSync();
     virtual bool Open( lpctstr pszFilename = nullptr, uint wFlags = OF_READ ) override;
     virtual void Close() override;

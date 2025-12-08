@@ -307,7 +307,7 @@ void UnixTerminal::tick()
 			{
                 this->ConsoleInterface::_ciQueueCV.wait(lock,
                     [this]() {
-                        return (this->m_terminateRequested || !this->ConsoleInterface::_qOutput.empty());
+                        return (this->m_fTerminateRequested || !this->ConsoleInterface::_qOutput.empty());
                     });
 			}
 
@@ -328,7 +328,7 @@ void UnixTerminal::tick()
 
 void UnixTerminal::waitForClose()
 {
-    this->m_terminateRequested = true;
+    this->m_fTerminateRequested = true;
     this->ConsoleInterface::_ciQueueCV.notify_one();
     //AbstractSphereThread::waitForClose();
     //AbstractThread::terminate(true);

@@ -155,10 +155,10 @@ public:
 	lpctstr FindValStr( lpctstr pVal ) const;
 
     CVarDefContNum* SetNumNew( lpctstr ptcKey, int64 iVal );
-    CVarDefContNum* SetNum( lpctstr ptcKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true );
+    CVarDefContNum* SetNum( lpctstr ptcKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = false );
     CVarDefContNum* ModNum( lpctstr ptcKey, int64 iMod, bool fDeleteZero = true);
     CVarDefContStr* SetStrNew( lpctstr ptcKey, lpctstr pszVal );
-    CVarDefCont* SetStr( lpctstr ptcKey, bool fQuoted, lpctstr pszVal, bool fDeleteZero = true, bool fWarnOverwrite = true );
+    CVarDefCont* SetStr(lpctstr ptcKey, bool fQuoted, lpctstr ptcVal, bool fDeleteZero = true, bool fWarnOverwrite = false );
 
 	CVarDefCont * GetAt( size_t at ) const;
 	CVarDefCont * GetKey( lpctstr ptcKey ) const;
@@ -169,8 +169,8 @@ public:
     CVarDefCont * CheckParseKey( lpctstr pszArgs ) const;
 	CVarDefCont * GetParseKey_Advance( lpctstr & pArgs ) const;
     inline CVarDefCont * GetParseKey( lpctstr pArgs ) const;
-    bool GetParseVal_Advance( lpctstr & pArgs, llong * pllVal ) const;
-    inline bool GetParseVal( lpctstr pArgs, llong * plVal ) const;
+    bool GetParseVal_Advance( lpctstr & pArgs, int64 * piVal ) const;
+    inline bool GetParseVal( lpctstr pArgs, int64 * plVal ) const;
 
 	void DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix = nullptr ) const;
 	void ClearKeys(lpctstr mask = nullptr);
@@ -204,9 +204,9 @@ CVarDefCont * CVarDefMap::GetParseKey(lpctstr pArgs) const
     return GetParseKey_Advance(pArgs);
 }
 
-bool CVarDefMap::GetParseVal(lpctstr pArgs, llong * pllVal) const
+bool CVarDefMap::GetParseVal(lpctstr pArgs, int64 *piVal) const
 {
-    return GetParseVal_Advance(pArgs, pllVal);
+    return GetParseVal_Advance(pArgs, piVal);
 }
 
 CVarDefMap::iterator CVarDefMap::begin()                { return m_Container.begin();   }

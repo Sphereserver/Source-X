@@ -36,8 +36,11 @@ set(pch_list
 set(sphere_S
     src/sphere/asyncdb.cpp
     src/sphere/ConsoleInterface.cpp
+    src/sphere/GlobalInitializer.cpp
+    src/sphere/MainThread.cpp
     src/sphere/ProfileData.cpp
     src/sphere/ProfileTask.cpp
+    src/sphere/StartupMonitorThread.cpp
     src/sphere/threads.cpp
     src/sphere/ntservice.cpp
     src/sphere/ntwindow.cpp
@@ -47,8 +50,12 @@ set(sphere_H
     src/sphere/asyncdb.h
     src/sphere/containers.h
     src/sphere/ConsoleInterface.h
+    src/sphere/GlobalInitializer.h
+    src/sphere/MainThread.h
     src/sphere/ProfileData.h
     src/sphere/ProfileTask.h
+    src/sphere/StartupMonitorAPI.h
+    src/sphere/StartupMonitorThread.h
     src/sphere/threads.h
     src/sphere/ntservice.h
     src/sphere/ntwindow.h
@@ -315,6 +322,7 @@ set(spherelibrary_S
     src/common/sphere_library/CSTime.cpp
     src/common/sphere_library/CSWindow.cpp
     src/common/sphere_library/smutex.cpp
+    src/common/sphere_library/snetwork.cpp
     src/common/sphere_library/sresetevents.cpp
     src/common/sphere_library/sstring.cpp
     src/common/sphere_library/sstringobjs.cpp
@@ -344,6 +352,7 @@ set(spherelibrary_H
     src/common/sphere_library/sfastmath.h
     src/common/sphere_library/smap.h
     src/common/sphere_library/smutex.h
+    src/common/sphere_library/snetwork.h
     src/common/sphere_library/sobjpool.h
     src/common/sphere_library/squeues.h
     src/common/sphere_library/sresetevents.h
@@ -375,7 +384,7 @@ set(game_S
     src/game/CResourceCalc.cpp
     src/game/CSector.cpp
     src/game/CSectorEnviron.cpp
-    src/game/CSectorTemplate.cpp
+    src/game/CSectorBase.cpp
     src/game/CSectorList.cpp
     src/game/CServer.cpp
     src/game/CServerConfig.cpp
@@ -415,7 +424,7 @@ set(game_H
     src/game/CScriptProfiler.h
     src/game/CSector.h
     src/game/CSectorEnviron.h
-    src/game/CSectorTemplate.h
+    src/game/CSectorBase.h
     src/game/CSectorList.h
     src/game/CServer.h
     src/game/CServerConfig.h

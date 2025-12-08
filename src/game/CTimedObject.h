@@ -44,7 +44,7 @@ public:
     virtual ~CTimedObject();
 
 protected:
-    inline bool IsTimeoutTickingActive() noexcept;
+    inline bool _IsTimeoutTickingActive() noexcept;
 
 protected:  inline  bool _IsSleeping() const noexcept;
 public:             bool IsSleeping() const noexcept;
@@ -55,18 +55,15 @@ public:             virtual void GoSleep();
 protected:  virtual void _GoAwake();
 public:     virtual void  GoAwake();
 
+protected:
+    inline void _SetAwakeFlagRaw();
+
     /**
     * @brief returns the type of ticking object.
     * @return the type.
     */
 protected:  inline PROFILE_TYPE _GetProfileType() const noexcept;
 public:     PROFILE_TYPE GetProfileType() const noexcept;
-
-    /**
-     * @brief   Determine if the object is in a "tickable" state.
-    */
-protected:  virtual bool _TickableState() const;  // TODO: locks need to be extended to derived classes
-public:     virtual bool  TickableState() const;
 
     /**
      * @brief   Executes the tick action.
@@ -185,7 +182,12 @@ void CTimedObject::_GoSleep()
     _fIsSleeping = true;
 }
 
-bool CTimedObject::IsTimeoutTickingActive() noexcept
+void CTimedObject::_SetAwakeFlagRaw()
+{
+    _fIsSleeping = false;
+}
+
+bool CTimedObject::_IsTimeoutTickingActive() noexcept
 {
     return _fIsInWorldTickList || _fIsInWorldTickAddList;
 }

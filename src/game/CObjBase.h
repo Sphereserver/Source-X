@@ -33,7 +33,8 @@ class CWorldTicker;
 DIR_TYPE GetDirStr(lpctstr pszDir);
 
 
-class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps, public virtual CTimedObject
+class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps,
+                 public virtual CTimedObject    /* TODO: can we get rid of virtual inheritance in the future? */
 {
 	static lpctstr const sm_szLoadKeys[];   // All Instances of CItem or CChar have these base attributes.
 	static lpctstr const sm_szVerbKeys[];   // All Instances of CItem or CChar have these base attributes.
@@ -922,14 +923,8 @@ protected:
      */
     virtual void OnTickStatusUpdate();
 
-    virtual bool _TickableState() const override;
-    //virtual bool  TickableState() const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
-
-    std::optional<bool> _TickableStateOverride() const;
-
-    bool _CanTick(bool fParentGoingToSleep = false) const;
-
 public:
+    virtual bool _CanTick(bool fParentGoingToSleep) const;
 
     /**
      * @fn  PacketPropertyList* CObjBase::GetPropertyList(void) const

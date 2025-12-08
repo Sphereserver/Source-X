@@ -3,9 +3,9 @@
 #include "CWorld.h"
 #include "CSectorList.h"
 
-CSectorList::CSectorList() : _SectorData{}
+CSectorList::CSectorList() :
+    _SectorData{}, _fInitialized(false)
 {
-	_fInitialized = false;
 }
 
 CSectorList::~CSectorList()
@@ -31,13 +31,6 @@ void CSectorList::Init()
 
 	for (int iMap = 0; iMap < MAP_SUPPORTED_QTY; ++iMap)
 	{
-		/*
-			Before iSectorIndex was declared and set to 0 outside the FOR, so I moved it inside because
-			we need to (re)set iSectorIndex to 0 when Sphere finish to initialize every sectors in a map, otherwise
-			iSectorIndex will have the same value of iSectorQty when Sphere finish loading map0.
-		*/
-		int iSectorIndex = 0;
-
 		MapSectorsData& sd = _SectorData[iMap];
 		sd.iSectorSize = sd.iSectorColumns = sd.iSectorRows = sd.iSectorQty = 0;
 		sd._pSectors.reset();
@@ -53,6 +46,8 @@ void CSectorList::Init()
 		Str_ConcatLimitNull(tsConcat.buffer(), ts.buffer(), tsConcat.capacity());
 
 		sd._pSectors		= std::make_unique<CSector[]>(iSectorQty);
+        ASSERT(sd._pSectors);
+
 		sd.iSectorSize		= g_MapList.GetSectorSize(iMap);
 		sd.iSectorQty		= iSectorQty;
 		sd.iSectorColumns	= iMaxX;
@@ -63,21 +58,24 @@ void CSectorList::Init()
         uint32 sector_shift = 0;
         for (uint sz = sd.iSectorSize; sz > 1; sz >>= 1)
             ++sector_shift;
-        sd.uiSectorDivShift = (uint16)sector_shift;
+        sd.uiSectorSizeDivShift = (uint16)sector_shift;
 
 
 		short iSectorX = 0, iSectorY = 0;
-		for (; iSectorIndex < iSectorQty; ++iSectorIndex)
+        for (int iSectorIndex = 0; iSectorIndex < iSectorQty; ++iSectorIndex)
 		{
-			if (iSectorX >= iMaxX)
-			{
-				iSectorX = 0;
-				++iSectorY;
-			}
+            // Map sectors are ordered in row-major order:
+            //  consecutive elements from the same row are contiguous and the inner loop varies the column index.
+            if (iSectorX >= iMaxX)
+            {
+                iSectorX = 0;
+                ++iSectorY;
+            }
 
 			CSector* pSector = &(sd._pSectors[iSectorIndex]);
-			ASSERT(pSector);
 			pSector->Init(iSectorIndex, (uchar)iMap, iSectorX, iSectorY);
+
+            ++iSectorX;
 		}
 
 	}
@@ -117,27 +115,44 @@ void CSectorList::Close(bool fClosingWorld)
 
 
 [[nodiscard]]
-const MapSectorsData& CSectorList::GetMapSectorData(int map) const
+const MapSectorsData* CSectorList::GetMapSectorData(int map) const noexcept
 {
-    DEBUG_ASSERT(g_MapList.IsMapSupported(map));
+    if (!g_MapList.IsMapSupported(map))
+        return nullptr;
+
+    return &_SectorData[map];
+}
+
+[[nodiscard]]
+const MapSectorsData& CSectorList::GetMapSectorDataUnchecked(int map) const noexcept
+{
+    // We assume we HAVE checked that's a valid map and that we are not indexing the _SectorData out of bounds.
+    //if (!g_MapList.IsMapSupported(map))
+    //    return nullptr;
+
     return _SectorData[map];
 }
 
-CSector* CSectorList::GetSectorByIndex(int map, int index) const noexcept
+CSector* CSectorList::GetSectorByIndexUnchecked(int map, int index) const noexcept
 {
     // We call this method very often and from places we ASSUME have already checked that the map number is legit.
-    // Micro-optimization: Skip the function call and the if statement to avoid the possible cost of a branch misprediction.
+    //  (it's done in CWorldMap::GetSectorByIndex).
+
+    // Micro-optimization: Skip the function call (with the call cost) and the if statement to avoid the possible cost of a branch misprediction.
     //if (!g_MapList.IsMapSupported(map) || !_SectorData[map]._pSectors)
     //	return nullptr;
+    //if ((map < 0) || ((size_t)map < sizeof(_SectorData)) )
+    //    return nullptr;
 
 	const MapSectorsData& sd = _SectorData[map];
-    //return (index < sd.iSectorQty) ? &(sd._pSectors[index]) : nullptr;
     return (index < sd.iSectorQty) ? &(sd._pSectors.get()[index]) : nullptr;
 }
 
-CSector* CSectorList::GetSectorByCoordsUnchecked(int map, short x, short y) const noexcept
+CSector* CSectorList::GetSectorByCoordsUnchecked(int map, short x, short y) const NOEXCEPT_NODEBUG
 {
     // We call this method very often and from places we ASSUME have already checked that the map number is legit.
+    //  (it's done in CPointBase::GetSector())
+
     // Micro-optimization: Skip the IsMapSupported function call and the if statement to avoid the possible cost of a branch misprediction.
     //if (!g_MapList.IsMapSupported(map) || !_SectorData[map]._pSectors)
     //	return nullptr;
@@ -146,7 +161,7 @@ CSector* CSectorList::GetSectorByCoordsUnchecked(int map, short x, short y) cons
 
     // We know that sector sizes MUST be multiple of 2, so just use bit shifts.
     //const int xSectTest = (x / sd.iSectorSize), ySectTest = (y / sd.iSectorSize);
-    const int xSect = (x >> sd.uiSectorDivShift), ySect = (y >> sd.uiSectorDivShift);
+    const int xSect = (x >> sd.uiSectorSizeDivShift), ySect = (y >> sd.uiSectorSizeDivShift);
     //ASSERT(xSectTest == xSect);
     //ASSERT(ySectTest == ySect);
 

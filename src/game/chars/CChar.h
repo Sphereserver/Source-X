@@ -1398,13 +1398,13 @@ protected:
 
     bool IsPeriodicTickPending() const;
 
-    virtual bool _TickableState() const override final;
-
 protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills, AI, etc.
 //public:	virtual bool  _OnTick() override final;
 
 public:
-	bool OnTickEquip( CItem * pItem );
+    virtual bool _CanTick(bool fParentGoingToSleep) const override final;
+
+    bool OnTickEquip( CItem * pItem );
 	void OnTickFood( ushort uiVal, int HitsHungerLoss );
 
 	virtual void OnTickStatusUpdate() override;

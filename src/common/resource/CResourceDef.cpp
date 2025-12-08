@@ -64,7 +64,7 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
             g_Log.EventWarn("DEFNAME=%s: redefinition (0%x!=0%x)\n",
                             pszName, iKeyIndex, iResIndex);
 
-        pVarKeyNum = gwriter->m_VarResDefs.SetNum( pszName, dwResPrivateUID );
+        pVarKeyNum = gwriter->m_VarResDefs.SetNum( pszName, dwResPrivateUID, false, true );
     }
     else
     {

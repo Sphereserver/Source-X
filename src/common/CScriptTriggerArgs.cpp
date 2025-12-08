@@ -116,15 +116,16 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
 
     if ( IsDigit(*pszStr) || ((*pszStr == '-') && IsDigit(*(pszStr+1))) )
     {
-        m_iN1 = Exp_GetSingle(pszStr);
+        auto& gExprParser = CExpression::GetExprParser();
+        m_iN1 = gExprParser.GetSingle(pszStr);
         SKIP_ARGSEP( pszStr );
         if ( IsDigit(*pszStr) || ((*pszStr == '-') && IsDigit(*(pszStr+1))) )
         {
-            m_iN2 = Exp_GetSingle(pszStr);
+            m_iN2 = gExprParser.GetSingle(pszStr);
             SKIP_ARGSEP( pszStr );
             if ( IsDigit(*pszStr) || ((*pszStr == '-') && IsDigit(*(pszStr+1))) )
             {
-                m_iN3 = Exp_GetSingle(pszStr);
+                m_iN3 = gExprParser.GetSingle(pszStr);
             }
         }
     }

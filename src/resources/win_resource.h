@@ -17,6 +17,7 @@
 #define IDM_STATUS                      528
 #define IDM_RESTORE                     544
 #define IDM_MINIMIZE                    560
+#define IDM_CLEAR_CONSOLE               561
 #define IDM_EDIT_COPY                   580
 #define IDM_EXIT                        582
 #define IDC_ABOUT_VERSION               1117

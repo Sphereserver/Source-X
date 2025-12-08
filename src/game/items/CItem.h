@@ -608,7 +608,7 @@ protected:
 public:
 	virtual bool _OnTick() override;
 
-    virtual bool _TickableState() const override;
+    virtual bool _CanTick(bool fParentGoingToSleep) const override final;
 	bool _CanHoldTimer() const;
 
     virtual void DupeCopy( const CObjBase * pItem ) override;
@@ -634,17 +634,18 @@ public:
 
 	ITEMID_TYPE GetID() const;
     virtual dword GetIDCommon() const override final; // The unique index id (will NOT be the same as artwork if outside artwork range).
-	inline ITEMID_TYPE GetDispID() const noexcept {
-		// This is what the item looks like.
-		// May not be the same as the item that defines it's type.
-		return m_dwDispIndex;
-	}
 
 	bool SetBaseID( ITEMID_TYPE id );
 	bool SetID( ITEMID_TYPE id );
 
 	bool IsSameDispID( ITEMID_TYPE id ) const;	// account for flipped types ?
 	bool SetDispID( ITEMID_TYPE id );
+    inline ITEMID_TYPE GetDispID() const noexcept {
+        // This is what the item looks like.
+        // May not be the same as the item that defines it's type.
+        return m_dwDispIndex;
+    }
+
 	void SetAnim( ITEMID_TYPE id, int64 iTicksTimeout); // time in ticks
 
 	virtual int IsWeird() const override;

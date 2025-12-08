@@ -1,0 +1,50 @@
+name: "🐛 Bug Report"
+description: Report unexpected behavior
+labels: ["bug"]
+#assignees:
+#  - cbnolok
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening a bug report, please search for the behaviour in the existing issues.
+        ---
+        Thank you for taking the time to file a bug report. To address this bug as fast as possible, we need some information.
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Step-by-step guide for reproducing the bug in a vanilla SphereServer instance. If addressing a regression, please provide the sphere revision number or commit since when the bug started to occur.
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: false
+  - type: input
+    id: sphere-rev
+    attributes:
+      label: Revision Number and Git Version Hash
+      placeholder: "e.g. 4031 bbfc587bb2c270c53ecb54cb5e1ea2f54cd9031f"
+    validations:
+      required: true
+   - type: dropdown
+     id: sphere-branch
+     attributes:
+       label: Branch
+       description: "Select the branch you are working with"
+       options:
+          - "master"
+          - "dev"
+      validations:
+        required: true

@@ -434,7 +434,7 @@ void CSector::r_Write()
 	if ( m_fSaveParity == g_World.m_fSaveParity )
 		return; // already saved.
 
-    CPointMap const& pt = m_BasePoint;
+    CPointMap const& pt = m_BasePointSectUnits;
 
 	m_fSaveParity = g_World.m_fSaveParity;
 	bool fHeaderCreated = false;
@@ -615,23 +615,23 @@ int CSector::GetLocalTime() const
 {
 	ADDTOCALLSTACK("CSector::GetLocalTime");
 	//	Get local time of the day (in minutes)
+    const CPointMap& pt = m_BasePointSectUnits;
     const CSectorList& pSectors = CSectorList::Get();
-    const CPointMap& pt = m_BasePoint;
-	int64 iLocalTime = CWorldGameTime::GetCurrentTimeInGameMinutes();
+    const MapSectorsData& sd = pSectors.GetMapSectorDataUnchecked(pt.m_map);
+    int64 iLocalTime = CWorldGameTime::GetCurrentTimeInGameMinutes();
 
 	if ( !g_Cfg.m_fAllowLightOverride )
 	{
-		iLocalTime += ( pt.m_x * 24*60 ) / g_MapList.GetMapSizeX(pt.m_map);
+        iLocalTime += ( pt.m_x * 24*60 ) / sd.iSectorColumns;
 	}
 	else
 	{
-        const MapSectorsData& sd = pSectors.GetMapSectorData(pt.m_map);
-
 		// Time difference between adjacent sectors in minutes
         const int iSectorTimeDiff = (24*60) / sd.iSectorColumns;
 
 		// Calculate the # of columns between here and Castle Britannia ( x = 1400 )
-        const int iSectorOffset = ( pt.m_x / sd.iSectorSize);
+        // TODO: This code doesn't actually do that...
+        const int iSectorOffset = pt.m_x;
 
 		// Calculate the time offset from global time
 		const int iTimeOffset = iSectorOffset * iSectorTimeDiff;
@@ -835,8 +835,9 @@ void CSector::SetLight( int light )
 void CSector::SetDefaultWeatherChance()
 {
 	ADDTOCALLSTACK("CSector::SetDefaultWeatherChance");
-    CPointMap const& pt = m_BasePoint;
-	byte iPercent = (byte)(IMulDiv( pt.m_y, 100, g_MapList.GetMapSizeY(pt.m_map) ));	// 100 = south
+    const CSectorList& pSectors = CSectorList::Get();
+    const MapSectorsData& sd = pSectors.GetMapSectorDataUnchecked(m_BasePointSectUnits.m_map);
+    byte iPercent = (byte)(IMulDiv( m_BasePointSectUnits.m_y, 100, sd.iSectorRows ));	// 100 = south
 	if ( iPercent < 50 )
 	{
 		// Anywhere north of the Britain Moongate is a good candidate for snow
@@ -949,7 +950,7 @@ bool CSector::IsInDungeon() const
     ADDTOCALLSTACK("CSector::IsInDungeon");
     // What part of the maps are filled with dungeons.
     // Used for light / weather calcs.
-    CRegion *pRegion = GetRegion(m_BasePoint, REGION_TYPE_AREA);
+    CRegion *pRegion = GetRegion(GetBasePointMapUnits(), REGION_TYPE_AREA);
 
     return ( pRegion && pRegion->IsFlag(REGION_FLAG_UNDERGROUND) );
 }
@@ -965,6 +966,9 @@ void CSector::OnHearItem( CChar * pChar, lpctstr pszText )
 	for (CSObjContRec* pObjRec : m_Items.GetIterationSafeContReverse())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
+        if (!pItem->CanHear())
+            continue;
+
 		pItem->OnHear( pszText, pChar );
 	}
 }
@@ -975,12 +979,13 @@ void CSector::MoveItemToSector( CItem * pItem )
 	// remove from previous list and put in new.
 	// May just be setting a timer. SetTimer or MoveTo()
 	ASSERT( pItem );
+    m_Items.AddItemToSector(pItem);
 
     if (_IsSleeping())
     {
         if (_CanSleep(true))
         {
-            if (!pItem->TickableState())
+            if (!pItem->_CanTick(true))
                 pItem->GoSleep();
         }
         else
@@ -995,8 +1000,6 @@ void CSector::MoveItemToSector( CItem * pItem )
         if (pItem->IsSleeping())
             pItem->GoAwake();
     }
-
-	m_Items.AddItemToSector(pItem);
 }
 
 bool CSector::MoveCharToSector( CChar * pChar )
@@ -1041,10 +1044,9 @@ bool CSector::MoveCharToSector( CChar * pChar )
             _GoAwake();    // Awake the sector and the chars inside (so, also pChar)
             ASSERT(!pChar->IsSleeping());
         }
-        else if (!pChar->IsSleeping())    // An NPC entered, but the sector is sleeping
+        else if (!pChar->_CanTick(true))    // An NPC entered, but the sector is sleeping
         {
-            if (!pChar->TickableState())
-                pChar->GoSleep(); // then make the NPC sleep too.
+            pChar->GoSleep(); // then make the NPC sleep too.
         }
     }
     else
@@ -1122,32 +1124,25 @@ void CSector::RespawnDeadNPCs()
 {
 	ADDTOCALLSTACK("CSector::RespawnDeadNPCs");
 	// skip sectors in unsupported maps
-    if ( !g_MapList.IsMapSupported(m_BasePoint.m_map) )
+    if ( !g_MapList.IsMapSupported(m_BasePointSectUnits.m_map) )
         return;
 
 	// Respawn dead NPCs
-	size_t sizeStart = m_Chars_Active.GetContentCount();
-	for (size_t i = 0; i < sizeStart; )
+    const auto charsActive = m_Chars_Active.GetIterationSafeCont();
+    for (CSObjContRec *pObjRec : charsActive)
 	{
-		CChar* pChar = static_cast <CChar*>(m_Chars_Active.GetContentIndex(i));
+        CChar* pChar = static_cast <CChar*>(pObjRec);
 		if (!pChar->m_pNPC || !pChar->m_ptHome.IsValidPoint() || !pChar->IsStatFlag(STATF_DEAD))
-		{
-			++i;
 			continue;
-		}
 
 		// Restock them with npc stuff.
 		pChar->NPC_LoadScript(true);
 
 		// Res them back to their "home".
-		ushort uiDist = pChar->m_pNPC->m_Home_Dist_Wander;
+        const ushort uiDist = pChar->m_pNPC->m_Home_Dist_Wander;
 		pChar->MoveNear( pChar->m_ptHome, uiDist );
 		pChar->NPC_CreateTrigger(); //Removed from NPC_LoadScript() and triggered after char placement
 		pChar->Spell_Resurrection();
-
-		size_t sizeCur = m_Chars_Active.GetContentCount();
-		ASSERT(sizeCur != sizeStart);
-		sizeStart = sizeCur;
 	}
 }
 
@@ -1158,8 +1153,9 @@ void CSector::Restock()
     // set restock time of all vendors in Sector.
     // set the respawn time of all spawns in Sector.
 
-	for (CSObjContRec* pObjRec : m_Chars_Active)
-	{
+    for (const auto charsActive = m_Chars_Active.GetIterationSafeCont();
+        CSObjContRec *pObjRec : charsActive)
+    {
 		CChar* pChar = static_cast<CChar*>(pObjRec);
         if (pChar->m_pNPC)
         {
@@ -1167,11 +1163,10 @@ void CSector::Restock()
         }
     }
 
-	size_t i = m_Items.GetContentCount();
-	while (i > 0)
-	{
-		ASSERT(i < m_Items.GetContentCount());
-		CItem* pItem = static_cast<CItem*>(m_Items.GetContentIndex(--i));
+    for (const auto items = m_Items.GetIterationSafeCont();
+        CSObjContRec *pObjRec : items)
+    {
+        CItem* pItem = static_cast<CItem*>(pObjRec);
         CCSpawn* pSpawn = pItem->GetSpawn();
         if (pSpawn)
         {
@@ -1201,7 +1196,7 @@ bool CSector::_OnTick()
     */
 
 	//	do not tick sectors on maps not supported by server
-    if ( !g_MapList.IsMapSupported(m_BasePoint.m_map) )
+    if ( !g_MapList.IsMapSupported(m_BasePointSectUnits.m_map) )
 		return true;
 
     EXC_TRY("_OnTick");
@@ -1337,9 +1332,10 @@ bool CSector::_OnTick()
 		EXC_CATCHSUB("Sector");
 
 		EXC_DEBUGSUB_START;
-        CPointMap const& pt = m_BasePoint;
+        CPointMap const& pt = m_BasePointSectUnits;
 		g_Log.EventDebug("#0 char 0%x '%s'\n", (dword)(pChar->GetUID()), pChar->GetName());
 		g_Log.EventDebug("#0 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
+        // TODO: add rect cords?
 		EXC_DEBUGSUB_END;
 	}
 
@@ -1348,8 +1344,9 @@ bool CSector::_OnTick()
     _SetTimeout(SECTOR_TICKING_PERIOD);  // Sector is Awake, make it tick after 30 seconds.
 
 	EXC_DEBUG_START;
-    CPointMap const& pt = m_BasePoint;
+    CPointMap const& pt = m_BasePointSectUnits;
 	g_Log.EventError("#4 sector #%d [%hd,%hd,%hhd,%hhu]\n", GetIndex(), pt.m_x, pt.m_y, pt.m_z, pt.m_map);
+    // TODO: add rect coords?
 	EXC_DEBUG_END;
     return true;
 }
@@ -1422,7 +1419,7 @@ bool CSector::CheckItemComplexity() const noexcept
 	const size_t uiCount = GetItemComplexity();
 	if (uiCount > g_Cfg.m_iMaxSectorComplexity)
     {
-        g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " items at %s. Sector too complex!\n", uiCount, m_BasePoint.WriteUsed());
+        g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " items at %s. Sector too complex!\n", uiCount, GetBasePointMapUnits().WriteUsed());
         return true;
     }
     return false;
@@ -1473,7 +1470,7 @@ bool CSector::CheckCharComplexity() const noexcept
 	const size_t uiCount = GetCharComplexity();
 	if (uiCount > g_Cfg.m_iMaxCharComplexity)
     {
-        g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", uiCount, m_BasePoint.WriteUsed());
+        g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", uiCount, GetBasePointMapUnits().WriteUsed());
         return true;
     }
     return false;

@@ -62,17 +62,17 @@ private:
 public:
 	static const char *m_sClassName;
 	CPointMap m_pt;			// safe point in the region. (for teleporting to)
-	int m_iLinkedSectors;	// just for statistics tracking. How many sectors are linked ?
+    int m_iLinkedSectors;	// just for statistics tracking. How many sectors are linked ?
 	dword m_dwModifiedFlags;
+    CItemMulti* _pMultiLink;    // Does this region belong to a multi?
 
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szTrigName[RTRIG_QTY+1];
 	static lpctstr const sm_szVerbKeys[];
 
-	CResourceRefArray		m_Events;	// trigger [REGION x] when entered or exited RES_REGIONTYPE
-	CVarDefMap				m_TagDefs;		// attach extra tags here.
+    CResourceRefArray		m_Events;       // trigger [REGION x] when entered or exited RES_REGIONTYPE
+    CVarDefMap				m_TagDefs;		// attach extra tags here.
 	CVarDefMap				m_BaseDefs;		// New Variable storage system
-    CItemMulti* _pMultiLink;    // Does this region belong to a multi?
 
 	TRIGRET_TYPE OnRegionTrigger( CTextConsole * pChar, RTRIG_TYPE trig );
 
@@ -87,14 +87,14 @@ public:
 		return m_BaseDefs.GetKeyNum( ptcKey );
 	}
 
-	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true)
+    void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true, bool fWarnOverwrite = false)
 	{
-		m_BaseDefs.SetNum(ptcKey, iVal, fZero);
+        m_BaseDefs.SetNum(ptcKey, iVal, fZero, fWarnOverwrite);
 	}
 
-	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
+    void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true, bool fWarnOverwrite = false)
 	{
-		m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero);
+        m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero, fWarnOverwrite);
 	}
 
 	void DeleteDef(lpctstr ptcKey)
@@ -106,8 +106,6 @@ private:
 	bool SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsole * pSrc ); // distribute to the CSectors
 
 public:
-	virtual bool RealizeRegion();
-	void UnRealizeRegion();
 #define REGMOD_FLAGS	0x0001
 #define REGMOD_EVENTS	0x0002
 #define REGMOD_TAGS		0x0004
@@ -134,39 +132,33 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
 	virtual void r_Write( CScript & s );
 
+    virtual bool IsValid() const noexcept
+    {
+        return m_sName.IsValid();
+    }
+
+    virtual bool RealizeRegion();
+    void UnRealizeRegion();
+
 	virtual bool AddRegionRect( const CRectMap & rect ) override;
-	bool SetRegionRect( const CRectMap & rect )
-	{
-		EmptyRegion();
-		return AddRegionRect( rect );
-	}
-	inline dword GetRegionFlags() const noexcept
+    bool SetRegionRect( const CRectMap & rect );
+
+    inline dword GetRegionFlags() const noexcept
 	{
 		return m_dwFlags;
 	}
-	bool IsFlag( dword dwFlags ) const noexcept
+    inline bool IsFlag( dword dwFlags ) const noexcept
 	{
-		return (( m_dwFlags & dwFlags ) ? true : false );
+        return (bool( m_dwFlags & dwFlags ));
 	}
-	bool IsGuarded() const;
-	void SetRegionFlags( dword dwFlags ) noexcept
+    inline void SetRegionFlags( dword dwFlags ) noexcept
 	{
 		m_dwFlags |= dwFlags;
 	}
-	void TogRegionFlags( dword dwFlags, bool fSet ) noexcept
-	{
-		if ( fSet )
-			m_dwFlags |= dwFlags;
-		else
-			m_dwFlags &= ~dwFlags;
-		SetModified( REGMOD_FLAGS );
-	}
+    void TogRegionFlags( dword dwFlags, bool fSet ) noexcept;
 
-	bool CheckAntiMagic( SPELL_TYPE spell ) const;
-	virtual bool IsValid() const noexcept
-	{
-		return m_sName.IsValid();
-	}
+    bool IsGuarded() const;
+    bool CheckAntiMagic( SPELL_TYPE spell ) const;
 
 	bool MakeRegionDefname();
 
