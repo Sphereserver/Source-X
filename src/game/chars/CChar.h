@@ -1178,7 +1178,10 @@ public:
 	bool Horse_UnMount(); // Remove horse char and give player a horse item
 
 private:
-	CItem* Horse_GetMountItem() const;
+    [[nodiscard]]
+    CItem* Horse_ValidateMountItem(CItem *pMountItem) const;
+
+    CItem* Horse_GetMountItem() const;
     CChar* Horse_GetMountChar() const;
     CItem* Horse_GetValidMountItem();
     CChar* Horse_GetValidMountChar();
@@ -1188,7 +1191,7 @@ public:
 	bool IsOwnedBy( const CChar * pChar, bool fAllowGM = true ) const;
 	CChar * GetOwner() const;
 	CChar * Use_Figurine( CItem * pItem, bool fCheckFollowerSlots = true );
-	CItem * Make_Figurine( const CUID &uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
+    CItem * Make_Figurine( const CUID uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
     bool FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots = 0, bool fCheckOnly = false );
     short GetFollowerSlots() const;

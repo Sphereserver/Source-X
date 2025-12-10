@@ -945,22 +945,27 @@ int CChar::FixWeirdness()
 	}
 	if ( IsStatFlag( STATF_RIDDEN ))
 	{
-		// Move the ridden creature to the same location as it's rider.
-		if ( m_pPlayer || ! IsDisconnected())
+        // Move the ridden creature to the same location as its rider.
+        if ( m_pPlayer || ! IsDisconnected())
+        {
 			StatFlag_Clear( STATF_RIDDEN );
-		else
+        }
+        else
 		{
-			if ( Skill_GetActive() != NPCACT_RIDDEN )
+            // For some historical reasons, disconnected NPCs should be in "ridden" state...
+            if ( Skill_GetActive() != NPCACT_RIDDEN )
 			{
 				iResultCode = 0x1203;
 				return iResultCode;
 			}
+
 			const CItem * pFigurine = Horse_GetValidMountItem();
 			if ( pFigurine == nullptr )
 			{
 				iResultCode = 0x1204;
 				return iResultCode;
 			}
+
 			const CPointMap& pt = pFigurine->GetTopLevelObj()->GetTopPoint();
 			if ( pt != GetTopPoint())
 			{
