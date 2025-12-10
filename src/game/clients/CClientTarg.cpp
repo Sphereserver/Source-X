@@ -96,13 +96,25 @@ bool CClient::OnTarg_Obj_Function( CObjBase * pObj, const CPointMap & pt, ITEMID
 	if ( pSpace )
 		GETNONWHITESPACE( pSpace );
 
-    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-    pScriptArgs->Init(pSpace ? pSpace : "");
-    pScriptArgs->m_VarsLocal.SetNum( "ID", id, true );
-    pScriptArgs->m_pO1 = pObj;
-	CSString sVal;
-    m_pChar->r_Call(m_Targ_Text.GetBuffer(), pScriptArgs, this, &sVal );
-	return true;
+    lpctstr ptcFunction = m_Targ_Text.GetBuffer();
+    const size_t uiFunctionIndex = r_GetFunctionIndex(ptcFunction);
+    if ( r_CanCall(uiFunctionIndex) )
+    {
+        // It's a scripted FUNCTION
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(pSpace ? pSpace : "");
+        pScriptArgs->m_VarsLocal.SetNum( "ID", id, true );
+        pScriptArgs->m_pO1 = pObj;
+        CSString sVal;
+        m_pChar->r_Call(m_Targ_Text.GetBuffer(), pScriptArgs, this, &sVal );
+        return true;
+    }
+    return false;
+
+    // TODO: enable this? leave it working only with scripted functions?
+    // This function might not exist at all, or simply it is a hardcoded verb/command...
+    //CScript s(ptcFunction);
+    //return m_pChar->r_Verb(s, nullptr);
 }
 
 

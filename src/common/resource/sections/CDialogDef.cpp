@@ -126,6 +126,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
     const int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1 );
     if ( index < 0 )
     {
+        // TODO: This function check is already done in CObjBase::r_Verb... remove this?
         const size_t uiFunctionIndex = r_GetFunctionIndex(ptcKey);
         if (r_CanCall(uiFunctionIndex))
         {
