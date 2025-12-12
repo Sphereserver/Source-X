@@ -21,7 +21,7 @@ on:
 
 jobs:
   macos-x86_64:
-    runs-on: macos-13   # intel
+    runs-on:  macos-15-intel
     env:
       CMAKE_GEN: Ninja
       CMAKE_TCH: cmake/toolchains/OSX-AppleClang-x86_64.cmake
