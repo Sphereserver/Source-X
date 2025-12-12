@@ -2077,7 +2077,9 @@ bool CItem::SetBase( CItemBase * pItemDef )
 	ADDTOCALLSTACK("CItem::SetBase");
 	// Total change of type. (possibly dangerous)
 
-	CItemBase * pItemOldDef = Item_GetDef();
+    CItemBase * pItemOldDef = nullptr;
+    if (m_BaseRef.GetRef())
+        pItemOldDef = Item_GetDef();
 
 	if ( pItemDef == nullptr || pItemDef == pItemOldDef )
 		return false;

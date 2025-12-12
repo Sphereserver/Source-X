@@ -108,6 +108,7 @@ void CTimedFunctionHandler::Add(const CUID& uid, int64 iTimeout, const char* pcC
 	ASSERT(strlen(pcCommand) < CTimedFunction::kuiCommandSize);
 
 	auto* tf = new CTimedFunction(uid, pcCommand);
+    tf->_SetAwakeFlagRaw();
 	_timedFunctions.InsertContentTail(tf);
 	tf->SetTimeout(iTimeout);
 }
