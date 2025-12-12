@@ -27,34 +27,34 @@ jobs:
       actions: read
 
     steps:
-    - name: Checkout repository
-    uses: actions/checkout@v5
-    with:
-      fetch-depth: 0
+     - name: Checkout repository
+       uses: actions/checkout@v5
+       with:
+         fetch-depth: 0
 
-    - name: Add msbuild to PATH
-    uses: microsoft/setup-msbuild@v2
+     - name: Add msbuild to PATH
+       uses: microsoft/setup-msbuild@v2
 
-    - name: CMake
-    run: cmake -G "Visual Studio 17 2022" .\
+     - name: CMake
+       run: cmake -G "Visual Studio 17 2022" .\
 
-    - name: MSBuild
-    run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
+     - name: MSBuild
+       run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
 
-    - name: Create package
-    run: |
-        pwd
-        mkdir accounts, logs, save, scripts
-        7z a SphereSvrX-win-x86_64-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86_64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\_bin\x86_64\mariadb\libmariadb.dll
+     - name: Create package
+       run: |
+           pwd
+           mkdir accounts, logs, save, scripts
+           7z a SphereSvrX-win-x86_64-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86_64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\_bin\x86_64\mariadb\libmariadb.dll
 
-    # Upload artifact for later release jobs (main/master/dev or PR)
-    - name: Upload artifact
-    if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
-    uses: actions/upload-artifact@v4
-    with:
-      name: Build-win-x86_64
-      path: SphereSvrX-win-x86_64-nightly.zip
-      overwrite: true
+     # Upload artifact for later release jobs (main/master/dev or PR)
+     - name: Upload artifact
+       if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+       uses: actions/upload-artifact@v4
+       with:
+         name: Build-win-x86_64
+         path: SphereSvrX-win-x86_64-nightly.zip
+         overwrite: true
 
   # Release job for master/main → goes to "Nightly"
   upload_github_release_main:

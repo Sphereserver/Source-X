@@ -27,49 +27,49 @@ jobs:
       CMAKE_TCH: cmake/toolchains/OSX-AppleClang-x86_64.cmake
 
     steps:
-    - name: Checkout repository
-    uses: actions/checkout@v5
-    with:
-      fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
-    - name: Install prerequisites
-    run: |
-      sw_vers
-      echo "** Setting up compiler"
-      export HOMEBREW_NO_AUTO_UPDATE=1
-      export HOMEBREW_NO_INSTALL_CLEANUP=1
-      brew install ninja mariadb-connector-c
+      - name: Install prerequisites
+        run: |
+          sw_vers
+          echo "** Setting up compiler"
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          export HOMEBREW_NO_INSTALL_CLEANUP=1
+          brew install ninja mariadb-connector-c
 
-    - name: Report building tools
-    run: |
-      echo "Apple Clang:" && clang --version
-      echo "CMake:" && cmake --version
-      echo "Ninja:" && ninja --version
+      - name: Report building tools
+        run: |
+          echo "Apple Clang:" && clang --version
+          echo "CMake:" && cmake --version
+          echo "Ninja:" && ninja --version
 
-    - name: CMake
-    run: |
-      mkdir -p build
-      cmake -G "Ninja" \
-        -DCMAKE_BUILD_TYPE="Nightly" \
-        -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH" \
-        -S . -B ./build
+      - name: CMake
+        run: |
+          mkdir -p build
+          cmake -G "Ninja" \
+            -DCMAKE_BUILD_TYPE="Nightly" \
+            -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH" \
+            -S . -B ./build
 
-    - name: Ninja
-    run: cd build && ninja && cd ..
+      - name: Ninja
+        run: cd build && ninja && cd ..
 
-    - name: Create package
-    run: |
-      mkdir accounts logs save scripts
-      zip -rj SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/ \
-         src/sphere.ini src/sphereCrypt.ini build/bin-x86_64/*
+      - name: Create package
+        run: |
+          mkdir accounts logs save scripts
+          zip -rj SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/ \
+             src/sphere.ini src/sphereCrypt.ini build/bin-x86_64/*
 
-    - name: Upload artifact
-    if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || github.event_name == 'pull_request'
-    uses: actions/upload-artifact@v4
-    with:
-      name: Build-osx-x86_64
-      path: SphereSvrX-osx-x86_64-nightly.zip
-      overwrite: true
+      - name: Upload artifact
+        if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-osx-x86_64
+          path: SphereSvrX-osx-x86_64-nightly.zip
+          overwrite: true
 
   # -------- Release job for master/main → "Nightly" --------
   upload_github_release_main:
