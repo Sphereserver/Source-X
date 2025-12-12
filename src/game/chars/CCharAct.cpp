@@ -5874,7 +5874,6 @@ bool CChar::IsTickableEvenIfDisconnected() const
             // The linked item is a mount item.
             // I am actually riding this NPC/mount.  Its disconnected "body" should continue to tick.
 
-            ASSERT(IsDisconnected());
             if (!IsStatFlag(STATF_PET))
             {
                 // GMs can ride untamed chars. They will be assigned the PET flag later on.
