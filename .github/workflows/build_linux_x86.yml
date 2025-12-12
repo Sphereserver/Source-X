@@ -107,10 +107,8 @@ jobs:
               -DCMAKE_C_FLAGS="-fpch-preprocess" \
               -DCMAKE_CXX_FLAGS="-fpch-preprocess" \
               -S ./ -B ./build
-
     - name: Ninja
       run: ninja -C build -v
-
     - name: Create package
       run:  |
             mkdir accounts logs save scripts
@@ -142,7 +140,6 @@ jobs:
           name: Build-linux-x86
           merge-multiple: true
           run-id: ${{ github.run_id }}
-
       - name: Create DEV release
         uses: softprops/action-gh-release@v2
         env:
