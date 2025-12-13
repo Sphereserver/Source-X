@@ -5857,14 +5857,17 @@ bool CChar::IsTickableEvenIfDisconnected() const
     else if (fStatfRidden)
         ASSERT(fSkillRidden);
 
+    // Skip the following checks at startup stage, because the mount item or rider might have not been created yet.
+    const bool fShouldCheck = !g_Serv.IsStartupLoadingScripts();
+
     // For some reason, shrunken NPCs historically have been put in the "ridden" state.
-    if (fRidden)
+    if (fRidden && !fShouldCheck)
     {
         const CItem *pLinkedItem = m_atRidden.m_uidFigurine.ItemFind(); // CUID::ItemFindFromUID(m_atRidden.m_uidFigurine.GetPrivateUID());
         if (!pLinkedItem)
         {
-            g_Log.EventError("Char name='%s' UID=0%" PRIx32 " is ridden but isn't linked to any mount item or figurine?\n",
-                             GetName(), GetUID().GetObjUID());
+            g_Log.EventError("Char name='%s' UID=0%" PRIx32 " is ridden but isn't linked to any mount item or figurine (ACTARG1=0%" PRIx32 ")\n",
+                             GetName(), GetUID().GetObjUID(), m_atRidden.m_uidFigurine.GetObjUID());
             return false;
         }
 

@@ -6177,16 +6177,19 @@ bool CItem::_CanTick(bool fParentGoingToSleep) const
     const bool fAllowContained = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
     if (fCharCont && fAllowContained)
 	{
-        auto pCharCont = static_cast<const CChar*>(pCont);
-        if (!pCharCont->_CanTick(fParentGoingToSleep))
-            return false;
+        if (!Can(CAN_O_NOSLEEP))
+        {
+            auto pCharCont = static_cast<const CChar*>(pCont);
+            if (!pCharCont->_CanTick(fParentGoingToSleep))
+                return false;
+        }
     }
 
     if (!pCont && IsAttr(ATTR_DECAY))
     {
-        // If pCont is not a CObjBase, it will most probably be a CSector. Decaying items won't go to sleep.
+        // If pCont is not a CObjBase, it will most probably be a CSector object container. Decaying items won't go to sleep.
         ASSERT(dynamic_cast<const CSectorObjCont*>(pParent));
-        return false;
+        return true;
     }
 
     return CObjBase::_CanTick(fParentGoingToSleep);
