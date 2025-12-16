@@ -5861,7 +5861,7 @@ bool CChar::IsTickableEvenIfDisconnected() const
     const bool fShouldCheck = !g_Serv.IsStartupLoadingScripts();
 
     // For some reason, shrunken NPCs historically have been put in the "ridden" state.
-    if (fRidden && !fShouldCheck)
+    if (fRidden && fShouldCheck)
     {
         const CItem *pLinkedItem = m_atRidden.m_uidFigurine.ItemFind(); // CUID::ItemFindFromUID(m_atRidden.m_uidFigurine.GetPrivateUID());
         if (!pLinkedItem)
