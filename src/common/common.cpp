@@ -45,7 +45,17 @@ extern "C"
 	}
 #endif // !_WIN32
 
-void stderrLog(lpctstr ptcFormat, ...) noexcept // SPHERE_PRINTFARGS(1,2);
+void reserved_stdout_log(lpctstr ptcFormat, ...) noexcept // SPHERE_PRINTFARGS(1,2);
+{
+    va_list vargs;
+    va_start(vargs, ptcFormat);
+    fprintf(stdout, ptcFormat, vargs);
+    va_end(vargs);
+
+    fflush(stdout);
+}
+
+void reserved_stderr_log(lpctstr ptcFormat, ...) noexcept // SPHERE_PRINTFARGS(1,2);
 {
     va_list vargs;
     va_start(vargs, ptcFormat);

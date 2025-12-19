@@ -132,15 +132,17 @@ void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
 {
     if (!pAbstractThread)
     {
-        stderrLog("THREADING: ThreadHolder::push: nullptr thread.\n");
-        return;
+        reserved_stderr_log("CRITICAL: [THREADING] ThreadHolder::push: nullptr thread.\n");
+        RaiseImmediateAbort(30);
+        //return;
     }
 
     auto* pSphereThread = dynamic_cast<AbstractSphereThread*>(pAbstractThread);
     if (!pSphereThread)
     {
-        stderrLog("THREADING: ThreadHolder::push: not an AbstractSphereThread.\n");
-        return;
+        reserved_stderr_log("CRITICAL: [THREADING] ThreadHolder::push: not an AbstractSphereThread.\n");
+        RaiseImmediateAbort(31);
+        //return;
     }
 
 #ifdef _DEBUG
@@ -179,9 +181,11 @@ void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
             lock.unlock();
 #ifdef _DEBUG
             if (fShouldLogDebug)
+            {
                 g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-                    "THREADING: ThreadHolder already registered: %s (ThreadHolder-ID %d).\n",
+                    "[THREADING] ThreadHolder already registered: %s (ThreadHolder-ID %d).\n",
                     ptcNameForLog, iIdForLogDebug);
+            }
 #endif
             return;
         }
@@ -201,9 +205,10 @@ void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
             auto* other = itExistingSys->second;
             lock.unlock();
             g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-                "THREADING: ThreadHolder: refusing to register %s on OS thread already owned by %s.\n",
+                "[THREADING] ThreadHolder: refusing to register %s on OS thread already owned by %s.\n",
                 ptcNameForLog, other ? other->getName() : "<unknown>");
             EXC_NOTIFY_DEBUGGER;
+            RaiseImmediateAbort(32);
             return;
         }
 
@@ -221,18 +226,20 @@ void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
 
 #ifdef _DEBUG
         if (fShouldLogDebug)
+        {
             g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-                "THREADING: ThreadHolder registered %s (ThreadHolder-ID %d).\n",
+                "[THREADING] ThreadHolder registered %s (ThreadHolder-ID %d).\n",
                 ptcNameForLog, iIdForLogDebug);
+        }
 #endif
     }
     catch (const std::exception& e)
     {
-        stderrLog("THREADING: ThreadHolder::push: exception: %s.\n", e.what());
+        reserved_stderr_log("CRITICAL: [THREADING] ThreadHolder::push: exception: %s.\n", e.what());
     }
     catch (...)
     {
-        stderrLog("THREADING: ThreadHolder::push: unknown exception.\n");
+        reserved_stderr_log("CRITICAL: [THREADING] ThreadHolder::push: unknown exception.\n");
     }
 }
 
@@ -275,15 +282,14 @@ void ThreadHolder::remove(AbstractThread* pAbstractThread) CANTHROW
     if (!isServClosing())
     {
         g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-            "THREADING: ThreadHolder removed %s with sys-id %" PRIu64 ".\n",
+            "[THREADING] ThreadHolder removed %s with sys-id %" PRIu64 ".\n",
             ptcName, (uint64_t)sysId);
     }
     else
     {
         // Logger may be shutting down; print directly to stdout to avoid loss.
-        fprintf(stdout, "DEBUG: THREADING: ThreadHolder removed %s with sys-id %" PRIu64 ".\n",
+        reserved_stdout_log_debug("DEBUG: [THREADING] ThreadHolder removed %s with sys-id %" PRIu64 ".\n",
             ptcName, (uint64_t)sysId);
-        fflush(stdout);
     }
 #endif
 }
@@ -440,7 +446,7 @@ static void os_set_thread_name_portable(const char* name_trimmed) noexcept
         } __except(EXCEPTION_EXECUTE_HANDLER) {
         }
 #   else
-        stderrLog("THREADING: WARN: no available implementation to set the thread name.\n");
+        reserved_stderr_log("[THREADING] WARN: no available implementation to set the thread name.\n");
 #   endif
     }
 #elif defined(__APPLE__)
@@ -461,7 +467,7 @@ static void os_set_thread_name_portable(const char* name_trimmed) noexcept
     // TODO: support other BSD systems
     // No-op on unknown platforms
     (void)name_trimmed;
-    stderrLog("THREADING: WARN: no available implementation to set the thread name for the current platform (unknown/unsupported).\n");
+    reserved_stderr_log("[THREADING] WARN: no available implementation to set the thread name for the current platform (unknown/unsupported).\n");
 #endif
 }
 
@@ -471,7 +477,7 @@ AbstractThread::AbstractThread(const char *name, ThreadPriority priority)
     {
 #ifdef _WIN32
         if (CoInitializeEx(nullptr, COINIT_MULTITHREADED) != S_OK)
-            throw CSError(LOGL_FATAL, 0, "OLE init failed, threading unavailable");
+            throw CSError(LOGL_FATAL, 0, "[THREADING] OLE init failed, threading unavailable");
 #endif
     }
     ++AbstractThread::m_threadsAvailable;
@@ -491,25 +497,25 @@ AbstractThread::~AbstractThread()
 {
 #ifdef _DEBUG
     const char* name = getName();
-    if (!name || !name[0]) name = "(unnamed)";
+    if (!name || !name[0])
+        name = "(unnamed)";
 
-    const bool stillRegistered = (m_threadHolderId != ThreadHolder::m_kiInvalidThreadID);
-    const bool everBound       = (m_threadSystemId != 0);
-    const bool everRanLoop     = (m_uiState != eRunningState::NeverStarted);
+    const bool fStillRegistered = (m_threadHolderId != ThreadHolder::m_kiInvalidThreadID);
+    const bool fEverBound       = (m_threadSystemId != 0);
+    const bool fEverRanLoop     = (m_uiState != eRunningState::NeverStarted);
 
     const char* state =
-        stillRegistered               ? "[registered, closing]" :
-        (everBound && everRanLoop)    ? "[detached, closed]" :
-        (everBound && !everRanLoop)   ? "[attached-only, closed]" :
+        fStillRegistered                ? "[registered, closing]" :
+        (fEverBound && fEverRanLoop)    ? "[detached, closed]" :
+        (fEverBound && !fEverRanLoop)   ? "[attached-only, closed]" :
                                         "[not started]";
 
-    if (everBound)
-        fprintf(stdout, "DEBUG: Destroying AbstractThread '%s' (ThreadHolder-ID %d) %s, sys-id %" PRIu64 ".\n",
+    if (fEverBound)
+        reserved_stdout_log_debug("[THREADING] DEBUG: Destroying AbstractThread '%s' (ThreadHolder-ID %d) %s, sys-id %" PRIu64 ".\n",
             name, m_threadHolderId, state, (uint64_t)m_threadSystemId);
     else
-        fprintf(stdout, "DEBUG: Destroying AbstractThread '%s' (ThreadHolder-ID %d) %s, sys-id n/a.\n",
+        reserved_stdout_log_debug("[THREADING] DEBUG: Destroying AbstractThread '%s' (ThreadHolder-ID %d) %s, sys-id n/a.\n",
             name, m_threadHolderId, state);
-    fflush(stdout);
 #endif
 
     terminate(true);
@@ -529,7 +535,7 @@ void AbstractThread::start()
 {
 #ifdef _DEBUG
     g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGF_CONSOLE_ONLY,
-        "THREADING: Spawning new thread '%s' (AbstractThread* = 0x% " PRIxSIZE_T ")...\n",
+        "[THREADING] Spawning new thread '%s' (AbstractThread* = 0x% " PRIxSIZE_T ")...\n",
         getName(), reinterpret_cast<void*>(this));
 #endif
 
@@ -565,7 +571,7 @@ void AbstractThread::terminate(bool ended)
         {
             if (!m_handle.has_value())
             {
-                stderrLog("THREADING: AbstractThread::terminate: no handle available.\n");
+                reserved_stderr_log("[THREADING] AbstractThread::terminate: no handle available.\n");
             }
             else
             {
@@ -626,19 +632,19 @@ void AbstractThread::run()
         catch (const CSError& e)
         {
             gotException = true;
-            g_Log.CatchEvent(&e, "[TR] CSError in %s::tick", getName());
+            g_Log.CatchEvent(&e, "THREADING Exception: CSError in %s::tick", getName());
             GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         }
         catch (const std::exception& e)
         {
             gotException = true;
-            g_Log.CatchStdException(&e, "[TR] std::exception in %s::tick", getName());
+            g_Log.CatchStdException(&e, "THREADING Exception: std::exception in %s::tick", getName());
             GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         }
         catch (...)
         {
             gotException = true;
-            g_Log.CatchEvent(nullptr, "[TR] Unknown exception in %s::tick", getName());
+            g_Log.CatchEvent(nullptr, "THREADING Exception: Unknown exception in %s::tick", getName());
             GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         }
 
@@ -654,7 +660,7 @@ void AbstractThread::run()
 
             if (exceptions >= THREAD_EXCEPTIONS_ALLOWED)
             {
-                g_Log.Event(LOGL_CRIT, "'%s' raised too many exceptions, soft-restarting...\n", getName());
+                g_Log.Event(LOGL_CRIT, "Thread '%s' raised too many exceptions, soft-restarting...\n", getName());
                 onStart();
                 lastWasException = false;
             }
@@ -712,7 +718,7 @@ bool AbstractThread::checkStuck()
         m_uiHangCheck = 0xDEADDEAD;
     else
     {
-        g_Log.Event(LOGL_CRIT, "'%s' hang detected, restarting thread...\n", m_name);
+        g_Log.Event(LOGL_CRIT, "Thread '%s' hang detected, restarting...\n", m_name);
 
         m_fTerminateRequested = true;
         awaken();
@@ -779,7 +785,7 @@ void AbstractThread::onStart()
 
 #ifdef _DEBUG
     g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-        "THREADING: Started thread loop for '%s' (ThreadHolder-ID %d), sys-id %" PRIu64 ".\n",
+        "[THREADING] Started thread loop for '%s' (ThreadHolder-ID %d), sys-id %" PRIu64 ".\n",
         getName(), m_threadHolderId, (uint64)m_threadSystemId);
 #endif
 
@@ -832,17 +838,16 @@ void AbstractThread::attachToCurrentThread(const char* osThreadName) noexcept
     // Refuse if another Sphere context already owns this OS thread.
     if (sg_tlsCurrentSphereThread && sg_tlsCurrentSphereThread != this)
     {
-#ifdef _DEBUG
-        g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-            "THREADING: attachToCurrentThread rejected: current OS thread already bound to '%s'; wanted '%s'.\n",
+        g_Log.Event(LOGL_CRIT,
+            "[THREADING] attachToCurrentThread rejected: current OS thread already bound to '%s'; wanted '%s'.\n",
             sg_tlsCurrentSphereThread->getName(), ptcThreadName);
-#endif
+        RaiseImmediateAbort(30);
         return;
     }
 
 #ifdef _DEBUG
     g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-        "THREADING: Binding current context to thread '%s'...\n", ptcThreadName);
+        "[THREADING] Binding current context to thread '%s'...\n", ptcThreadName);
 #endif
 
     // Attempt to bind; onStart will self-guard and leave this object clean on refusal.
@@ -1041,7 +1046,7 @@ getThreadRawStringBuffer() CANTHROW
 
         if (index == initialPosition)
         {
-            DEBUG_WARN(("Thread temporary string buffer is full.\n"));
+            g_Log.EventError("Thread temporary string buffer is full.\n");
             throw CSError(LOGL_FATAL, 0, "Thread temporary string buffer is full");
         }
     }
@@ -1069,7 +1074,7 @@ char* AbstractSphereThread::Strings::allocateBuffer() noexcept
 
 void AbstractSphereThread::Strings::getBufferForStringObject(TemporaryString &string) CANTHROW
 {
-    ADDTOCALLSTACK("AbstractSphereThread::Strings::alloc");
+    ADDTOCALLSTACK("AbstractSphereThread::Strings::getBufferForStringObject");
     auto* store = getThreadRawStringBuffer(); // may throw
     string.init(store->m_buffer, &store->m_state);
 }

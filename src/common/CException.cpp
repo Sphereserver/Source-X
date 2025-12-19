@@ -98,7 +98,7 @@ void RaiseImmediateAbort(int iErrCode)
     UnreferencedParameter(iErrCode);
 
 #ifdef _DEBUG
-    stderrLog("RaiseImmediateAbort with code %d.\n", iErrCode);
+    reserved_stderr_log("RaiseImmediateAbort with code %d.\n", iErrCode);
 #endif
 
     EXC_NOTIFY_DEBUGGER;
@@ -326,7 +326,7 @@ static void Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
         if ((sig == SIGABRT) && IsAbortImmediate())
         {
             // No clean ending. Abort right now.
-            stderrLog("FATAL: Immediate abort requested.");
+            reserved_stderr_log("FATAL: Immediate abort requested.");
 
 #if defined(__GNUC__) || defined(__clang__)
             __builtin_trap();
