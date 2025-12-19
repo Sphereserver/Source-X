@@ -349,7 +349,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 		// Not much we can do about this
 		iRet = 0;
 		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
-        stderrLog("CLog::EventStr failed to print: '%s'.\n", pszMsg);
+        reserved_stderr_log("CLog::EventStr failed to print: '%s'.\n", pszMsg);
 	}
 
 	return iRet;

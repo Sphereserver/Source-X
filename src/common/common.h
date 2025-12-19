@@ -319,8 +319,17 @@ constexpr void UnreferencedParameter([[maybe_unused]] T const& ) noexcept {
 #define STATIC_ASSERT_THROWING_MEMBER_FUNCTION(_ClassType, _func, ...) \
     static_assert(!std::is_nothrow_invocable_v<decltype(&_ClassType::_func), _ClassType __VA_OPT__(,) __VA_ARGS__>, #_func  " function should be noexcept!")
 
-// For unrecoverable/unloggable errors. Should be used almost *never*.
-void stderrLog(lpctstr pszFormat, ...) noexcept  SPHERE_PRINTFARGS(1,2);
+// For unrecoverable/unloggable errors, or special init messages that can't use CLog. Should be used almost *never*.
+void reserved_stdout_log(lpctstr ptcFormat, ...) noexcept  SPHERE_PRINTFARGS(1,2);
+void reserved_stderr_log(lpctstr ptcFormat, ...) noexcept  SPHERE_PRINTFARGS(1,2);
+
+#ifdef _DEBUG
+#define reserved_stdout_log_debug(...) reserved_stdout_log(__VA_ARGS__)
+#define reserved_stderr_log_debug(...) reserved_stderr_log(__VA_ARGS__)
+#else
+#define reserved_stdout_log_debug(...) (void)0
+#define reserved_stderr_log_debug(...) (void)0
+#endif
 
 
 /* Sanitizers utilities */
