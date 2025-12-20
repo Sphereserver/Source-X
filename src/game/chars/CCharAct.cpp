@@ -5922,16 +5922,19 @@ bool CChar::IsTickableEvenIfDisconnected() const
         const CItem *pLinkedItem = m_atRidden.m_uidFigurine.ItemFind(); // CUID::ItemFindFromUID(m_atRidden.m_uidFigurine.GetPrivateUID());
         if (!pLinkedItem)
         {
-            g_Log.EventError("Char name='%s' UID=0%" PRIx32 " is ridden but isn't linked to any mount item or figurine (ACTARG1=0%" PRIx32 ")\n",
-                             GetName(), GetUID().GetObjUID(), m_atRidden.m_uidFigurine.GetObjUID());
-            return false;
+            const CChar* pOwner = GetOwner();
+            const dword dwUidMine = GetUID().GetObjUID();
+            const dword dwUidOwner = !pOwner ? 0 : pOwner->GetUID().GetObjUID();
+            const dword dwUidFigurine = m_atRidden.m_uidFigurine.GetObjUID();
+            g_Log.EventError("Char name='%s' UID=0%" PRIx32 " (Owner UID=0%" PRIx32 ") is ridden but not linked to any mount item or figurine (ACTARG1=0%" PRIx32 ").\n",
+                             GetName(), dwUidMine, dwUidOwner, dwUidFigurine);
         }
 
         const CChar *pRider = !pLinkedItem ? nullptr : pLinkedItem->m_uidLink.CharFind();
         if (pRider && pLinkedItem->IsType(IT_EQ_HORSE))
         {
             // The linked item is a mount item.
-            // I am actually riding this NPC/mount.  Its disconnected "body" should continue to tick.
+            // I am actually riding this NPC/mount. Its disconnected "body" should continue to tick.
 
             if (!IsStatFlag(STATF_PET))
             {
@@ -5952,9 +5955,13 @@ bool CChar::IsTickableEvenIfDisconnected() const
         }
         else
         {
-            g_Log.EventError("Char name='%s' UID=0%" PRIx32 " is ridden but linked to mount item with invalid type (UID=0%" PRIx32 ")?\n",
-                             GetName(), GetUID().GetObjUID(), pLinkedItem->GetUID().GetObjUID());
-            return false;
+            const CChar* pOwner = GetOwner();
+            const dword dwUidMine = GetUID().GetObjUID();
+            const dword dwUidOwner = !pOwner ? 0 : pOwner->GetUID().GetObjUID();
+            const dword dwUidMountItem = pLinkedItem->GetUID().GetObjUID();
+
+            g_Log.EventError("Char name='%s' UID=0%" PRIx32 " (Owner UID=0%" PRIx32 ") is ridden but linked to mount item with invalid type (UID=0%" PRIx32 ")?\n",
+                             GetName(), dwUidMine, dwUidOwner, dwUidMountItem);
         }
     }
 
