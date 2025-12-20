@@ -2152,7 +2152,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			{
 				case IT_CLOTH_BOLT:
 					// Just make cut cloth here !
-					pItemTarg->ConvertBolttoCloth();
+					pItemTarg->ConvertBoltToCloth();
 					m_pChar->Sound( SOUND_SNIP );	// snip noise.
 					return true;
 				case IT_CLOTH:

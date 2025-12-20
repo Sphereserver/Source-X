@@ -853,7 +853,7 @@ public:
 	bool IsValidLockUID() const;
 	bool IsKeyLockFit( dword dwLockUID ) const;
 
-	void ConvertBolttoCloth();
+	void ConvertBoltToCloth();
 
     const CFactionDef* GetSlayer() const noexcept;
     CFactionDef* GetSlayer() noexcept;
