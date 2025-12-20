@@ -3729,13 +3729,13 @@ bool CChar::r_LoadVal( CScript & s )
 			}
 			break;
 		case CHC_ACTARG1:
-			m_atUnk.m_dwArg1 = s.GetArgVal();
+            m_atUnk.m_dwArg1 = s.GetArgDWVal();
 			break;
 		case CHC_ACTARG2:
-			m_atUnk.m_dwArg2 = s.GetArgVal();
+            m_atUnk.m_dwArg2 = s.GetArgDWVal();
 			break;
 		case CHC_ACTARG3:
-			m_atUnk.m_dwArg3 = s.GetArgVal();
+            m_atUnk.m_dwArg3 = s.GetArgDWVal();
 			break;
 		case CHC_ACTION:
 		{
@@ -3752,98 +3752,104 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
 		case CHC_ATTACKER:
 		{
-			if ( strlen(ptcKey) > 8 )
-			{
-				ptcKey += 8;
-				if ( *ptcKey == '.' )
-				{
-					++ptcKey;
-					if ( !strnicmp(ptcKey, "CLEAR", 5) )
-					{
-						if ( !m_lastAttackers.empty() )
-							Fight_ClearAll();
-						return true;
-					}
-					else if ( !strnicmp(ptcKey, "DELETE", 6) )
-					{
-						if ( !m_lastAttackers.empty() )
-						{
-							int idx = s.GetArgVal();
-							CChar *pChar = CUID::CharFindFromUID(idx);
-							if (!pChar)
-								return false;
-							Attacker_Delete(idx, false, ATTACKER_CLEAR_SCRIPT);
-						}
-						return true;
-					}
-					else if ( !strnicmp(ptcKey, "ADD", 3) )
-					{
-						CChar *pChar = CUID::CharFindFromUID(s.GetArgVal());
-						if ( !pChar )
-							return false;
-						Fight_Attack(pChar);
-						return true;
-					}
-					else if ( !strnicmp(ptcKey, "TARGET", 6) )
-					{
-						CChar *pChar = CUID::CharFindFromUID(s.GetArgVal());
-						if ( !pChar || (pChar == this) )	// can't set ourself as target
-						{
-							m_Fight_Targ_UID.InitUID();
-							return false;
-						}
-						m_Fight_Targ_UID = pChar->GetUID();
-						return true;
-					}
+            if ( strlen(ptcKey) <= 8 )
+                return false;
 
-					int attackerIndex = Exp_GetVal(ptcKey);
+            ptcKey += 8;
+            if ( *ptcKey != '.' )
+                return false;
 
-					SKIP_SEPARATORS(ptcKey);
-					if ( attackerIndex < GetAttackersCount() )
-					{
-						if ( !strnicmp(ptcKey, "DAM", 3) )
-						{
-							Attacker_SetDam(attackerIndex, s.GetArgVal());
-							return true;
-						}
-						else if ( !strnicmp(ptcKey, "ELAPSED", 7) )
-						{
-							Attacker_SetElapsed(attackerIndex, s.GetArgVal());
-							return true;
-						}
-						else if ( !strnicmp(ptcKey, "THREAT", 6) )
-						{
-							Attacker_SetThreat(attackerIndex, s.GetArgVal());
-							return true;
-						}
-						else if ( !strnicmp(ptcKey, "DELETE", 6) )
-						{
-							Attacker_Delete(attackerIndex, false, ATTACKER_CLEAR_SCRIPT);
-							return true;
-						}
-						else if ( !strnicmp(ptcKey, "IGNORE", 6) )
-						{
-							bool fIgnore = s.GetArgVal() < 1 ? 0 : 1;
-							Attacker_SetIgnore(attackerIndex, fIgnore);
-							return true;
-						}
-					}
-				}
-			}
+            ++ptcKey;
+            if ( !strnicmp(ptcKey, "CLEAR", 5) )
+            {
+                if ( !m_lastAttackers.empty() )
+                    Fight_ClearAll();
+                return true;
+            }
+            else if ( !strnicmp(ptcKey, "DELETE", 6) )
+            {
+                if ( !m_lastAttackers.empty() )
+                {
+                    int idx = s.GetArgVal();
+                    CChar *pChar = CUID::CharFindFromUID(idx);
+                    if (!pChar)
+                        return false;
+                    Attacker_Delete(idx, false, ATTACKER_CLEAR_SCRIPT);
+                }
+                return true;
+            }
+            else if ( !strnicmp(ptcKey, "ADD", 3) )
+            {
+                CChar *pChar = CUID::CharFindFromUID(s.GetArgVal());
+                if ( !pChar )
+                    return false;
+                Fight_Attack(pChar);
+                return true;
+            }
+            else if ( !strnicmp(ptcKey, "TARGET", 6) )
+            {
+                CChar *pChar = CUID::CharFindFromUID(s.GetArgVal());
+                if ( !pChar || (pChar == this) )	// can't set ourself as target
+                {
+                    m_Fight_Targ_UID.InitUID();
+                    return false;
+                }
+                m_Fight_Targ_UID = pChar->GetUID();
+                return true;
+            }
+
+            int attackerIndex = Exp_GetVal(ptcKey);
+
+            SKIP_SEPARATORS(ptcKey);
+            if ( attackerIndex >= GetAttackersCount() )
+                return false;
+
+            if ( !strnicmp(ptcKey, "DAM", 3) )
+            {
+                Attacker_SetDam(attackerIndex, s.GetArgVal());
+                return true;
+            }
+            else if ( !strnicmp(ptcKey, "ELAPSED", 7) )
+            {
+                Attacker_SetElapsed(attackerIndex, s.GetArgVal());
+                return true;
+            }
+            else if ( !strnicmp(ptcKey, "THREAT", 6) )
+            {
+                Attacker_SetThreat(attackerIndex, s.GetArgVal());
+                return true;
+            }
+            else if ( !strnicmp(ptcKey, "DELETE", 6) )
+            {
+                Attacker_Delete(attackerIndex, false, ATTACKER_CLEAR_SCRIPT);
+                return true;
+            }
+            else if ( !strnicmp(ptcKey, "IGNORE", 6) )
+            {
+                bool fIgnore = s.GetArgVal() < 1 ? 0 : 1;
+                Attacker_SetIgnore(attackerIndex, fIgnore);
+                return true;
+            }
+
 			return false;
 		}
 		case CHC_BODY:
 			SetID( (CREID_TYPE)(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr())) );
 			break;
 		case CHC_BREATH:
-			{
-				if ( !strnicmp(ptcKey, "BREATH.MAXDIST", 14) || !strnicmp(ptcKey, "BREATH.DAM", 10) || !strnicmp(ptcKey, "BREATH.HUE", 10) || !strnicmp(ptcKey, "BREATH.ANIM", 11) || !strnicmp(ptcKey, "BREATH.TYPE", 11) || !strnicmp(ptcKey, "BREATH.DAMTYPE", 14))
-				{
-					SetDefNum(s.GetKey(), s.GetArgLLVal());
-					return true;
-				}
-				return false;
-			}break;
+        {
+            ptcKey += 6;
+            if ( *ptcKey != '.' )
+                return false;
+
+            if (   !strnicmp(ptcKey, "MAXDIST", 6) || !strnicmp(ptcKey, "DAM", 3) || !strnicmp(ptcKey, "HUE", 3)
+                || !strnicmp(ptcKey, "ANIM", 4) || !strnicmp(ptcKey, "TYPE", 4) || !strnicmp(ptcKey, "DAMTYPE", 7))
+            {
+                SetDefNum(s.GetKey(), s.GetArgLLVal());
+                return true;
+            }
+            return false;
+        }
         case CHC_CREATE:
             {
                 if (g_Serv.IsLoadingGeneric())
