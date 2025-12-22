@@ -1,7 +1,8 @@
 // Common for client and server.
 #include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/CResourceLock.h"
-#include "../common/CExpression.h"
+//#include "../common/CExpression.h" // included in the precompiled header
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../network/CClientIterator.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
@@ -17,9 +18,9 @@
 CRegion::CRegion( CResourceID rid, lpctstr pszName ) :
 	CResourceDef( rid )
 {
-	ADDTOCALLSTACK("CRegion::CRegion()");
-	m_dwFlags	= 0;
-	m_dwModifiedFlags	= 0;
+    ADDTOCALLSTACK("CRegion::CRegion");
+    m_dwFlags = 0;
+    m_dwModifiedFlags = 0;
 	m_iLinkedSectors = 0;
 	if ( pszName )
 		SetName( pszName );
@@ -49,13 +50,15 @@ void CRegion::UnRealizeRegion()
 
 	for ( int i = 0; ; ++i )
 	{
-		CSector * pSector = GetSector(i);
+		CSector * pSector = GetSectorAtIndex(i);
 		if ( pSector == nullptr )
 			break;
+
 		// Does the rect overlap ?
-		if ( ! IsOverlapped( pSector->GetRect()))
+        if ( ! IsOverlapped( pSector->GetRectWorldUnits()))
 			continue;
-		if ( pSector->UnLinkRegion( this ))
+
+        if ( pSector->UnLinkRegion( this ))
 			--m_iLinkedSectors;
 	}
 
@@ -67,19 +70,22 @@ bool CRegion::RealizeRegion()
 	// Link the region to the world. RETURN: false = not valid.
 	if ( IsRegionEmpty() )
 		return false;
+
+    ASSERT(g_MapList.IsMapSupported(m_pt.m_map));
 	if ( !m_pt.IsValidPoint() )
 		m_pt = GetRegionCorner( DIR_QTY );	// center
 
 	// Attach to all sectors that i overlap.
 	ASSERT( m_iLinkedSectors == 0 );
-	const CSectorList* pSectors = CSectorList::Get();
-	for ( int i = 0, iMax = pSectors->GetSectorQty(m_pt.m_map); i < iMax; ++i )
+    const CSectorList& pSectors = CSectorList::Get();
+    for ( int i = 0, iMax = pSectors.GetMapSectorDataUnchecked(m_pt.m_map).iSectorQty; i < iMax; ++i )
 	{
-		CSector *pSector = pSectors->GetSector(m_pt.m_map, i);
+        // TODO: maybe provide a hint on where to start checking, instead of checking every sector in the map...
+        CSector *pSector = pSectors.GetSectorByIndexUnchecked(m_pt.m_map, i);
 
-		if ( pSector && IsOverlapped(pSector->GetRect()) )
+        if ( pSector && IsOverlapped(pSector->GetRectWorldUnits()) )
 		{
-			//	Yes, this sector overlapped, so add it to the sector list
+            //	Yes, this sector is overlapped, so add it to the sector list
 			if ( !pSector->LinkRegion(this) )
 			{
 				g_Log.EventError("Linking sector #%d (map %d) for region %s failed (fatal for this region).\n", i, int(m_pt.m_map), GetName());
@@ -104,6 +110,12 @@ bool CRegion::AddRegionRect( const CRectMap & rect )
 
 	// Need to call RealizeRegion now.?
 	return true;
+}
+
+bool CRegion::SetRegionRect( const CRectMap & rect )
+{
+    EmptyRegion();
+    return AddRegionRect( rect );
 }
 
 void CRegion::SetName( lpctstr pszName )
@@ -314,7 +326,7 @@ bool CRegion::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
             int iClients = 0;
             for (int i = 0; ; ++i)
             {
-                CSector	*pSector = GetSector(i);
+                CSector	*pSector = GetSectorAtIndex(i);
                 if (pSector == nullptr)
                     break;
                 iClients += pSector->m_Chars_Active.GetClientsNumber();
@@ -689,6 +701,14 @@ void CRegion::r_Write( CScript &s )
 	r_WriteBase( s );
 }
 
+void CRegion::TogRegionFlags( dword dwFlags, bool fSet ) noexcept
+{
+    if ( fSet )
+        m_dwFlags |= dwFlags;
+    else
+        m_dwFlags &= ~dwFlags;
+    SetModified( REGMOD_FLAGS );
+}
 
 bool CRegion::IsGuarded() const
 {
@@ -833,12 +853,13 @@ bool CRegion::SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsole * 
 	bool fRet = false;
 	for ( int i=0; ; ++i )
 	{
-		CSector * pSector = GetSector(i);
+        // TODO: optimization, use GetSectorAtIndexWithHints instead.
+		CSector * pSector = GetSectorAtIndex(i);
 		if ( pSector == nullptr )
 			break;
 
 		// Does the rect overlap ?
-		if ( IsOverlapped( pSector->GetRect() ) )
+        if ( IsOverlapped( pSector->GetRectWorldUnits() ) )
 		{
 			CScript script( pszVerb, pszArgs );
 			fRet |= pSector->r_Verb( script, pSrc );
@@ -874,7 +895,7 @@ TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
 		CResourceLock s;
 		if ( pLink->ResourceLock(s) )
 		{
-			iRet = CScriptObj::OnTriggerScript(s, sm_szTrigName[iAction], pSrc);
+            iRet = CScriptObj::OnTriggerScript(s, sm_szTrigName[iAction], CScriptParserBufs::GetCScriptTriggerArgsPtr(), pSrc);
 			if ( iRet == TRIGRET_RET_TRUE )
 				return iRet;
 		}
@@ -891,7 +912,7 @@ TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
 		if ( !pLink->ResourceLock(s) )
 			continue;
 
-		iRet = CScriptObj::OnTriggerScript(s, sm_szTrigName[iAction], pSrc);
+        iRet = CScriptObj::OnTriggerScript(s, sm_szTrigName[iAction], CScriptParserBufs::GetCScriptTriggerArgsPtr(), pSrc);
 		if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 			return iRet;
 	}
@@ -998,7 +1019,6 @@ bool CRegionWorld::r_LoadVal( CScript &s )
 	EXC_DEBUG_END;
 	return false;
 }
-
 
 
 void CRegionWorld::r_WriteModified( CScript &s )

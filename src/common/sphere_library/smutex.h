@@ -31,7 +31,7 @@ private:
 #endif
 
 public:
-	/** @name Constructors, Destructor, Asign operator:
+	/** @name Constructors, Destructor, Assign operator:
 	*/
 	///@{
 	SimpleMutex() noexcept;
@@ -98,7 +98,7 @@ public:
 class SimpleThreadLock
 {
 public:
-	/** @name Constructors, Destructor, Asign operator:
+	/** @name Constructors, Destructor, Assign operator:
 	*/
 	///@{
 	inline explicit SimpleThreadLock(SimpleMutex &mutex) noexcept
@@ -140,7 +140,7 @@ private:
 class ManualThreadLock
 {
 public:
-	/** @name Constructors, Destructor, Asign operator:
+	/** @name Constructors, Destructor, Assign operator:
 	*/
 	///@{
 	inline ManualThreadLock() noexcept

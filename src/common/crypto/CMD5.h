@@ -1,5 +1,5 @@
  /**
- * @file CUID.h
+ * @file CMD5.h
  * @brief MD5 hashing.
  */
 
@@ -8,7 +8,7 @@
  public domain code.
  */
 
-#ifndef _INC_CMD5_H 
+#ifndef _INC_CMD5_H
 #define _INC_CMD5_H
 
 #include "../datatypes.h"
@@ -37,7 +37,7 @@ public:
 	void digest( char * digest ) noexcept;
 	// Get digest in a "numeric" form to be usable
 	void numericDigest( uchar * digest ) noexcept;
-	
+
     static void fastDigest(char * digest, const char * message) noexcept;
 };
 

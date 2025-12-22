@@ -33,7 +33,7 @@ bool CResourceLock::_Open(lpctstr ptcUnused, uint uiUnused)
 bool CResourceLock::Open(lpctstr ptcUnused, uint uiUnused)
 {
     ADDTOCALLSTACK("CResourceLock::Open");
-    MT_UNIQUE_LOCK_RETURN(CResourceLock::_Open(ptcUnused, uiUnused));
+    MT_UNIQUE_LOCK_RETURN(this, CResourceLock::_Open(ptcUnused, uiUnused));
 }
 
 void CResourceLock::_Close()
@@ -60,7 +60,7 @@ void CResourceLock::_Close()
 void CResourceLock::Close()
 {
     ADDTOCALLSTACK("CResourceLock::Close");
-    MT_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET(this);
     CResourceLock::_Close();
 }
 
@@ -75,10 +75,10 @@ bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the 
 
     EXC_TRY("_ReadTextLine");
     ASSERT(m_pLock);
-    ASSERT( ! IsBinaryMode() );
+    ASSERT( ! _IsBinaryMode() );
 
-    tchar* ptcBuf = _GetKeyBufferRaw(SCRIPT_MAX_LINE_LEN);
-    while ( CCacheableScriptFile::_ReadString( ptcBuf, SCRIPT_MAX_LINE_LEN ))
+    tchar* ptcBuf = _GetKeyBufferRaw();
+    while ( CCacheableScriptFile::_ReadString( ptcBuf, sm_TextBufMaxSize ))
     {
         m_pLock->m_iLineNum = ++m_iLineNum;	// share this with original open.
         if ( fRemoveBlanks )
@@ -96,7 +96,7 @@ bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the 
 bool CResourceLock::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
     //ADDTOCALLSTACK_DEBUG("CResourceLock::ReadTextLine");
-    MT_UNIQUE_LOCK_RETURN(CResourceLock::_ReadTextLine(fRemoveBlanks));
+    MT_UNIQUE_LOCK_RETURN(this, CResourceLock::_ReadTextLine(fRemoveBlanks));
 }
 
 int CResourceLock::OpenLock( CResourceScript * pLock, CScriptLineContext context )

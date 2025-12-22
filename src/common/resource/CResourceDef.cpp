@@ -4,7 +4,7 @@
 */
 
 #include "../../sphere/threads.h"
-#include "../CExpression.h"
+#include "../CExpression.h" // included in the precompiled header
 #include "../CLog.h"
 #include "CResourceDef.h"
 
@@ -40,10 +40,12 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
         }
     }
 
-    const CVarDefCont * pExistingVarKey = g_Exp.m_VarResDefs.GetKey( pszName );
     const dword dwResPrivateUID = GetResourceID().GetPrivateUID();
     const int iResIndex = GetResourceID().GetResIndex();
-	CVarDefContNum* pVarKeyNum = nullptr;
+    CVarDefContNum* pVarKeyNum = nullptr;
+
+    auto gwriter = g_ExprGlobals.mtEngineLockedWriter();
+    const CVarDefCont * pExistingVarKey = gwriter->m_VarResDefs.GetKey( pszName );
     if ( pExistingVarKey )
     {
         const dword dwKeyVal = (dword)pExistingVarKey->GetValNum();
@@ -62,11 +64,11 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
             g_Log.EventWarn("DEFNAME=%s: redefinition (0%x!=0%x)\n",
                             pszName, iKeyIndex, iResIndex);
 
-        pVarKeyNum = g_Exp.m_VarResDefs.SetNum( pszName, dwResPrivateUID );
+        pVarKeyNum = gwriter->m_VarResDefs.SetNum( pszName, dwResPrivateUID );
     }
     else
     {
-        pVarKeyNum = g_Exp.m_VarResDefs.SetNumNew( pszName, dwResPrivateUID );
+        pVarKeyNum = gwriter->m_VarResDefs.SetNumNew( pszName, dwResPrivateUID );
     }
 
     if ( pVarKeyNum == nullptr )
@@ -136,7 +138,8 @@ bool CResourceDef::MakeResourceName()
     size_t uiVar = 1;
     size_t uiLen = strlen( pbuf );
 
-    for ( const CVarDefCont *pVarDef : g_Exp.m_VarResDefs )
+    auto gReader = g_ExprGlobals.mtEngineLockedReader();
+    for ( const CVarDefCont *pVarDef : gReader->m_VarResDefs )
     {
         // Is this a similar key?
         ptcKey	= pVarDef->GetKey();

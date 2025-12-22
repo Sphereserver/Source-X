@@ -3,8 +3,8 @@
 
 #include "../common/CLog.h"
 #include "../sphere/threads.h"
-#include "CException.h"
-#include "CExpression.h"
+//#include "CException.h" // included in the precompiled header
+//#include "CExpression.h" // included in the precompiled header
 #include "CScript.h"
 #include "common.h"
 
@@ -301,35 +301,36 @@ CScriptKey::CScriptKey( tchar * ptcKey, tchar * ptcArg ) :
 ///////////////////////////////////////////////////////////////
 // -CScriptKeyAlloc
 
-tchar * CScriptKeyAlloc::_GetKeyBufferRaw( size_t iLen )
+tchar * CScriptKeyAlloc::_GetKeyBufferRaw()
 {
 	//ADDTOCALLSTACK_DEBUG("CScriptKeyAlloc::_GetKeyBufferRaw");
 	// iLen = length of the string we want to hold.
-	if ( iLen > SCRIPT_MAX_LINE_LEN )
-		iLen = SCRIPT_MAX_LINE_LEN;
-	++iLen;	// add null.
 
-	if ( m_Mem.GetDataLength() < iLen )
-		m_Mem.Alloc( iLen );
-
+    if (!m_TextBuf)
+        m_TextBuf = CScriptParserBufs::GetScriptKeyArgBufPtr();
 	m_pszKey = m_pszArg = GetKeyBuffer();
 	m_pszKey[0] = '\0';
 
 	return m_pszKey;
 }
 /*
-tchar * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
+tchar * CScriptKeyAlloc::GetKeyBufferRaw()
 {
     ADDTOCALLSTACK("CScriptKeyAlloc::GetKeyBufferRaw");
-    MT_UNIQUE_LOCK_RETURN(CScriptKeyAlloc::_GetKeyBufferRaw(iLen));
+    MT_UNIQUE_LOCK_RETURN(this, CScriptKeyAlloc::_GetKeyBufferRaw());
 }
 */
+
+void CScriptKeyAlloc::_FreeKeyBuffer()
+{
+    m_TextBuf.reset();
+}
 
 tchar * CScriptKeyAlloc::GetKeyBuffer()
 {
 	// Get the buffer the key is in.
-	ASSERT(m_Mem.GetData());
-	return reinterpret_cast<tchar *>(m_Mem.GetData());
+    ASSERT(m_TextBuf);
+    return reinterpret_cast<tchar *>(m_TextBuf.get()->data());
 }
 
 bool CScriptKeyAlloc::ParseKey( lpctstr ptcKey )
@@ -338,17 +339,17 @@ bool CScriptKeyAlloc::ParseKey( lpctstr ptcKey )
 	// Skip leading white space
 	if ( ! ptcKey )
 	{
-		_GetKeyBufferRaw(0);
+        _GetKeyBufferRaw();
 		return false;
 	}
 
 	GETNONWHITESPACE( ptcKey );
 
-	tchar * pBuffer = _GetKeyBufferRaw( strlen( ptcKey ));
+    tchar * pBuffer = _GetKeyBufferRaw();
 	ASSERT(pBuffer);
 
-	size_t iLen = m_Mem.GetDataLength();
-	Str_CopyLimitNull( pBuffer, ptcKey, iLen );
+    size_t iLen = sizeof(CScriptKeyArgBuf);
+    Str_CopyLimitNull( pBuffer, ptcKey, iLen );
 
 	Str_Parse( pBuffer, &m_pszArg );
 	return true;
@@ -363,25 +364,25 @@ bool CScriptKeyAlloc::ParseKey( lpctstr ptcKey, lpctstr pszVal )
 	if ( ! lenkey )
 		return ParseKey(pszVal);
 
-	ASSERT( lenkey < SCRIPT_MAX_LINE_LEN-2 );
+    ASSERT( lenkey < sizeof(CScriptKeyArgBuf) - 2 );
 
 	size_t lenval = 0;
 	if ( pszVal )
 		lenval = strlen( pszVal );
 
-	m_pszKey = _GetKeyBufferRaw( lenkey + lenval + 1 );
+    m_pszKey = _GetKeyBufferRaw();
 
     if (ptcKey != m_pszKey)
     {
         // Invalid key, or not yet inited.
-        Str_CopyLimitNull(m_pszKey, ptcKey, m_Mem.GetDataLength());
+        Str_CopyLimitNull(m_pszKey, ptcKey, sizeof(CScriptKeyArgBuf));
     }
 	m_pszArg = m_pszKey + lenkey;
 
 	if ( pszVal )
 	{
 		++m_pszArg;
-		lenval = m_Mem.GetDataLength();
+        lenval = sizeof(CScriptKeyArgBuf);
 		Str_CopyLimitNull( m_pszArg, pszVal, lenval - lenkey );
 	}
 
@@ -514,7 +515,7 @@ bool CScript::_Open( lpctstr ptcFilename, uint uiFlags )
 bool CScript::Open( lpctstr ptcFilename, uint uiFlags )
 {
     ADDTOCALLSTACK("CScript::Open");
-    MT_UNIQUE_LOCK_RETURN(CScript::_Open(ptcFilename, uiFlags));
+    MT_UNIQUE_LOCK_RETURN(this, CScript::_Open(ptcFilename, uiFlags));
 }
 
 bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
@@ -525,8 +526,8 @@ bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened
 	// ARGS:
 	// fRemoveBlanks = Don't report any blank lines, (just keep reading)
 
-    tchar* ptcBuf = _GetKeyBufferRaw(SCRIPT_MAX_LINE_LEN);
-	while ( CCacheableScriptFile::_ReadString( ptcBuf, SCRIPT_MAX_LINE_LEN ))
+    tchar* ptcBuf = _GetKeyBufferRaw();
+    while ( CCacheableScriptFile::_ReadString( ptcBuf, sizeof(CScriptKeyArgBuf) ))
 	{
 		++m_iLineNum;
 		if ( fRemoveBlanks )
@@ -542,7 +543,7 @@ bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened
 }
 bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-    MT_UNIQUE_LOCK_RETURN(CScript::_ReadTextLine(fRemoveBlanks));
+    MT_UNIQUE_LOCK_RETURN(this, CScript::_ReadTextLine(fRemoveBlanks));
 }
 
 bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current script
@@ -550,7 +551,7 @@ bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current
 	ADDTOCALLSTACK("CScript::FindTextHeader");
 	// RETURN: false = EOF reached.
 	ASSERT(pszName);
-	ASSERT( ! IsBinaryMode());
+    ASSERT(!_IsBinaryMode());
 
 	SeekToBegin();
 
@@ -585,7 +586,7 @@ int CScript::_Seek( int iOffset, int iOrigin )
 int CScript::Seek( int iOffset, int iOrigin )
 {
     ADDTOCALLSTACK("CScript::Seek");
-    MT_UNIQUE_LOCK_RETURN(CScript::_Seek(iOffset, iOrigin));
+    MT_UNIQUE_LOCK_RETURN(this, CScript::_Seek(iOffset, iOrigin));
 }
 
 bool CScript::FindNextSection()
@@ -800,12 +801,16 @@ void CScript::_Close()
 	ADDTOCALLSTACK("CScript::_Close");
 	// EndSection();
     CCacheableScriptFile::_Close();
+
+    // If i don't have to use this to read/parse stuff anymore (example: after i have cached a script file), just free the text buffer.
+    // It will be created again if necessary by _GetKeyBufferRaw().
+    m_TextBuf.reset();
 }
 void CScript::Close()
 {
     ADDTOCALLSTACK("CScript::Close");
-    // EndSection();
-    CCacheableScriptFile::Close();
+    MT_UNIQUE_LOCK_SET(this);
+    CScript::_Close();
 }
 
 void CScript::CloseForce()
@@ -821,7 +826,7 @@ bool CScript::_SeekContext(const CScriptLineContext &LineContext )
 }
 bool CScript::SeekContext( CScriptLineContext const& LineContext )
 {
-    MT_UNIQUE_LOCK_RETURN(CScript::_SeekContext(LineContext));
+    MT_UNIQUE_LOCK_RETURN(this, CScript::_SeekContext(LineContext));
 }
 
 CScriptLineContext CScript::_GetContext() const
@@ -832,19 +837,20 @@ CScriptLineContext CScript::_GetContext() const
 	LineContext.m_iOffset = _GetPosition();
 	return LineContext;
     */
-    return {m_iLineNum, _GetPosition()};
+    return {_GetPosition(), m_iLineNum};
 }
 
 CScriptLineContext CScript::GetContext() const
 {
-    MT_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET(this);
     /*
     CScriptLineContext LineContext;
     LineContext.m_iLineNum = m_iLineNum;
     LineContext.m_iOffset = _GetPosition();
     return LineContext;
     */
-    return {m_iLineNum, _GetPosition()};
+    auto ret = CScriptLineContext(_GetPosition(), m_iLineNum);
+    return ret;
 }
 
 bool CScript::WriteSection( lpctstr ptcSection, ... )
@@ -869,7 +875,7 @@ bool CScript::WriteSection( lpctstr ptcSection, ... )
 	offset += Str_CopyLimitNull(tsHeader.buffer() + offset, tsSectionFormatted.buffer(), tsHeader.capacity() - 2);
 	offset += Str_ConcatLimitNull(tsHeader.buffer() + offset, "]\n", tsHeader.capacity() - offset);
 
-	MT_UNIQUE_LOCK_SET;
+	MT_UNIQUE_LOCK_SET(this);
 	_Write(tsHeader.buffer(), int(offset));
 
 	return true;

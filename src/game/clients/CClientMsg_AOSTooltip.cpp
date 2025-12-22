@@ -1,4 +1,6 @@
-#include "../../common/CExpression.h"
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
+#include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../clients/CClientTooltip.h"
@@ -96,9 +98,10 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 
 			if (IsTrigUsed(TRIGGER_CLIENTTOOLTIP) || (pItem && IsTrigUsed(TRIGGER_ITEMCLIENTTOOLTIP)) || (pChar && IsTrigUsed(TRIGGER_CHARCLIENTTOOLTIP)))
 			{
-				CScriptTriggerArgs args(pObj);
-				args.m_iN1 = fRequested;
-				iRet = pObj->OnTrigger("@ClientTooltip", this->GetChar(), &args); //ITRIG_CLIENTTOOLTIP , CTRIG_ClientTooltip
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_pO1 = pObj;
+                pScriptArgs->m_iN1 = fRequested;
+                iRet = pObj->OnTrigger("@ClientTooltip", pScriptArgs, this->GetChar()); //ITRIG_CLIENTTOOLTIP , CTRIG_ClientTooltip
 			}
 
 			if (iRet != TRIGRET_RET_TRUE)
@@ -117,9 +120,10 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 
 			if (IsTrigUsed(TRIGGER_CLIENTTOOLTIP_AFTERDEFAULT) || (pItem && IsTrigUsed(TRIGGER_ITEMCLIENTTOOLTIP_AFTERDEFAULT)) || (pChar && IsTrigUsed(TRIGGER_CHARCLIENTTOOLTIP_AFTERDEFAULT)))
 			{
-				CScriptTriggerArgs args(pObj);
-				args.m_iN1 = fRequested;
-				iRet = pObj->OnTrigger("@ClientTooltip_AfterDefault", this->GetChar(), &args); //Save to return on iRet to make sure return value doesn't stuck the boolean.
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_pO1 = pObj;
+                pScriptArgs->m_iN1 = fRequested;
+                iRet = pObj->OnTrigger("@ClientTooltip_AfterDefault", pScriptArgs, this->GetChar()); //Save to return on iRet to make sure return value doesn't stuck the boolean.
 			}
 		}
 

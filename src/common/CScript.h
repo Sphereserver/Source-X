@@ -6,8 +6,8 @@
 #ifndef _INC_CSCRIPT_H
 #define _INC_CSCRIPT_H
 
-#include "sphere_library/CSMemBlock.h"
 #include "CScriptContexts.h"
+#include "CScriptParserBufs.h"
 #include "CCacheableScriptFile.h"
 
 
@@ -78,11 +78,13 @@ class CScriptKeyAlloc : public CScriptKey
 {
 	// Dynamic allocated script key.
 protected:
-	CSMemLenBlock m_Mem;	// the buffer to hold data read.
+    static constexpr size_t sm_TextBufMaxSize = sizeof(CScriptKeyArgBuf);
+    CScriptKeyArgBufPtr m_TextBuf;	// the buffer to hold data read.
 
 protected:
-	tchar * _GetKeyBufferRaw( size_t iSize );
-    //tchar * GetKeyBufferRaw( size_t iSize );
+    tchar * _GetKeyBufferRaw();
+    //tchar * GetKeyBufferRaw();
+    void _FreeKeyBuffer();
 	size_t ParseKeyEnd();
 
 public:

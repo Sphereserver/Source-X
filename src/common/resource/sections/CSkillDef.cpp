@@ -1,5 +1,5 @@
 #include "../../../sphere/threads.h"
-#include "../../CException.h"
+//#include "../../CException.h" // included in the precompiled header
 #include "../../CScript.h"
 #include "CSkillDef.h"
 

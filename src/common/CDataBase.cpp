@@ -4,16 +4,23 @@
 #include "../sphere/asyncdb.h"
 #include "resource/sections/CResourceNamedDef.h"    // Needed because it was only forward declared.
 #include "CLog.h"
-#include "CException.h"
-#include "CExpression.h"
+//#include "CException.h" // included in the precompiled header
+//#include "CExpression.h" // included in the precompiled header
 #include "CScriptTriggerArgs.h"
 #include "CDataBase.h"
 
+#include <mysql/errmsg.h>	// mysql standard include
+#include <mysql/mysql.h>	// this needs to be defined AFTER common.h
 
-CDataBase::CDataBase()
+
+struct MySQLDataWrapper
 {
-	m_fConnected = false;
-	_myData = nullptr;
+    MYSQL *ptr;
+};
+
+CDataBase::CDataBase() :
+    _myData(std::make_unique<MySQLDataWrapper>()), m_fConnected(false)
+{
 }
 
 CDataBase::~CDataBase()
@@ -38,8 +45,8 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 		return false;
 	}
 
-	_myData = mysql_init(_myData ? _myData : nullptr);
-	if ( !_myData )
+    _myData->ptr = mysql_init(_myData->ptr ? _myData->ptr : nullptr);
+    if ( !_myData->ptr )
 		return false;
 
 	int portnum = 0;
@@ -53,12 +60,12 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 		host = pcTemp;
 	}
 
-	if ( !mysql_real_connect(_myData, host, user, password, base, portnum, nullptr, CLIENT_MULTI_STATEMENTS ) )
+    if ( !mysql_real_connect(_myData->ptr, host, user, password, base, portnum, nullptr, CLIENT_MULTI_STATEMENTS ) )
 	{
-		const char *error = mysql_error(_myData);
+        const char *error = mysql_error(_myData->ptr);
 		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MariaDB connect fail with error: %s\n", error);
-		mysql_close(_myData);
-		_myData = nullptr;
+        mysql_close(_myData->ptr);
+        _myData->ptr = nullptr;
 		return false;
 	}
 
@@ -81,8 +88,8 @@ void CDataBase::Close()
 {
 	ADDTOCALLSTACK("CDataBase::Close");
 	SimpleThreadLock lock(m_connectionMutex);
-	mysql_close(_myData);
-	_myData = nullptr;
+    mysql_close(_myData->ptr);
+    _myData->ptr = nullptr;
 	m_fConnected = false;
 }
 
@@ -91,10 +98,10 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
     ADDTOCALLSTACK("CDataBase::query");
     mapQueryResult.Clear();
     mapQueryResult.SetNumNew("NUMROWS", 0);
-    
+
     if ( !isConnected() )
         return false;
-        
+
     int result;
     MYSQL_RES * m_res = nullptr;
     const char * myErr = nullptr;
@@ -105,28 +112,28 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
          * finish the query -and- retrieve the results
          */
         SimpleThreadLock lock(m_connectionMutex);
-        result = mysql_query(_myData, query);
-        
+        result = mysql_query(_myData->ptr, query);
+
         if ( result == 0 )
         {
-            m_res = mysql_store_result(_myData);
+            m_res = mysql_store_result(_myData->ptr);
             if ( m_res == nullptr )
                 return false;
         }
         else
         {
-            myErr = mysql_error(_myData);
+            myErr = mysql_error(_myData->ptr);
         }
     }
-    
+
     if ( m_res != nullptr )
     {
         MYSQL_FIELD * fields = mysql_fetch_fields(m_res);
         int num_fields = mysql_num_fields(m_res);
-        
+
         mapQueryResult.SetNum("NUMROWS", mysql_num_rows(m_res));
         mapQueryResult.SetNum("NUMCOLS", num_fields);
-        
+
         char key[12];
         char **trow = nullptr;
         int rownum = 0;
@@ -139,13 +146,13 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
                 char *z = trow[i];
                 if (z == nullptr) //We need to check if the row empty, and return char 0 as return, because SetStr clean up \0 chars from vardef and causes the Sphere crash.
                     z = &empty;
-                    
+
                 if ( !rownum )
                 {
                     mapQueryResult.SetStr(Str_FromI_Fast(i, key, sizeof(key), 10), true, z);
                     mapQueryResult.SetStr(fields[i].name, true, z);
                 }
-            
+
                 snprintf(zStore, Str_TempLength(), "%d.%d", rownum, i);
                 mapQueryResult.SetStr(zStore, true, z);
                 snprintf(zStore, Str_TempLength(), "%d.%s", rownum, fields[i].name);
@@ -160,10 +167,10 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
     {
         g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MariaDB query \"%s\" failed due to \"%s\"\n", query, ( *myErr ? myErr : "unknown reason"));
     }
-    
+
     if (( result == CR_SERVER_GONE_ERROR ) || ( result == CR_SERVER_LOST ))
         Close();
-        
+
     return false;
 }
 
@@ -189,12 +196,12 @@ bool CDataBase::exec(const char *query)
 	{
 		// connection can only handle one query at a time, so we need to lock until we finish
 		SimpleThreadLock lock(m_connectionMutex);
-		result = mysql_query(_myData, query);
+        result = mysql_query(_myData->ptr, query);
 		if (result == 0)
 		{
 			// even though we don't want (or expect) any result data, we must retrieve
 			// is anyway otherwise we will lose our connection to the server
-			MYSQL_RES* res = mysql_store_result(_myData);
+            MYSQL_RES* res = mysql_store_result(_myData->ptr);
 			if (res != nullptr)
 				mysql_free_result(res);
 
@@ -202,7 +209,7 @@ bool CDataBase::exec(const char *query)
 		}
 		else
 		{
-			const char *myErr = mysql_error(_myData);
+            const char *myErr = mysql_error(_myData->ptr);
 			g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MariaDB query \"%s\" failed due to \"%s\"\n",
 				query, ( *myErr ? myErr : "unknown reason"));
 		}
@@ -244,11 +251,11 @@ bool CDataBase::addQuery(bool isQuery, lpctstr theFunction, lpctstr theQuery)
 	}
 }
 
-void CDataBase::addQueryResult(CSString & theFunction, CScriptTriggerArgs * theResult)
+void CDataBase::addQueryResult(CSString & theFunction, CScriptTriggerArgsPtr theResult)
 {
 	SimpleThreadLock stlThelock(m_resultMutex);
 
-	m_QueryArgs.push(FunctionArgsPair_t(theFunction, theResult));
+    m_QueryArgs.push(FunctionArgsPair_t(theFunction, std::move(theResult)));
 }
 
 bool CDataBase::_OnTick()
@@ -268,7 +275,7 @@ bool CDataBase::_OnTick()
 		if ( isConnected() )	//	currently connected - just check that the link is alive
 		{
 			SimpleThreadLock lock(m_connectionMutex);
-			const int iPingRet = mysql_ping(_myData);
+            const int iPingRet = mysql_ping(_myData->ptr);
 			if ( iPingRet )
 			{
 				g_Log.EventError("MariaDB server link has been lost (error code: %d). Trying to reattach to it.\n", iPingRet);
@@ -287,17 +294,14 @@ bool CDataBase::_OnTick()
 		FunctionArgsPair_t currentPair;
 		{
 			SimpleThreadLock lock(m_resultMutex);
-			currentPair = m_QueryArgs.front();
+            currentPair = m_QueryArgs.front();
 			m_QueryArgs.pop();
 		}
 
-		if ( !g_Serv.r_Call(currentPair.first, &g_Serv, currentPair.second) )
+        if ( !g_Serv.r_Call(currentPair.first.GetBuffer(), currentPair.second, &g_Serv) )
 		{
 			// error
 		}
-
-		ASSERT(currentPair.second != nullptr);
-		delete currentPair.second;
 	}
 
 	return true;
@@ -438,7 +442,7 @@ bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, b
 				tchar * escapedString = Str_GetTemp();
 
 				SimpleThreadLock lock(m_connectionMutex);
-				if ( isConnected() && mysql_real_escape_string(_myData, escapedString, ptcKey, (uint)(strlen(ptcKey))) )
+                if ( isConnected() && mysql_real_escape_string(_myData->ptr, escapedString, ptcKey, (uint)(strlen(ptcKey))) )
 				{
 					sVal = escapedString;
 				}

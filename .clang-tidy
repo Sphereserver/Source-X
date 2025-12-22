@@ -1,4 +1,4 @@
-ExcludeHeaderFilterRegex: ^.*(lib\/).*
+#ExcludeHeaderFilterRegex: ^.*(lib\/).*
 
 Checks: >
   #-*,
@@ -16,26 +16,36 @@ Checks: >
   -clang-analyzer-security.insecureAPI.strcpy,
   -clang-diagnostic-format-security,
   -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-avoid-do-while,
   -cppcoreguidelines-avoid-goto,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-no-malloc,
   -cppcoreguidelines-init-variables, # false positives
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-prefer-member-initializer,
-  -cppcoreguidelines-pro-bounds-array-pointer-decay,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  #-cppcoreguidelines-pro-bounds-array-pointer-decay,
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -cppcoreguidelines-pro-bounds-constant-array-index,
   -cppcoreguidelines-pro-type-const-cast,   # we have some instances, and we should remove them...
-  -cppcoreguidelines-pro-type-vararg,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
   -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-pro-type-vararg,
+  -cppcoreguidelines-special-member-functions, # explicit move, copy contructors...
   ##-hicpp-use-auto, #duplicate
   ##-hicpp-braces-around-statements,
   ##-hicpp-vararg, #duplicate
+  -misc-const-correctness, # temporary
   -misc-include-cleaner,
+  -misc-non-private-member-variables-in-classes,
   -modernize-avoid-c-arrays,
   -modernize-use-auto,
   -modernize-use-trailing-return-type,
   -modernize-loop-convert,
+  -modernize-macro-to-enum,
+  -modernize-use-designated-initializers,
+  -modernize-use-nodiscard,
+  -modernize-use-using,
   -readability-braces-around-statements,
   -readability-delete-null-pointer,
   -readability-else-after-return,
@@ -43,6 +53,7 @@ Checks: >
   -readability-identifier-length,
   -readability-identifier-naming,
   -readability-implicit-bool-conversion,
+  -readability-inconsistent-declaration-parameter-name,
   -readability-magic-numbers,
   -readability-misleading-indentation, # to be enabled after the source is properly formatted
   -readability-simplify-boolean-expr,
@@ -52,12 +63,14 @@ Checks: >
   ##-readability-braces-around-statements,
   ##-readability-magic-numbers
 
+  #-format security
+
 # Turn all the warnings from the checks above into errors.
 #WarningsAsErrors: "*"
 
 CheckOptions:
-  - key: 'clang-analyzer-core.NonNullParamChecker:assert_like_macro'
-    value: 'DEBUG_ASSERT,ASSERT,ASSERT_ALWAYS'
+#  - key: 'clang-analyzer-core.NonNullParamChecker:assert_like_macro'
+#    value: 'DEBUG_ASSERT,ASSERT,ASSERT_ALWAYS'
   - key: 'clang-analyzer-config:noreturn_function'
     value: 'RaiseImmediateAbort,RaiseRecoverableAbort'
   - { key: readability-identifier-naming.NamespaceCase,          value: lower_case }

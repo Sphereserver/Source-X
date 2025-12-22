@@ -608,7 +608,7 @@ protected:
 public:
 	virtual bool _OnTick() override;
 
-    virtual bool _CanTick() const override;
+    virtual bool _TickableStateBase() const override;
 	bool _CanHoldTimer() const;
 
     virtual void DupeCopy( const CObjBase * pItem ) override;
@@ -726,7 +726,9 @@ public:
 	bool IsTopLevelMultiLocked() const;
 	bool IsMovableType() const;
 	bool IsMovable() const;
-	virtual int GetVisualRange() const override;
+
+    [[nodiscard]]
+    virtual int GetVisualRange() const override;
 
 	bool IsStackableException() const;
 	bool IsStackable( const CItem * pItem ) const;
@@ -821,8 +823,8 @@ public:
     */
     void SetTriggerActive(lpctstr trig = nullptr);
 
-	virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs ) override;
-	TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
+    virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc ) override;
+    TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc );
 
 	// Item type specific stuff.
     inline bool IsType(IT_TYPE type) const noexcept {
@@ -883,7 +885,7 @@ public:
 	bool IsBookSystem() const;
 
 	void OnExplosion();
-	virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting = false, int64 iDuration = 0) override;
+    virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false, int64 iDuration = 0) override;
 	int OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType = DAMAGE_HIT_BLUNT );
 
 	int Armor_GetRepairPercent() const;

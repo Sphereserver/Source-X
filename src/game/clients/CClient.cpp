@@ -1,12 +1,14 @@
 #include "../../common/resource/sections/CResourceNamedDef.h"
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CLog.h"
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../common/CUOClientVersion.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/CNetworkManager.h"
 #include "../../network/CIPHistoryManager.h"
+#include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../components/CCSpawn.h"
 #include "../items/CItemMultiCustom.h"
@@ -92,7 +94,7 @@ CClient::~CClient() noexcept
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
 	if ( GetConnectType() != CONNECT_GAME )
     {
-        EXC_TRYSUB("m_iPendingConnectionRequests")
+        EXC_TRYSUB("m_iPendingConnectionRequests");
 
         ASSERT(history.m_iPendingConnectionRequests > 0);
 		-- history.m_iPendingConnectionRequests;
@@ -137,7 +139,7 @@ CClient::~CClient() noexcept
 bool CClient::CanInstantLogOut() const
 {
 	ADDTOCALLSTACK("CClient::CanInstantLogOut");
-	if ( g_Serv.IsLoading())	// or exiting.
+	if ( g_Serv.IsLoadingGeneric())	// or exiting.
 		return true;
 	if ( ! g_Cfg.m_iClientLingerTime )
 		return true;
@@ -190,10 +192,13 @@ void CClient::CharDisconnect()
 
 	if ( IsTrigUsed(TRIGGER_LOGOUT) )
 	{
-		CScriptTriggerArgs Args(iLingerTime, fCanInstaLogOut);
-		m_pChar->OnTrigger(CTRIG_LogOut, m_pChar, &Args);
-		iLingerTime = (int)(Args.m_iN1);
-		fCanInstaLogOut = (Args.m_iN2 != 0);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(iLingerTime, fCanInstaLogOut, 0, nullptr);
+
+        m_pChar->OnTrigger(CTRIG_LogOut, pScriptArgs, m_pChar);
+
+        iLingerTime = (int)(pScriptArgs->m_iN1);
+        fCanInstaLogOut = (pScriptArgs->m_iN2 != 0);
 	}
 
 	if ( iLingerTime <= 0 )
@@ -1259,7 +1264,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
-					closeUIWindow(pChar, PacketCloseUIWindow::Paperdoll);
+                    closeUIWindow(pChar, PacketCloseUIWindowType::Paperdoll);
 			}
 			break;
 
@@ -1272,7 +1277,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
-					closeUIWindow(pChar, PacketCloseUIWindow::Profile);
+                    closeUIWindow(pChar, PacketCloseUIWindowType::Profile);
 			}
 			break;
 
@@ -1285,7 +1290,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
-					closeUIWindow(pChar, PacketCloseUIWindow::Status);
+                    closeUIWindow(pChar, PacketCloseUIWindowType::Status);
 			}
 			break;
 

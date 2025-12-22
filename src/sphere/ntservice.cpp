@@ -3,13 +3,14 @@
 #ifdef _WIN32
 
 #include <direct.h>
-#include "../common/CException.h"
-#include "../common/CExpression.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CServer.h"
 #include "../game/spheresvr.h"
+#include "StartupMonitorAPI.h"
 #include "ntwindow.h"
 #include "ntservice.h"
 
@@ -460,6 +461,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
 	UnreferencedParameter(hPrevInstance);
     AbstractThread::setThreadName("T_SphereStartup");
+    Sphere_AttachBootstrapContext(); // bind bootstrap OS thread to StartupMonitor context
 
 	TCHAR	*argv[32];
 	argv[0] = nullptr;

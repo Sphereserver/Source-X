@@ -20,7 +20,7 @@ class CSTypedArray : public std::vector<TYPE>
 public:
     static const char *m_sClassName;
 
-    /** @name Constructors, Destructor, Asign operator:
+    /** @name Constructors, Destructor, Assign operator:
     */
     ///@{
     /**
@@ -79,7 +79,6 @@ public:
     inline bool IsValidIndex( size_t i ) const;
     ///@}
 };
-
 
 
 /* Template methods (inlined or not) are defined here */

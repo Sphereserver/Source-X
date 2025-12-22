@@ -2,8 +2,8 @@
 // CItemShip.cpp
 //
 
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
 #include "../chars/CChar.h"
 #include "../CServer.h"
 #include "../CWorldSearch.h"
@@ -201,7 +201,7 @@ bool CItemShip::r_LoadVal(CScript & s)
     EXC_TRY("LoadVal");
     lpctstr	ptcKey = s.GetKey();
     IMCS_TYPE index = (IMCS_TYPE)FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
-    if (index >= 0 && g_Serv.IsLoading())
+    if (index >= 0 && g_Serv.IsLoadingGeneric())
     {
         switch (index)
         {

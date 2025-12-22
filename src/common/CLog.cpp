@@ -3,7 +3,7 @@
 #include "../sphere/threads.h"
 #include "../game/CServer.h"
 #include "sphere_library/sstringobjs.h"
-#include "CException.h"
+//#include "CException.h" // included in the precompiled header
 #include "CScript.h"
 #include "CLog.h"
 
@@ -107,7 +107,7 @@ const CScript * CLog::_SetScriptContext( const CScript * pScriptContext )
 
 const CScript * CLog::SetScriptContext(const CScript * pScriptContext)
 {
-    MT_UNIQUE_LOCK_RETURN(CLog::_SetScriptContext(pScriptContext));
+    MT_UNIQUE_LOCK_RETURN(this, CLog::_SetScriptContext(pScriptContext));
 }
 
 const CScriptObj * CLog::_SetObjectContext( const CScriptObj * pObjectContext )
@@ -119,7 +119,7 @@ const CScriptObj * CLog::_SetObjectContext( const CScriptObj * pObjectContext )
 
 const CScriptObj * CLog::SetObjectContext(const CScriptObj * pObjectContext)
 {
-    MT_UNIQUE_LOCK_RETURN(CLog::_SetObjectContext(pObjectContext));
+    MT_UNIQUE_LOCK_RETURN(this, CLog::_SetObjectContext(pObjectContext));
 }
 
 bool CLog::SetFilePath( lpctstr pszName )
@@ -216,7 +216,7 @@ bool CLog::_OpenLog( lpctstr pszBaseDirName )	// name set previously.
 bool CLog::OpenLog(lpctstr pszBaseDirName)	// name set previously.
 {
 	ADDTOCALLSTACK("CLog::OpenLog");
-	MT_UNIQUE_LOCK_RETURN(CLog::_OpenLog(pszBaseDirName));
+	MT_UNIQUE_LOCK_RETURN(this, CLog::_OpenLog(pszBaseDirName));
 }
 
 int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) noexcept
@@ -277,7 +277,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 		// Print to screen.
 		if ( !(dwMask & LOGF_LOGFILE_ONLY) )
 		{
-			if ( !(dwMask & LOGM_INIT) && !g_Serv.IsLoading() )
+            if ( !(dwMask & LOGM_INIT) && !g_Serv.IsLoadingGeneric() )
 			{
 				g_Serv.PrintStr(CTCOL_YELLOW, szTime );
 			}
@@ -310,7 +310,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 		// Print to log file.
 		if ( !(dwMask & LOGF_CONSOLE_ONLY) )
 		{
-			MT_UNIQUE_LOCK_SET;
+			MT_UNIQUE_LOCK_SET(this);
 
 			if ( datetime.GetDay() != m_dateStamp.GetDay())
 			{
@@ -349,7 +349,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 		// Not much we can do about this
 		iRet = 0;
 		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
-        STDERR_LOG("CLog::EventStr failed to print: '%s'.\n", pszMsg);
+        stderrLog("CLog::EventStr failed to print: '%s'.\n", pszMsg);
 	}
 
 	return iRet;

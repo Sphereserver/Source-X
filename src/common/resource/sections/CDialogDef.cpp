@@ -1,10 +1,10 @@
-#include "../../../game/chars/CChar.h"
+#include "../../../game/chars/CChar.h"  // needed, even if clangd says the opposite
 #include "../../../game/clients/CClient.h"
 #include "../../../game/CObjBase.h"
 #include "../../../sphere/threads.h"
-#include "../../CException.h"
-#include "../../CExpression.h"
-#include "../../CScriptTriggerArgs.h"
+//#include "../../CException.h" // included in the precompiled header
+//#include "../../CExpression.h" // included in the precompiled header
+//#include "../../CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../CResourceLock.h"
 #include "CDialogDef.h"
 
@@ -131,8 +131,9 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         {
             // RES_FUNCTION call
             CSString sVal;
-            CScriptTriggerArgs Args(s.GetArgRaw());
-            if ( r_Call(uiFunctionIndex, pSrc, &Args, &sVal) )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(s.GetArgRaw());
+            if ( r_Call(uiFunctionIndex, pScriptArgs, pSrc, &sVal) )
                 return true;
         }
 
@@ -141,6 +142,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         return m_pObj->r_Verb(s, pSrc);
     }
 
+    auto &gExprParser = CExpression::GetExprParser();
     lptstr ptcArgs = s.GetArgStr();
     //g_Log.EventDebug("Dialog index %d, KEY %s ARG %s.\n", index, ptcKey, ptcArgs);
 
@@ -150,25 +152,33 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         GETNONWHITESPACE(ptcArgs_);
     };
 
-    const auto _CalcRelative = [](lptstr& ptcArgs_, int &iCoordBase_) -> int
+    const auto _CalcRelative = [&gExprParser](lptstr& ptcArgs_, int &iCoordBase_) -> int
     {
         int c;
-            if ( *ptcArgs_ == '-' && IsSpace(ptcArgs_[1]))
+        if ( *ptcArgs_ == '-' && IsSpace(ptcArgs_[1]))
             c = iCoordBase_, ++ptcArgs_;
         else if ( *ptcArgs_ == '+' )
-            c = iCoordBase_ + Exp_GetSingle( ++ptcArgs_ );
+            c = iCoordBase_ + n64_narrow_n32_checked(gExprParser.GetSingle(++ptcArgs_ ));
         else if ( *ptcArgs_ == '-' )
-            c = iCoordBase_ - Exp_GetSingle( ++ptcArgs_ );
+            c = iCoordBase_ - n64_narrow_n32_checked(gExprParser.GetSingle(++ptcArgs_ ));
         else if ( *ptcArgs_ == '*' )
-            iCoordBase_ = c = iCoordBase_ + Exp_GetSingle( ++ptcArgs_ );
+            iCoordBase_ = c = iCoordBase_ + n64_narrow_n32_checked(gExprParser.GetSingle( ++ptcArgs_ ));
         else
-            c = Exp_GetSingle( ptcArgs_ );
+            c = n64_narrow_n32_checked(gExprParser.GetSingle( ptcArgs_ ));
         return c;
     };
 
-#   define GET_ABSOLUTE(c)          _SkipAll(ptcArgs);   int c = Exp_GetSingle(ptcArgs);
-#   define GET_EVAL(c)              _SkipAll(ptcArgs);   int c = Exp_GetVal(ptcArgs);
-#   define GET_RELATIVE(c, base)    _SkipAll(ptcArgs);   int c = _CalcRelative(ptcArgs, base);
+#   define GET_RELATIVE(c, base)    \
+        _SkipAll(ptcArgs);          \
+        const int c = _CalcRelative(ptcArgs, base);
+
+#   define GET_ABSOLUTE(c)          \
+        _SkipAll(ptcArgs);          \
+        const int c = n64_narrow_n32_checked(gExprParser.GetSingle(ptcArgs), false);
+
+#   define GET_EVAL(c)              \
+        _SkipAll(ptcArgs);          \
+        const int c = n64_narrow_n32_checked(gExprParser.GetVal(ptcArgs), false);
 
     switch( index )
     {
@@ -430,17 +440,17 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             if ( *ptcArgs == '-' && (IsSpace( ptcArgs[1] ) || !ptcArgs[1]) )
                 ++ptcArgs;
             else if ( *ptcArgs == '*' )
-                m_iOriginX += Exp_GetSingle( ++ptcArgs );
+                m_iOriginX += n64_narrow_n32_checked(gExprParser.GetSingle( ++ptcArgs ), false);
             else
-            	m_iOriginX	= Exp_GetSingle( ptcArgs );
+                m_iOriginX	= n64_narrow_n32_checked(gExprParser.GetSingle( ptcArgs ), false);
 
             _SkipAll( ptcArgs );
             if ( *ptcArgs == '-' && (IsSpace( ptcArgs[1] ) || !ptcArgs[1]) )
                 ++ptcArgs;
             else if ( *ptcArgs == '*' )
-                m_iOriginY += Exp_GetSingle( ++ptcArgs );
+                m_iOriginY += n64_narrow_n32_checked(gExprParser.GetSingle( ++ptcArgs ), false);
             else
-                m_iOriginY  = Exp_GetSingle( ptcArgs );
+                m_iOriginY  = n64_narrow_n32_checked(gExprParser.GetSingle( ptcArgs ), false);
 
             return true;
         }
@@ -552,11 +562,13 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
     m_wPage			= (word)(iPage);
     m_fNoDispose	= false;
 
-    CScriptTriggerArgs	Args(iPage, 0, pObjSrc);
-    //DEBUG_ERR(("Args.m_s1_buf_vec %s  Args.m_s1 %s  Arguments 0x%x\n",Args.m_s1_buf_vec, Args.m_s1, Arguments));
+    CExpression& expr_parser = CExpression::GetExprParser();
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(iPage, 0, 0, pObjSrc);
+    //DEBUG_ERR(("pScriptArgs->m_s1_buf_vec %s  pScriptArgs->m_s1 %s  Arguments 0x%x\n",pScriptArgs->m_s1_buf_vec, pScriptArgs->m_s1, Arguments));
     if (Arguments)
     {
-        Args.m_s1_buf_vec = Args.m_s1 = Arguments;
+        pScriptArgs->m_s1_buf_vec = pScriptArgs->m_s1 = Arguments;
     }
 
     // read text first
@@ -564,7 +576,8 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
     {
         while ( s.ReadKey())
         {
-            m_pObj->ParseScriptText( s.GetKeyBuffer(), pClient->GetChar() );
+            CScriptExprContext scpContext{._pScriptObjI = m_pObj};
+            expr_parser.ParseScriptText( s.GetKeyBuffer(), scpContext, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pClient->GetChar() );
             m_sText.emplace_back(false) = s.GetKey();
         }
     }
@@ -582,13 +595,14 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
     // starting x,y location.
     int64 iSizes[2];
     tchar * pszBuf = s.GetKeyBuffer();
-    m_pObj->ParseScriptText( pszBuf, pClient->GetChar() );
+    CScriptExprContext scpContext{._pScriptObjI = m_pObj};
+    expr_parser.ParseScriptText( pszBuf, scpContext, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pClient->GetChar() );
 
     Str_ParseCmds( pszBuf, iSizes, ARRAY_COUNT(iSizes) );
     m_x	= (int)(iSizes[0]);
     m_y	= (int)(iSizes[1]);
 
-    const auto trigRet = OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, pClient->GetChar(), &Args );
+    const auto trigRet = OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, pScriptArgs, pClient->GetChar() );
     m_sText.shrink_to_fit();
     m_sControls.shrink_to_fit();
 

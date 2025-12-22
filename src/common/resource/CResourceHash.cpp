@@ -3,6 +3,7 @@
 *
 */
 
+#include "../CLog.h"
 #include "CResourceDef.h"
 #include "CResourceHash.h"
 
@@ -48,14 +49,49 @@ int CResourceHashArray::_compare(std::unique_ptr<CResourceDef> const& pObjStored
     return -1;
 }
 
+void CResourceHashArray::ManualSort()
+{
+    auto sorter = CResourceHashArraySorter();
+    std::sort(this->begin(), this->end(), sorter);
+    auto it = this->cbegin();
+    const auto itEnd = this->cend();
+    while (true)
+    {
+        it = std::adjacent_find(it, itEnd);
+        if (it == itEnd)
+            break;
+
+        const CResourceDef * pRes = it->get();
+        g_Log.EventError("Duplicated CResourceDef '%s'.\n", pRes->GetResourceName());
+    }
+}
+
 void CResourceHash::AddSortKey(CResourceID const& rid, CResourceDef* pNew)
 {
     ASSERT(rid.GetResPage() <= RES_PAGE_MAX); // RES_PAGE_ANY can be used only for search, you can't insert a rid with this special page
-    
+
     auto& destArray = m_Array[GetHashArray(rid)];
 
     ASSERT(destArray.find_sorted(rid) == sl::scont_bad_index());
     destArray.emplace(pNew);
+}
+
+void CResourceHash::AddUnsortedKey(CResourceID const& rid, CResourceDef* pNew)
+{
+    ASSERT(rid.GetResPage() <= RES_PAGE_MAX); // RES_PAGE_ANY can be used only for search, you can't insert a rid with this special page
+
+    auto& destArray = m_Array[GetHashArray(rid)];
+
+    //ASSERT(destArray.find_sorted(rid) == sl::scont_bad_index());
+    destArray.emplace_unsorted(pNew);
+}
+
+void CResourceHash::SortStep()
+{
+    for (auto& arr : m_Array)
+    {
+        arr.ManualSort();
+    }
 }
 
 void CResourceHash::SetAt(CResourceID const& rid, size_t index, CResourceDef* pNew)

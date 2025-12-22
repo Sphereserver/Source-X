@@ -13,7 +13,8 @@
 
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../common/CLog.h"
 #include "../../common/CScript.h"
 #include "../chars/CChar.h"
@@ -21,7 +22,7 @@
 #include "../CWorldGameTime.h"
 #include "CCChampion.h"	// predef header.
 #include <string>
-#include <sstream> 
+#include <sstream>
 
 #define CANDLESNEXTRED 4
 #define MAXSPAWN 2400
@@ -76,6 +77,8 @@ CCChampion::CCChampion(CItem* pLink) : CComponent(COMP_CHAMPION)
     _idChampion = CREID_INVALID;
     _iLastActivationTime = 0;
     Init();
+    _iSpawnsNextRed = 0;
+    _iSpawnsNextWhite = 0;
 }
 
 void CCChampion::Copy(const CComponent* target)
@@ -89,12 +92,15 @@ void CCChampion::Copy(const CComponent* target)
 CCChampion::~CCChampion()
 {
     ADDTOCALLSTACK("CCChampion::~CCChampion");
+    EXC_TRY("Destructor");
     ClearWhiteCandles();
     ClearRedCandles();
+    EXC_CATCH;
 }
 
 CItem* CCChampion::GetLink() const
 {
+    ASSERT(_pLink != nullptr);
     return _pLink;
 }
 
@@ -103,8 +109,6 @@ CCRET_TYPE CCChampion::OnTickComponent()
     ADDTOCALLSTACK("CCChampion::_OnTick");
     if (!_pRedCandles.empty())
     {
-        // TODO: Check
-        // DONE
         _iSpawnsCur -= minimum(_iSpawnsCur, _iSpawnsNextRed);
         _iDeathCount -= minimum(_iDeathCount, _iSpawnsNextRed);
         DelRedCandle(CANDLEDELREASON_TIMEOUT);
@@ -159,11 +163,9 @@ void CCChampion::Start(CChar *pChar)
     // TODO store light in the area
     if (_fActive)
         return;
+
     _fActive = true;
     _iLastActivationTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
-
-    // TODO: Check
-    // DONE
     _iSpawnsNextRed = GetCandlesCount();
 
     SetLevel(1);
@@ -171,8 +173,7 @@ void CCChampion::Start(CChar *pChar)
     if (pChar && IsTrigUsed(TRIGGER_START))
     {
         // TODO: add source?
-        // DONE
-        if (OnTrigger(ITRIG_Start, pChar, nullptr) == TRIGRET_RET_TRUE)
+        if (OnTrigger(ITRIG_Start, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pChar) == TRIGRET_RET_TRUE)
             return;
     }
 
@@ -188,7 +189,7 @@ void CCChampion::Stop(CChar* pChar)
     {
         if (IsTrigUsed(TRIGGER_STOP))
         {
-            if (OnTrigger(ITRIG_STOP, pChar, nullptr) == TRIGRET_RET_TRUE)
+            if (OnTrigger(ITRIG_STOP, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pChar) == TRIGRET_RET_TRUE)
                 return;
         }
     }
@@ -219,11 +220,10 @@ void CCChampion::Complete()
         Stop();
 
     // TODO: add new trigger
-    // DONE
     // TODO: Add attacker list in trigger.
     if (IsTrigUsed(TRIGGER_COMPLETE))
     {
-        OnTrigger(ITRIG_COMPLETE, &g_Serv, nullptr);
+        OnTrigger(ITRIG_COMPLETE, CScriptParserBufs::GetCScriptTriggerArgsPtr(), &g_Serv);
     }
     // TODO: add rewards, titles, etc?
 }
@@ -241,8 +241,6 @@ void CCChampion::OnKill(const CUID& uid)
         }
     }
 
-    // TODO: addwhite candle
-    // DONE
     if (!_iSpawnsNextWhite)
         AddWhiteCandle();
 
@@ -337,8 +335,6 @@ void CCChampion::SpawnNPC()
                 m_ChampionSummoned = pChar->GetUID();
         }
     }
-    // TODO: code spawn system.
-    // DONE
     ++_iSpawnsCur;
     --_iSpawnsNextWhite;
 
@@ -347,8 +343,6 @@ void CCChampion::SpawnNPC()
 void CCChampion::AddWhiteCandle(const CUID& uid)
 {
     ADDTOCALLSTACK("CCChampion::AddWhiteCandle");
-    // TODO: code add white candle system.
-    // DONE
     if (_iLevel >= _iLevelMax)
         return;
 
@@ -357,8 +351,8 @@ void CCChampion::AddWhiteCandle(const CUID& uid)
         AddRedCandle();
         return;
     }
-    else
-        _iSpawnsNextWhite = _iSpawnsNextRed / (CANDLESNEXTRED + 1);
+
+    _iSpawnsNextWhite = _iSpawnsNextRed / (CANDLESNEXTRED + 1);
 
     CItem* pCandle = nullptr;
     CItem* pLink = static_cast<CItem*>(GetLink());
@@ -397,12 +391,13 @@ void CCChampion::AddWhiteCandle(const CUID& uid)
         }
 
         pCandle->SetTopPoint(pt);
-        if (!g_Serv.IsLoading())
+        if (!g_Serv.IsLoadingGeneric())
         {
             if (IsTrigUsed(TRIGGER_ADDWHITECANDLE))
             {
-                CScriptTriggerArgs args(pCandle);
-                if (OnTrigger(ITRIG_ADDWHITECANDLE, &g_Serv, &args) == TRIGRET_RET_TRUE)
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_pO1 = pCandle;
+                if (OnTrigger(ITRIG_ADDWHITECANDLE, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
                 {
                     pCandle->Delete();
                     return;
@@ -423,8 +418,6 @@ void CCChampion::AddWhiteCandle(const CUID& uid)
 void CCChampion::AddRedCandle(const CUID& uid)
 {
     ADDTOCALLSTACK("CCChampion::AddRedCandle");
-    // TODO: code add red candle system.
-    // DONE
 
     CItem* pCandle = nullptr;
     CItem* pLink = static_cast<CItem*>(GetLink());
@@ -441,7 +434,7 @@ void CCChampion::AddRedCandle(const CUID& uid)
         return;
 
     _iSpawnsNextWhite = _iSpawnsNextRed / (CANDLESNEXTRED + 1);
-    if (!g_Serv.IsLoading()) // Do not remove white candles, while server is loading them from save.
+    if (!g_Serv.IsLoadingGeneric()) // Do not remove white candles, while server is loading them from save.
     {
         ClearWhiteCandles();
     }
@@ -518,12 +511,13 @@ void CCChampion::AddRedCandle(const CUID& uid)
             default:
                 break;
         }
-        if (!g_Serv.IsLoading())
+        if (!g_Serv.IsLoadingGeneric())
         {
             if (IsTrigUsed(TRIGGER_ADDREDCANDLE))
             {
-                CScriptTriggerArgs args(pCandle);
-                if (OnTrigger(ITRIG_ADDREDCANDLE, &g_Serv, &args) == TRIGRET_RET_TRUE)
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_pO1 = pCandle;
+                if (OnTrigger(ITRIG_ADDREDCANDLE, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
                 {
                     pCandle->Delete();
                     return;
@@ -546,7 +540,7 @@ void CCChampion::AddRedCandle(const CUID& uid)
 void CCChampion::SetLevel(byte iLevel)
 {
     ADDTOCALLSTACK("CCChampion::SetLevel");
-    if (g_Serv.IsLoading())
+    if (g_Serv.IsLoadingGeneric())
         return;
 
     _iLevel = iLevel;
@@ -555,12 +549,12 @@ void CCChampion::SetLevel(byte iLevel)
 
     ushort iLevelMonsters = GetMonstersCount();
     _iCandlesNextLevel += GetCandlesCount();
-    // TODO: Trigger @Level (level, GetMonstersPerLevel, _iCandlesNextLevel)
-    // DONE
+
     if (IsTrigUsed(TRIGGER_LEVEL))
     {
-        CScriptTriggerArgs args(_iLevel, iLevelMonsters, _iCandlesNextLevel);
-        OnTrigger(ITRIG_LEVEL, &g_Serv, &args);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(_iLevel, iLevelMonsters, _iCandlesNextLevel, nullptr);
+        OnTrigger(ITRIG_LEVEL, pScriptArgs, &g_Serv);
     }
 
     if (_iLevel >= _iLevelMax) // Start boss fight when level maxed.
@@ -572,8 +566,6 @@ void CCChampion::SetLevel(byte iLevel)
         return;
     }
 
-    // TODO: check and code
-    // DONE
     // TODO: As the level increases, the light on the area decreases.
     ushort iRedMonsters = iLevelMonsters / _iCandlesNextLevel;
     ushort iWhiteMonsters = iRedMonsters / (CANDLESNEXTRED + 1);
@@ -594,28 +586,26 @@ void CCChampion::InitializeLists()
     _MonstersList.clear();
     _CandleList.clear();
 
-    uchar ucPerc = 100 / _iLevelMax;
-    uchar ucMonsterTotal = 0;
-    uchar ucCandleTotal = 0;
+    uchar uiPerc = 100 / _iLevelMax;
+    uchar uiMonsterTotal = 0;
+    uchar uiCandleTotal = 0;
     for (uchar i = (_iLevelMax - 2); i > 0; --i)
     {
-        uchar ucMonster = (ucPerc / i) + (_iLevelMax - (i + 1));
-        _MonstersList.insert(_MonstersList.begin(), ucMonster); // Push the value from beginning.
-        ucMonsterTotal += ucMonster;
+        uchar uiMonster = (uiPerc / i) + (_iLevelMax - (i + 1));
+        _MonstersList.insert(_MonstersList.begin(), uiMonster); // Push the value from beginning.
+        uiMonsterTotal += uiMonster;
     }
-    _MonstersList.insert(_MonstersList.begin(), (100 - ucMonsterTotal)); // Push the left over as first element.
+    _MonstersList.insert(_MonstersList.begin(), (100 - uiMonsterTotal)); // Push the left over as first element.
 
     for (uchar i = (_iLevelMax - 1); i > 1; --i)
     {
-        uchar ucCandle = ((16 - ucCandleTotal) / i);
-        _CandleList.insert(_CandleList.begin(), ucCandle);
-        ucCandleTotal += ucCandle;
+        uchar uiCandle = ((16 - uiCandleTotal) / i);
+        _CandleList.insert(_CandleList.begin(), uiCandle);
+        uiCandleTotal += uiCandle;
     }
-    _CandleList.insert(_CandleList.begin(), (16 - ucCandleTotal));
+    _CandleList.insert(_CandleList.begin(), (16 - uiCandleTotal));
 }
 
-// TODO: as we have hardcoded switch base level system, _iLevelMax should always equals to 5! Shouldn't be overrideable.
-// DONE
 uchar CCChampion::GetCandlesCount()
 {
     ADDTOCALLSTACK("CCChampion::GetCandlesCount");
@@ -637,8 +627,6 @@ uchar CCChampion::GetCandlesCount()
 
 }
 
-// TODO: iMonsters? Change to something specific or remove?
-// DONE
 ushort CCChampion::GetMonstersCount()
 {
     ADDTOCALLSTACK("CCChampion::GetMonstersCount");
@@ -666,20 +654,20 @@ void CCChampion::DelWhiteCandle(CANDLEDELREASON_TYPE reason)
     if (_pWhiteCandles.empty())
         return;
 
-    CItem* pCandle = _pWhiteCandles.back().ItemFind();
-    if (pCandle)
+    CItem* pCandle;
+    CUID uidLastWhiteCandle = _pWhiteCandles.back();
+    if ((pCandle = uidLastWhiteCandle.ItemFind()))
     {
-        // TODO: trigger: @DelWhiteCandle
-    // DONE
         if (IsTrigUsed(TRIGGER_DELWHITECANDLE))
         {
-            CScriptTriggerArgs args(reason);
-            args.m_pO1 = pCandle;
-            if (OnTrigger(ITRIG_DELWHITECANDLE, &g_Serv, &args) == TRIGRET_RET_TRUE)
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = reason;
+            pScriptArgs->m_pO1 = pCandle;
+            if (OnTrigger(ITRIG_DELWHITECANDLE, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
                 return;
         }
 
-        if (pCandle) // Is candle still exists after trigger?
+        if ((pCandle = uidLastWhiteCandle.ItemFind())) // Does the candle still exist after the trigger?
             pCandle->Delete();
     }
     _pWhiteCandles.pop_back();
@@ -692,20 +680,20 @@ void CCChampion::DelRedCandle(CANDLEDELREASON_TYPE reason)
     if (_pRedCandles.empty())
         return;
 
-    CItem* pCandle = _pRedCandles.back().ItemFind();
-    if (pCandle)
+    CItem* pCandle;
+    CUID uidLastRedCandle = _pRedCandles.back();
+    if ((pCandle = uidLastRedCandle.ItemFind()))
     {
-        // TODO: trigger: @DelRedCandle
-        // DONE
         if (IsTrigUsed(TRIGGER_DELREDCANDLE))
         {
-            CScriptTriggerArgs args(reason);
-            args.m_pO1 = pCandle;
-            if (OnTrigger(ITRIG_DELREDCANDLE, &g_Serv, &args) == TRIGRET_RET_TRUE)
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = reason;
+            pScriptArgs->m_pO1 = pCandle;
+            if (OnTrigger(ITRIG_DELREDCANDLE, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
                 return;
         }
 
-        if (pCandle) // Is candle still exists after trigger?
+        if ((pCandle = uidLastRedCandle.ItemFind())) // Does the candle still exist after trigger?
             pCandle->Delete();
     }
     _pRedCandles.pop_back();
@@ -993,7 +981,7 @@ bool CCChampion::r_LoadVal(CScript& s)
     {
     case ICHMPL_ACTIVE:
         {
-            if (g_Serv.IsLoading() == true)    //Only when the server is loading.
+            if (g_Serv.IsLoadingGeneric() == true)    //Only when the server is loading.
             {
                 _fActive = (bool)s.GetArgBVal();
             }
@@ -1191,7 +1179,7 @@ bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
 }
 
 
-TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CTextConsole* pSrc, CScriptTriggerArgs* pArgs)
+TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc)
 {
     lpctstr pszTrigName = CItem::sm_szTrigName[trig];
 
@@ -1205,12 +1193,12 @@ TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CTextConsole* pSrc, CScriptT
         CResourceLock s;
         if (pResourceLink->ResourceLock(s))
         {
-            iRet = GetLink()->OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+            iRet = GetLink()->OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
         }
     }
     if (iRet == TRIGRET_RET_DEFAULT)
     {
-        iRet = GetLink()->OnTrigger(trig, pSrc, pArgs);
+        iRet = GetLink()->OnTrigger(trig, pScriptArgs, pSrc);
     }
     return iRet;
 }

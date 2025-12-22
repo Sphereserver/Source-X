@@ -1,5 +1,5 @@
 /**
-* @file ox_unix.h
+* @file os_unix.h
 * @brief Unix-specific declarations.
 */
 

@@ -25,7 +25,7 @@ set(lib_SOURCES
 source_group(lib\\libev FILES ${lib_SOURCES})
 
 # create the target. equivalent to add_executable, but for libraries
-add_library(libev STATIC ${lib_SOURCES})
+add_library(libev OBJECT ${lib_SOURCES})
 
 # make the headers available in the include path (accessible with < >).
 target_include_directories(libev PUBLIC .)

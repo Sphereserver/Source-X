@@ -179,6 +179,7 @@ public:
      * @param   ptcKey      The key.
      * @param   iVal        Zero-based index of the value.
      * @param   fDeleteZero true to zero.
+     * @param   fWarnOverwrite Log warning to console.
      */
 	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true)
 	{
@@ -191,6 +192,7 @@ public:
      * @param   pszVal      The value.
      * @param   fQuoted     true if quoted.
      * @param   fDeleteZero true to zero.
+     * @param   fWarnOverwrite Log warning to console.
      */
 	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fDeleteZero = true, bool fWarnOverwrite = true)
 	{

@@ -4,7 +4,7 @@
 */
 
 #include "../../game/CServerConfig.h"
-#include "../CException.h"
+//#include "../CException.h" // included in the precompiled header
 #include "../CScript.h"
 #include "CResourceRef.h"
 

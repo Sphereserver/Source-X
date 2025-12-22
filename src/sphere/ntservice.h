@@ -17,7 +17,6 @@
 #endif // NON_MSVC_COMPILER
 
 
-
 extern class CNTService
 {
 private:

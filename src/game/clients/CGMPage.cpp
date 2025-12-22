@@ -1,5 +1,5 @@
 
-#include "../../common/CException.h"
+//#include "../../common/CException.h" // included in the precompiled header
 #include "../chars/CChar.h"
 #include "../CWorld.h"
 #include "../CWorldGameTime.h"

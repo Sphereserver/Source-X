@@ -125,7 +125,7 @@ public:     virtual bool  IsDeleted() const override;
 
     /**
      * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).
-     * @param   bForce  Force deletion.
+     * @param   fForce  Force deletion.
      * @return  Was deleted.
      */
     virtual bool Delete(bool fForce = false);
@@ -195,7 +195,7 @@ public:
 
     /**
     * @brief   sets the Spawn item.
-    * @param  The CCSpawn.
+    * @param spawn The CCSpawn.
     */
     void SetSpawn(CCSpawn *spawn);
 
@@ -584,8 +584,8 @@ public:
      * @param   wHue                The hue.
      * @param   fAvoidTrigger       true to avoid trigger.
      * @param [in,out]  pSrc        (Optional) If non-null, source for the.
-     * @param [in,out]  SourceObj   (Optional) If non-null, source object.
-     * @param   sound               The sound.
+     * @param [in,out]  pSourceObj   (Optional) If non-null, source object.
+     * @param   iSound               The sound.
      */
 	void SetHue( HUE_TYPE wHue, bool fAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase * pSourceObj = nullptr, llong iSound = 0 );
 
@@ -695,8 +695,8 @@ public:
 	* @brief   Adds an Effect to a map point.
 	* @param   motion          The motion.
 	* @param   id              The identifier.
-	* @param   pt			   The map point.
-	* @param   pSource         Source for the.
+	* @param   ptSrc			   The map point.
+	* @param   ptDest         Source for the.
 	* @param   bspeedseconds   The bspeedseconds.
 	* @param   bloop           The bloop.
 	* @param   fexplode        true to fexplode.
@@ -822,7 +822,7 @@ public:
 	void UpdateCanSee( PacketSend * pPacket, CClient * pClientExclude = nullptr ) const;
 
     /**
-     * @fn  void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false ) const;
+     * @fn  void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE iMode, FONT_TYPE iFont = FONT_NORMAL, bool fUnicode = false ) const;
      *
      * @brief   Updates the object message.
      *
@@ -830,26 +830,29 @@ public:
      * @param   pTextYou                The text you.
      * @param [in,out]  pClientExclude  If non-null, the client exclude.
      * @param   wHue                    The hue.
-     * @param   mode                    The mode.
-     * @param   font                    The font.
-     * @param   bUnicode                true to unicode.
+     * @param   iMode                    The iMode.
+     * @param   iFont                    The iFont.
+     * @param   fUnicode                true to unicode.
      */
-	void UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false ) const;
+    void UpdateObjMessage(
+        lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude,
+        HUE_TYPE wHue, TALKMODE_TYPE iMode,
+        FONT_TYPE iFont = FONT_NORMAL, bool fUnicode = false ) const;
 
     /**
-     * @fn  TRIGRET_TYPE CObjBase::OnHearTrigger(CResourceLock &s, lpctstr pCmd, CChar *pSrc, TALKMODE_TYPE &mode, HUE_TYPE wHue = HUE_DEFAULT);
+     * @fn  TRIGRET_TYPE CObjBase::OnHearTrigger(CResourceLock &s, lpctstr pCmd, CChar *pSrc, TALKMODE_TYPE &iModeRef, HUE_TYPE wHue = HUE_DEFAULT);
      *
      * @brief   Executes the hear trigger action.
      *
      * @param [in,out]  s       The CResourceLock to process.
      * @param   pCmd            The command.
      * @param [in,out]  pSrc    If non-null, source for the.
-     * @param [in,out]  mode    The mode.
+     * @param [in,out]  iModeRef    The iModeRef.
      * @param   wHue            The hue.
      *
      * @return  A TRIGRET_TYPE.
      */
-	TRIGRET_TYPE OnHearTrigger(CResourceLock &s, lpctstr pCmd, CChar *pSrc, TALKMODE_TYPE &mode, HUE_TYPE wHue = HUE_DEFAULT);
+    TRIGRET_TYPE OnHearTrigger(CResourceLock &s, lpctstr pCmd, CChar *pSrc, TALKMODE_TYPE &iModeRef, HUE_TYPE wHue = HUE_DEFAULT);
 
     /**
      * @fn  bool CObjBase::IsContainer() const;
@@ -885,15 +888,16 @@ public:
      * @param [in,out]  pCharSrc    If non-null, the character source.
      * @param   iSkillLevel         Zero-based index of the skill level.
      * @param [in,out]  pSourceItem If non-null, source item.
-     * @param   bReflecting         true to reflecting.
+     * @param   fReflecting         true to reflecting.
+     * @param iDuration Duration of the spell effect (default is instant).
      *
      * @return  true if it succeeds, false if it fails.
      */
-	virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting = false, int64 iDuration = 0 )
+    virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false, int64 iDuration = 0 )
 		= 0;
 
     /**
-     * @fn  TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
+     * @fn  TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgsPtr const& pScriptArgs );
      *
      * @brief   Spell's trigger (@Effect, @Start...).
      *
@@ -904,7 +908,7 @@ public:
      *
      * @return  A TRIGRET_TYPE.
      */
-	TRIGRET_TYPE Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
+    TRIGRET_TYPE Spell_OnTrigger(SPELL_TYPE spell, SPTRIG_TYPE stage, CScriptTriggerArgsPtr const& pScriptArgs, CChar * pSrc);
 
 protected:
     virtual void _GoAwake() override;
@@ -918,10 +922,13 @@ protected:
      */
     virtual void OnTickStatusUpdate();
 
-    virtual bool _CanTick() const override;
-    //virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
+    virtual bool _TickableStateBase() const override;
+    //virtual bool  TickableStateBase() const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
+
+    std::optional<bool> _TickableStateOverride() const;
 
 public:
+    bool _CanTick(bool fParentGoingToSleep = false) const;
 
     /**
      * @fn  PacketPropertyList* CObjBase::GetPropertyList(void) const

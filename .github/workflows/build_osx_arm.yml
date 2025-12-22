@@ -20,7 +20,11 @@ on:
 
 jobs:
   macos-arm64:
-    runs-on: macos-14   # apple silicon
+    runs-on: macos-15   # apple silicon
+    permissions:
+      contents: read
+      actions: read
+
     env:
       CMAKE_GEN: Ninja
       #CMAKE_TCH: cmake/toolchains/OSX-AppleClang-native.cmake
@@ -28,7 +32,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
     - name: Install prerequisites
@@ -72,18 +76,21 @@ jobs:
 
 
   upload_github_release:
-    needs: macos-arm64
-    # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
+    needs: macos-arm64   # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
     if: contains(fromJson('["master", "main"]'), github.ref_name)
+    permissions:
+      contents: read
+      actions: write
 
     runs-on: ubuntu-latest
     steps:
       - name: Download builds
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Build-osx-arm64
           merge-multiple: true
           run-id: ${{ github.run_id }}
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         env:
@@ -98,11 +105,14 @@ jobs:
   upload_selfhost_release:
     needs: macos-arm64
     if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
+    permissions:
+      contents: write
+      actions: read
 
     runs-on: ubuntu-latest
     steps:
       - name: Download builds
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Build-osx-arm64
           merge-multiple: true

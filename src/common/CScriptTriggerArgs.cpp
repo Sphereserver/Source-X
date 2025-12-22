@@ -1,14 +1,13 @@
 #include "../game/CObjBase.h"
 #include "CLog.h"
-#include "CException.h"
-#include "CExpression.h"
+//#include "CException.h" // included in the precompiled header
+//#include "CExpression.h" // included in the precompiled header
 #include "CScriptTriggerArgs.h"
 
 
-CScriptTriggerArgs::CScriptTriggerArgs() :
-    m_iN1(0), m_iN2(0), m_iN3(0)
+CScriptTriggerArgs::CScriptTriggerArgs() noexcept :
+    m_iN1(0), m_iN2(0), m_iN3(0), m_pO1(nullptr)
 {
-    m_pO1 = nullptr;
 }
 
 CScriptTriggerArgs::CScriptTriggerArgs(lpctstr pszStr)
@@ -16,25 +15,13 @@ CScriptTriggerArgs::CScriptTriggerArgs(lpctstr pszStr)
     Init(pszStr);
 }
 
-CScriptTriggerArgs::CScriptTriggerArgs(CScriptObj* pObj) :
+CScriptTriggerArgs::CScriptTriggerArgs(CScriptObj* pObj) noexcept :
     m_iN1(0), m_iN2(0), m_iN3(0), m_pO1(pObj)
 {
 }
 
-CScriptTriggerArgs::CScriptTriggerArgs(int64 iVal1) :
-    m_iN1(iVal1), m_iN2(0), m_iN3(0)
-{
-    m_pO1 = nullptr;
-}
-
-CScriptTriggerArgs::CScriptTriggerArgs(int64 iVal1, int64 iVal2, int64 iVal3) :
-    m_iN1(iVal1), m_iN2(iVal2), m_iN3(iVal3)
-{
-    m_pO1 = nullptr;
-}
-
-CScriptTriggerArgs::CScriptTriggerArgs(int64 iVal1, int64 iVal2, CScriptObj* pObj) :
-    m_iN1(iVal1), m_iN2(iVal2), m_iN3(0), m_pO1(pObj)
+CScriptTriggerArgs::CScriptTriggerArgs(int64 iVal1, int64 iVal2, int64 iVal3, CScriptObj* pObj) noexcept :
+    m_iN1(iVal1), m_iN2(iVal2), m_iN3(iVal3), m_pO1(pObj)
 {
 }
 
@@ -129,20 +116,35 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
 
     if ( IsDigit(*pszStr) || ((*pszStr == '-') && IsDigit(*(pszStr+1))) )
     {
-        m_iN1 = Exp_GetSingle(pszStr);
+        auto& gExprParser = CExpression::GetExprParser();
+        m_iN1 = gExprParser.GetSingle(pszStr);
         SKIP_ARGSEP( pszStr );
         if ( IsDigit(*pszStr) || ((*pszStr == '-') && IsDigit(*(pszStr+1))) )
         {
-            m_iN2 = Exp_GetSingle(pszStr);
+            m_iN2 = gExprParser.GetSingle(pszStr);
             SKIP_ARGSEP( pszStr );
             if ( IsDigit(*pszStr) || ((*pszStr == '-') && IsDigit(*(pszStr+1))) )
             {
-                m_iN3 = Exp_GetSingle(pszStr);
+                m_iN3 = gExprParser.GetSingle(pszStr);
             }
         }
     }
 }
 
+void CScriptTriggerArgs::Init(CScriptObj* pObj)
+{
+    Clear();
+    m_pO1 = pObj;
+}
+
+void CScriptTriggerArgs::Init(int64 iVal1, int64 iVal2, int64 iVal3, CScriptObj* pObj)
+{
+    Clear();
+    m_iN1 = iVal1;
+    m_iN2 = iVal2;
+    m_iN3 = iVal3;
+    m_pO1 = pObj;
+}
 
 void CScriptTriggerArgs::GetArgNs(int64* iVar1, int64* iVar2, int64* iVar3) //Puts the ARGN's into the specified variables
 {

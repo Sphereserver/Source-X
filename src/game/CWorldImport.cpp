@@ -1,4 +1,4 @@
-#include "../common/CExpression.h"
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/CLog.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
@@ -249,7 +249,7 @@ bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 		CheckLast();
 		if ( s.IsSectionType( "ACCOUNT" ))
 		{
-			g_Cfg.LoadResourceSection( &s );
+            g_Cfg.LoadResourceSection( &s, true );
 			continue;
 		}
 		else if ( s.IsSectionType( "WORLDCHAR" ) || s.IsSectionType("WC"))
@@ -836,7 +836,6 @@ bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 }
 
 
-
 bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 {
 	ADDTOCALLSTACK("CWorld::DumpAreas");
@@ -864,7 +863,6 @@ bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 	s.WriteSection( "EOF" );
 	return true;
 }
-
 
 
 bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, short dx, short dy )

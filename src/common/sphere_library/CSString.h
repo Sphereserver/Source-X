@@ -1,5 +1,5 @@
 /**
-* @file CSString.
+* @file CSString.h
 * @brief Custom string implementation.
 */
 
@@ -42,7 +42,7 @@ private:
     void InitDefault();
 
 public:
-	/** @name Constructors, Destructor, Asign operator:
+	/** @name Constructors, Destructor, Assign operator:
 	 */
 	///@{
 
@@ -74,7 +74,7 @@ public:
     *
     * @see CopyLen()
     * @param pStr string to copy.
-    * #param iLen max number of chars (single-byte) to copy.
+    * @param iLen max number of chars (single-byte) to copy.
     */
     CSString(lpctstr pStr, int iLen);
 
@@ -89,7 +89,7 @@ public:
 	/**
 	* @brief Move constructor.
 	*
-	* @param pStr string to move the contents from.
+	* @param s string to move the contents from.
 	*/
 	inline CSString(CSString&& s) noexcept;
 
@@ -151,6 +151,7 @@ public:
 	* If the new length is bigger than the current length, alloc memory for the string and copy.
 	* If DEBUG_STRINGS setted, update statistical information (reallocs count, total memory allocated).
 	* @param iLen new length of the string.
+	* @param fPreciseSize If the length is bigger, should the size be the same?
 	* @return the new length of the CSString.
 	*/
 	int Resize(int iLen, bool fPreciseSize = false);
@@ -236,14 +237,14 @@ public:
 
 	/**
 	* @brief Concatenate CSString with a string.
-	* @param pointer to zero-terminated tchar string to concatenate with.
+	* @param string to zero-terminated tchar string to concatenate with.
 	* @return The result of concatenate the CSString with string.
 	*/
 	const CSString& operator+=(lpctstr string);
 
     /**
     * @brief Concatenate CSString with a string.
-    * @param pointer to zero-terminated tchar string to concatenate with.
+    * @param string to zero-terminated tchar string to concatenate with.
     * @return The result of concatenate the CSString with string.
     */
 	CSString operator+(lpctstr string);
@@ -352,7 +353,7 @@ public:
 	/**
 	* @brief Print a unsigned char value into the string.
 	* @see Format()
-	* @param iVal value to print.
+	* @param uiVal value to print.
 	*/
     void FormatUCVal(uchar uiVal);
 
@@ -366,7 +367,7 @@ public:
 	/**
 	* @brief Print a unsigned short value into the string.
 	* @see Format()
-	* @param iVal value to print.
+	* @param uiVal value to print.
 	*/
     void FormatUSVal(ushort uiVal);
 
@@ -380,7 +381,7 @@ public:
 	/**
 	* @brief Print a unsigned int value into the string.
 	* @see Format()
-	* @param iVal value to print.
+	* @param uiVal value to print.
 	*/
     void FormatUVal(uint uiVal);
 
@@ -394,35 +395,35 @@ public:
 	/**
 	* @brief Print a ullong value into the string.
 	* @see Format()
-	* @param iVal value to print.
+	* @param uiVal value to print.
 	*/
     void FormatULLVal(ullong uiVal);
 
 	/**
 	* @brief Print a size_t (unsigned) value into the string.
 	* @see Format()
-	* @param iVal value to print.
+	* @param uiVal value to print.
 	*/
     void FormatSTVal(size_t uiVal);
 
 	/**
 	* @brief Print a byte value into the string.
 	* @see Format()
-	* @param iVal value to print.
+	* @param uiVal value to print.
 	*/
     void FormatBVal(byte uiVal);
 
 	/**
 	* @brief Print a word value into the string.
 	* @see Format()
-	* @param iVal value to print.
+	* @param uiVal value to print.
 	*/
     void FormatWVal(word uiVal);
 
 	/**
 	* @brief Print a dword value into the string.
 	* @see Format()
-	* @param iVal value to print.
+	* @param uiVal value to print.
 	*/
     void FormatDWVal(dword uiVal);
 
@@ -436,7 +437,7 @@ public:
     /**
     * @brief Print a unsigned char value into the string.
     * @see Format()
-    * @param iVal value to print.
+    * @param uiVal value to print.
     */
     void FormatU8Val(uint8 uiVal);
 
@@ -450,7 +451,7 @@ public:
     /**
     * @brief Print a unsigned short value into the string.
     * @see Format()
-    * @param iVal value to print.
+    * @param uiVal value to print.
     */
     void FormatU16Val(uint16 uiVal);
 
@@ -464,7 +465,7 @@ public:
     /**
     * @brief Print a unsigned int value into the string.
     * @see Format()
-    * @param iVal value to print.
+    * @param uiVal value to print.
     */
     void FormatU32Val(uint32 uiVal);
 
@@ -478,7 +479,7 @@ public:
     /**
     * @brief Print a ullong value into the string.
     * @see Format()
-    * @param iVal value to print.
+    * @param uiVal value to print.
     */
     void FormatU64Val(uint64 uiVal);
 

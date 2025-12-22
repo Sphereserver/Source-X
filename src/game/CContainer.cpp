@@ -1,7 +1,7 @@
 
 #include "../common/sphere_library/CSRand.h"
-#include "../common/CException.h"
-#include "../common/CExpression.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/CUID.h"
 #include "../network/send.h"
 #include "chars/CChar.h"
@@ -35,7 +35,7 @@ void CContainer::_GoSleep()
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		//std::unique_lock<std::shared_mutex> lock(pItem->MT_CMUTEX);
-        if (!pItem->CanTick())
+        if (!pItem->TickableStateBase())
 		{
 			pItem->GoSleep();
 		}
@@ -182,13 +182,13 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 	}
 }
 
-void CContainer::OnRemoveObj( CSObjContRec *pObRec )	// Override this = called when removed from list.
+void CContainer::OnRemoveObj(CSObjContRec *pObjRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CContainer::OnRemoveObj");
 	// remove this object from the container list.
 	// Overload the RemoveAt for general lists to come here.
-	DEBUG_ASSERT(dynamic_cast<const CItem *>(pObRec));
-    CItem *pItem = static_cast<CItem *>(pObRec);
+    DEBUG_ASSERT(dynamic_cast<const CItem *>(pObjRec));
+    CItem *pItem = static_cast<CItem *>(pObjRec);
 	ASSERT(pItem);
 
 	CSObjCont::OnRemoveObj(pItem);
@@ -213,7 +213,7 @@ void CContainer::r_WriteContent( CScript &s ) const
 	}
 }
 
-CItem *CContainer::ContentFind( CResourceID const& rid, dword dwArg, int iDecendLevels ) const
+CItem *CContainer::ContentFind(CResourceID const& rid, dword dwArg, int iDescendLevels ) const
 {
 	ADDTOCALLSTACK("CContainer::ContentFind");
 	// send all the items in the container.
@@ -227,7 +227,7 @@ CItem *CContainer::ContentFind( CResourceID const& rid, dword dwArg, int iDecend
 		if ( pItem->IsResourceMatch(rid, dwArg) )
 			return pItem;
 
-		if ( iDecendLevels <= 0 )
+        if ( iDescendLevels <= 0 )
 			continue;
 
 		CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
@@ -235,7 +235,7 @@ CItem *CContainer::ContentFind( CResourceID const& rid, dword dwArg, int iDecend
 		{
 			if ( !pCont->IsSearchable() )
 				continue;
-			CItem *pItemInCont = pCont->ContentFind(rid, dwArg, iDecendLevels - 1);
+            CItem *pItemInCont = pCont->ContentFind(rid, dwArg, iDescendLevels - 1);
 			if ( pItemInCont )
 				return pItemInCont;
 		}
@@ -243,10 +243,12 @@ CItem *CContainer::ContentFind( CResourceID const& rid, dword dwArg, int iDecend
 	return nullptr;
 }
 
-TRIGRET_TYPE CContainer::OnContTriggerForLoop(CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
-                                              CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, const CResourceID &rid, dword dwArg, int iDecendLevels )
+TRIGRET_TYPE CContainer::OnContTriggerForLoop(
+    CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole *pSrc,
+    CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext,
+    const CResourceID &rid, dword dwArg, int iDescendLevels )
 {
-	ADDTOCALLSTACK("CContainer::OnContTriggerForLoop");
+    ADDTOCALLSTACK("CContainer::OnContTriggerForLoop");
 	if ( rid.GetResIndex() != 0 )
 	{
 		for (CSObjContRec *pObjRec : GetIterationSafeContReverse())
@@ -255,7 +257,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(CScript &s, CTextConsole *pSrc, CS
 			if ( pItem->IsResourceMatch(rid, dwArg) )
 			{
 				s.SeekContext(StartContext);
-				TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
+                TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pScriptArgs, pSrc, pResult);
 				if (iRet == TRIGRET_BREAK || iRet == TRIGRET_RET_ABORTED)
 				{
 					EndContext = StartContext;
@@ -268,7 +270,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(CScript &s, CTextConsole *pSrc, CS
 				else
 					EndContext = s.GetContext();
 			}
-			if ( iDecendLevels <= 0 )
+            if ( iDescendLevels <= 0 )
 				continue;
 
 			CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
@@ -277,7 +279,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(CScript &s, CTextConsole *pSrc, CS
 				if ( pCont->IsSearchable() )
 				{
 					CContainer *pContBase = dynamic_cast<CContainer *>(pCont);
-					TRIGRET_TYPE iRet = pContBase->OnContTriggerForLoop(s, pSrc, pArgs, pResult, StartContext, EndContext, rid, dwArg, iDecendLevels - 1);
+                    TRIGRET_TYPE iRet = pContBase->OnContTriggerForLoop(s, pScriptArgs, pSrc, pResult, StartContext, EndContext, rid, dwArg, iDescendLevels - 1);
 					if ( iRet != TRIGRET_ENDIF )
 						return iRet;
 
@@ -291,7 +293,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(CScript &s, CTextConsole *pSrc, CS
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
-		TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult);
+        TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult);
 		if ( iRet != TRIGRET_ENDIF )
 			return iRet;
 	}
@@ -303,7 +305,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(CScript &s, CTextConsole *pSrc, CS
 }
 
 TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
-	CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
+    CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole *pSrc,
 	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnGenericContTriggerForLoop");
@@ -311,7 +313,7 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		s.SeekContext(StartContext);
-		TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
+        TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pScriptArgs, pSrc, pResult);
 		if (iRet == TRIGRET_BREAK || iRet == TRIGRET_RET_ABORTED)
 		{
 			EndContext = StartContext;
@@ -330,7 +332,7 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
 		if ( pCont && pCont->IsSearchable() )
 		{
 			CContainer *pContBase = dynamic_cast<CContainer *>(pCont);
-			iRet = pContBase->OnGenericContTriggerForLoop(s, pSrc, pArgs, pResult, StartContext, EndContext, iDecendLevels - 1);
+            iRet = pContBase->OnGenericContTriggerForLoop(s, pScriptArgs, pSrc, pResult, StartContext, EndContext, iDecendLevels - 1);
 			if ( iRet != TRIGRET_ENDIF )
 				return iRet;
 
@@ -342,7 +344,7 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
-		TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult);
+        TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult);
 		if ( iRet != TRIGRET_ENDIF )
 			return iRet;
 	}
@@ -368,7 +370,7 @@ CItem *CContainer::ContentFindRandom() const
 	return static_cast<CItem *>(GetContentIndex(g_Rand.GetVal((int32)GetContentCount())));
 }
 
-int CContainer::ContentConsumeTest( const CResourceID& rid, int amount, dword dwArg ) const
+int CContainer::ContentConsumeTest( const CResourceID& rid, int iAmount, dword dwArg ) const
 {
     ADDTOCALLSTACK("CContainer::ContentConsumeTest");
     // ARGS:
@@ -378,7 +380,7 @@ int CContainer::ContentConsumeTest( const CResourceID& rid, int amount, dword dw
     //  # = number left to be consumed. (still required)
 
     if ( rid.GetResIndex() == 0 )
-        return amount;	// from skills menus.
+        return iAmount;	// from skills menus.
 
 	for (const CSObjContRec* pObjRec : *this)
 	{
@@ -386,9 +388,9 @@ int CContainer::ContentConsumeTest( const CResourceID& rid, int amount, dword dw
         if ( pItem->IsResourceMatch(rid, dwArg) )
         {
             const word wAmountMax = pItem->GetAmount();
-            const word wAmountToConsume = (word)minimum(amount,UINT16_MAX);
-            amount -= (wAmountMax > wAmountToConsume ) ? wAmountToConsume : wAmountMax;
-            if ( amount <= 0 )
+            const word wAmountToConsume = (word)minimum(iAmount,UINT16_MAX);
+            iAmount -= (wAmountMax > wAmountToConsume ) ? wAmountToConsume : wAmountMax;
+            if ( iAmount <= 0 )
                 break;
         }
 
@@ -405,12 +407,12 @@ int CContainer::ContentConsumeTest( const CResourceID& rid, int amount, dword dw
                 if ( !pCont->IsSearchable() )
                     continue;
             }
-            amount = pCont->ContentConsumeTest(rid, amount, dwArg);
-            if ( amount <= 0 )
+            iAmount = pCont->ContentConsumeTest(rid, iAmount, dwArg);
+            if ( iAmount <= 0 )
                 break;
         }
     }
-    return amount;
+    return iAmount;
 }
 
 int CContainer::ContentConsume( const CResourceID& rid, int amount, dword dwArg )

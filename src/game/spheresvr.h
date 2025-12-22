@@ -7,49 +7,22 @@
 #define _INC_SPHERESVR_H
 
 #include "../common/sphere_library/CSAssoc.h"
-#include "../sphere/threads.h"
 
-
-class GlobalInitializer
-{
-public:
-    GlobalInitializer();
-	static void InitRuntimeDefaultValues();
-    static void PeriodicSyncTimeConstants();
-};
-
-////////////////////////////////////////////////////////////////////////////////////
-
-class MainThread : public AbstractSphereThread
-{
-public:
-	MainThread();
-	virtual ~MainThread() { };
-
-private:
-	MainThread(const MainThread& copy);
-	MainThread& operator=(const MainThread& other);
-
-public:
-	// we increase the access level from protected to public in order to allow manual execution when
-	// configuration disables using threads
-	// TODO: in the future, such simulated functionality should lie in AbstractThread inself instead of hacks
-	virtual void tick() override;
-
-protected:
-	virtual void onStart() override;
-	virtual bool shouldExit() noexcept override;
-};
-
-//////////////////////////////////////////////////////////////
-
+/* Globals */
+// Generic. Simple data types.
 extern std::string g_sServerDescription;
+
+// Threading.
+extern std::atomic_bool sg_inStartup;
+extern std::atomic_bool sg_servClosing;
+
+// Generic. Sphere classes (require the threading flags above.
 extern CSStringList g_AutoComplete;
 
-extern int Sphere_InitServer( int argc, char *argv[] );
-extern int Sphere_OnTick();
-extern void Sphere_ExitServer();
-extern int Sphere_MainEntryPoint( int argc, char *argv[] );
 
+int Sphere_MainEntryPoint( int argc, char *argv[] );
+int Sphere_InitServer( int argc, char *argv[] );
+void Sphere_ExitServer();
+bool Sphere_CheckMainStuckAndRestart();
 
 #endif // _INC_SPHERESVR_H

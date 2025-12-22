@@ -65,17 +65,18 @@ struct KeyTableDesc_s
 /** @name String utilities: Modifiers
 */
 
-// If you want to use base = 16 to convert an hexadecimal string, it has to be in the format: 0x***
-[[nodiscard]] std::optional<char>   Str_ToI8 (const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<uchar>  Str_ToU8 (const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<short>  Str_ToI16(const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<ushort> Str_ToU16(const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<int>    Str_ToI  (const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<uint>   Str_ToU  (const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<llong>  Str_ToLL (const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
+// If you want to use base = 16 to convert an hexadecimal string, it has to be in the format: 0***
+// uiStopAtLen param: stop parsing at char at the given index. If 0, just parse until the end.
+[[nodiscard]] std::optional<char>   Str_ToI8 (const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<uchar>  Str_ToU8 (const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<short>  Str_ToI16(const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<ushort> Str_ToU16(const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<int>    Str_ToI  (const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<uint>   Str_ToU  (const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<llong>  Str_ToLL (const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
 [[nodiscard]] inline
-std::optional<size_t> Str_ToST(const tchar * ptcStr, uint base = 10) noexcept;
+std::optional<size_t> Str_ToST(const tchar * ptcStr, uint base = 10, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
 
 // The _Fast variants write from the end of the given buffer and return a pointer to the new start of the string, which in most
 //  cases is different from the pointer passed as argument!
@@ -256,10 +257,10 @@ void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept;
 ///@{
 
 //TODOC
-bool IsSimpleNumberString( const tchar * pszTest );
-bool IsStrNumericDec( const tchar * pszTest );
-bool IsStrNumeric( const tchar * pszTest );
-bool IsStrEmpty( const tchar * pszTest );
+bool IsSimpleNumberString( const tchar * pszTest ) noexcept;
+bool IsStrNumericDec( const tchar * pszTest ) noexcept;
+bool IsStrNumeric( const tchar * pszTest ) noexcept;
+bool IsStrEmpty( const tchar * pszTest ) noexcept;
 
 // strncpy does not always return the actual amount of bytes written. this doesn't count the string terminator.
 int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintError = true);
@@ -270,7 +271,6 @@ int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintErro
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
 int FindTable(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
@@ -280,7 +280,6 @@ int FindTable(const tchar * pFind, const tchar * const * ppTable, int iCount) no
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
 int FindTableSorted(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
@@ -300,7 +299,6 @@ int FindCAssocRegTableHeadSorted(const tchar * pFind, const tchar * const* ppTab
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
 int FindTableHead(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
@@ -310,22 +308,22 @@ int FindTableHead(const tchar * pFind, const tchar * const * ppTable, int iCount
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
 int FindTableHeadSorted(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
 
 /**
 * @param pszIn string to check.
+* @param uiMaxAcceptableSize a string greater than this is invalid.
 * @return true if string is empty or has '\c' or '\n' characters, false otherwise.
 */
-bool Str_Check(const tchar * pszIn) noexcept;
+bool Str_Untrusted_InvalidTermination(const tchar * pszIn, size_t uiMaxAcceptableSize = SCRIPT_MAX_LINE_LEN) noexcept;
 
 /**
 * @param pszIn string to check.
 * @return false if string match "[a-zA-Z0-9_- \'\.]+", true otherwise.
 */
-bool Str_CheckName(const tchar * pszIn) noexcept;
+bool Str_Untrusted_InvalidName(const tchar * pszIn, size_t uiMaxAcceptableSize = 100 /* arbitrary */) noexcept;
 
 /**
 * @brief find a substring in a string from an offset.
@@ -409,20 +407,20 @@ inline ssize_t sGetLine_StaticBuf(const char *data, const size_t datasize) noexc
 
 //--- Inline methods
 
-std::optional<size_t> Str_ToST(const tchar * ptcStr, uint base) noexcept
+std::optional<size_t> Str_ToST(const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     if constexpr (sizeof(size_t) == 4)
-        return Str_ToU(ptcStr, base);
+        return Str_ToU(ptcStr, base, uiStopAtLen, fIgnoreExcessChars);
     else
-        return Str_ToULL(ptcStr, base);
+        return Str_ToULL(ptcStr, base, uiStopAtLen, fIgnoreExcessChars);
 }
 
 bool IsHexNumDigit(int c) noexcept
 {
     return
-    (c >= 'A' && c <= 'F') ||
-    (c >= 'a' && c <= 'f') ||
-    (c >= '0' && c <= '9');
+        (c >= 'A' && c <= 'F') ||
+        (c >= 'a' && c <= 'f') ||
+        (c >= '0' && c <= '9');
 }
 
 

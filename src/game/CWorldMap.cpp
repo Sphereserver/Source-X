@@ -1,8 +1,9 @@
 #include "../common/resource/sections/CItemTypeDef.h"
 #include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/sections/CRegionResourceDef.h"
-#include "../common/CException.h"
-#include "../common/CScriptTriggerArgs.h"
+#include "../common/sphere_library/sfastmath.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../common/CRect.h"
 #include "../common/CLog.h"
 #include "../sphere/threads.h"
@@ -149,12 +150,14 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	EXC_SET_BLOCK("resourcefound");
 	if ( pCharSrc != nullptr )
 	{
-		CScriptTriggerArgs Args(0, 0, pResBit);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(0, 0, 0, pResBit);
 		TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
+
 		if ( IsTrigUsed(TRIGGER_REGIONRESOURCEFOUND) )
-			tRet = pCharSrc->OnTrigger(CTRIG_RegionResourceFound, pCharSrc, &Args);
+            tRet = pCharSrc->OnTrigger(CTRIG_RegionResourceFound, pScriptArgs, pCharSrc);
 		if ( IsTrigUsed(TRIGGER_RESOURCEFOUND) )
-			tRet = pOreDef->OnTrigger("@ResourceFound", pCharSrc, &Args);
+            tRet = pOreDef->OnTrigger("@ResourceFound", pScriptArgs, pCharSrc);
 
 		if (tRet == TRIGRET_RET_TRUE)
 		{
@@ -219,29 +222,35 @@ IT_TYPE CWorldMap::GetTerrainItemType(dword dwTerrainIndex) // static
 }
 
 
-
 //////////////////////////////////////////////////////////////////
 // Map reading and blocking.
 
 // gets sector # from one map
-CSector* CWorldMap::GetSector(int map, int index) noexcept // static
+CSector* CWorldMap::GetSectorByIndex(int map, int index) noexcept // static
 {
-	//ADDTOCALLSTACK_DEBUG("CWorldMap::GetSector(index)");
+    //ADDTOCALLSTACK_DEBUG("CWorldMap::GetSectorByIndex(index)");
 
-	const int iMapSectorQty = g_World._Sectors.GetSectorQty(map);
+    const MapSectorsData * pSd = g_World._Sectors.GetMapSectorData(map);
+    if (!pSd)
+    {
+        g_Log.EventError("Requested sector #%d for unsupported map #%d.\n", index, map);
+        return nullptr;
+    }
+
+    const int iMapSectorQty = pSd->iSectorQty;
 	if (index >= iMapSectorQty)
 	{
 		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", index, map);
 		return nullptr;
 	}
 
-	return g_World._Sectors.GetSector(map, index);
+    return g_World._Sectors.GetSectorByIndexUnchecked(map, index);
 }
 
-CSector* CWorldMap::GetSector(int map, short x, short y) noexcept // static
+CSector* CWorldMap::GetSectorByCoordsUnchecked(int map, short x, short y) noexcept // static
 {
-	//ADDTOCALLSTACK_DEBUG("CWorldMap::GetSector(x,y)");
-	return g_World._Sectors.GetSector(map, x, y);
+    //ADDTOCALLSTACK_DEBUG("CWorldMap::GetSectorByCoords(x,y)");
+    return g_World._Sectors.GetSectorByCoordsUnchecked(map, x, y);
 }
 
 
@@ -291,7 +300,10 @@ const CUOMapMeter* CWorldMap::GetMapMeter(const CPointMap& pt) // static
 	if (!pMapBlock)
 		return nullptr;
 
-	return pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+    return pMapBlock->GetTerrain(
+        UO_BLOCK_OFFSET(pt.m_x),
+        UO_BLOCK_OFFSET(pt.m_y)
+        );
 }
 
 std::optional<CUOMapMeter> CWorldMap::GetMapMeterAdjusted(const CPointMap& pt)
@@ -301,16 +313,28 @@ std::optional<CUOMapMeter> CWorldMap::GetMapMeterAdjusted(const CPointMap& pt)
 		return std::nullopt;
 
 	CUOMapMeter pMapTop(*pMeter);
-	const CUOMapMeter pMapLeft(CheckMapTerrain(pMapTop, pt.m_x, pt.m_y + 1, pt.m_map));
+    const CUOMapMeter pMapLeft  (CheckMapTerrain(pMapTop, pt.m_x,     pt.m_y + 1, pt.m_map));
 	const CUOMapMeter pMapBottom(CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1, pt.m_map));
-	const CUOMapMeter pMapRight(CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y, pt.m_map));
+    const CUOMapMeter pMapRight (CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y,     pt.m_map));
 
-	const short iAverage = GetAreaAverage(pMapTop.m_z, pMapLeft.m_z, pMapBottom.m_z, pMapRight.m_z);
-	if ((char)abs((short)pMapTop.m_z - (short)pMapBottom.m_z) > (char)abs((short)pMapLeft.m_z - (short)pMapRight.m_z))
-		pMapTop.m_z = GetFloorAvarage(pMapLeft.m_z, pMapRight.m_z, iAverage);
-	else
-		pMapTop.m_z = GetFloorAvarage(pMapTop.m_z, pMapBottom.m_z, iAverage);
-	return std::make_optional<CUOMapMeter>(pMapTop);
+    const int iAverage = GetAreaAverageHeight(pMapTop.m_z, pMapLeft.m_z, pMapBottom.m_z, pMapRight.m_z);
+    //const auto iAbsDiffTopBottom = (char)abs((short)pMapTop.m_z - (short)pMapBottom.m_z);
+    //const auto iAbsDiffLeftRight = (char)abs((short)pMapLeft.m_z - (short)pMapRight.m_z);
+    const int iAbsDiffTopBottom = sl::fmath::sAbsDiff((int)pMapTop.m_z,  (int)pMapBottom.m_z);
+    const int iAbsDiffLeftRight = sl::fmath::sAbsDiff((int)pMapLeft.m_z, (int)pMapRight.m_z);
+
+    //if (iAbsDiffTopBottom > iAbsDiffLeftRight)
+    //    pMapTop.m_z = GetFloorAverageHeight(pMapLeft.m_z, pMapRight.m_z, iAverage);
+    //else
+    //    pMapTop.m_z = GetFloorAverageHeight(pMapTop.m_z, pMapBottom.m_z, iAverage);
+
+    const bool useLeftRight = (iAbsDiffTopBottom > iAbsDiffLeftRight);
+    const int value1        = useLeftRight ? pMapLeft.m_z : pMapTop.m_z;
+    const int value2        = useLeftRight ? pMapRight.m_z : pMapBottom.m_z;
+
+    pMapTop.m_z = (char)GetFloorAverageHeight(value1, value2, iAverage);
+
+    return std::make_optional<CUOMapMeter>(pMapTop);
 }
 
 bool CWorldMap::IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance ) // static
@@ -318,6 +342,7 @@ bool CWorldMap::IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistan
 	ADDTOCALLSTACK("CWorldMap::IsTypeNear_Top");
 	if ( !pt.IsValidPoint() )
 		return false;
+
 	const CPointMap ptn = FindTypeNear_Top( pt, iType, iDistance );
 	return ptn.IsValidPoint();
 }
@@ -370,7 +395,8 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
             pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pItem->GetDispID()));
 			if ( ! pDupeDef )
 			{
-				g_Log.EventDebug("Failed to get non-parent reference (dynamic) (DispID 0%x) (X: %d Y: %d Z: %d)\n",pItem->GetDispID(),ptTest.m_x,ptTest.m_y,ptTest.m_z);
+                g_Log.EventDebug("Failed to get non-parent reference (dynamic) (DispID 0%x) (X: %d Y: %d Z: %d)\n",
+                    pItem->GetDispID(),ptTest.m_x,ptTest.m_y,ptTest.m_z);
 				Height = pItemDef->GetHeight();
 			}
 			else
@@ -383,10 +409,11 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 			continue;
 
 		//if ( ((( pItem->GetTopPoint().m_z - pt.m_z ) > 0) && ( pItem->GetTopPoint().m_z - pt.m_z ) > RESOURCE_Z_CHECK ) || ((( pt.m_z - pItem->GetTopPoint().m_z ) < 0) && (( pt.m_z - pItem->GetTopPoint().m_z ) < - RESOURCE_Z_CHECK )))
-		if ( ((( z - pt.m_z ) > 0) && ( z - pt.m_z ) > RESOURCE_Z_CHECK ) || ((( pt.m_z - z ) < 0) && (( pt.m_z - z ) < - RESOURCE_Z_CHECK )))
+        if ( ((( z - pt.m_z ) > 0) && ( z - pt.m_z ) > RESOURCE_Z_CHECK ) ||
+            ((( pt.m_z - z ) < 0) && (( pt.m_z - z ) < - RESOURCE_Z_CHECK )) )
 			continue;
 
-		if (( z < ptElem[0].m_z ) || (( z == ptElem[0].m_z ) && ( fElem[0] )))
+        if (( z < ptElem[0].m_z ) || (( z == ptElem[0].m_z ) && fElem[0]))
 			continue;
 
 		ptElem[0] = ptItemTop;
@@ -1496,43 +1523,60 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockingState & b
 	}
 }
 
-char CWorldMap::GetFloorAvarage(char pPoint1, char pPoint2, short iAverage)
+int CWorldMap::GetFloorAverageHeight(int iPoint1, int iPoint2, int iAverage)
 {
-	//We can't use char here, because higher points like hills has 64+ heights and adding 64+65 each other exceed char limit and causes returns minus values.
-	const short pTotal = pPoint1 + pPoint2, pHalf = pTotal / 2, pEven = pTotal % 2, pAverage = iAverage - pHalf;
-	return static_cast<char>(pHalf + (pEven != 0 && pAverage > 5));
+    // We can't use char here, because higher points like hills has 64+ heights and adding 64+65 each other exceed char limit and causes returns minus values.
+    const int iTotal = iPoint1 + iPoint2;
+    const int iHalf = iTotal / 2;
+
+    // Leaving the old, less efficient algorithm just because it's more clear.
+    //const short pEven = pTotal % 2, pAverage = iAverage - pHalf;
+    //return static_cast<char>(pHalf + (pEven != 0 && pAverage > 5));
+
+    // If total is odd and (iAverage - half) > 5, round up
+    //  const bool fRoundUp = (iTotal % 2 != 0) && ((iAverage - iHalf) > 5);
+    //  return static_cast<char>(iHalf + (fRoundUp ? 1 : 0));
+
+    const int iRoundUp = (iTotal & 1 /* odd number */) && ((iAverage - iHalf) > 5);
+    return iHalf + iRoundUp;
 }
 
-short CWorldMap::GetAreaAverage(char pTop, char pLeft, char pBottom, char pRight)
+int CWorldMap::GetAreaAverageHeight(int iTop, int iLeft, int iBottom, int iRight)
 {
-	const short iHighest1 = maximum(pTop, pBottom);
-	const short iLowest1 = minimum(pTop, pBottom);
+    // Leaving the old, less efficient algorithm just because it's more clear.
+    /*
+    const short iHighest1 = maximum(iTop, iBottom);
+    const short iLowest1 = minimum(iTop, iBottom);
 
-	const short iHighest2 = maximum(pLeft, pRight);
-	const short iLowest2 = minimum(pLeft, pRight);
+    const short iHighest2 = maximum(iLeft, iRight);
+    const short iLowest2 = minimum(iLeft, iRight);
 	return maximum(iHighest1, iHighest2) - minimum(iLowest1, iLowest2);
+    */
+
+    sl::fmath::sSortPair(iBottom, iTop);    // iTop   will be >= iBottom
+    sl::fmath::sSortPair(iLeft,   iRight);  // iRight will be >= iLeft
+    const int iHighest = sl::fmath::sMax(iTop, iRight);
+    const int iLowest  = sl::fmath::sMin(iBottom, iLeft);
+
+    return iHighest - iLowest;
 }
 
-CUOMapMeter CWorldMap::CheckMapTerrain(CUOMapMeter pDefault, short x, short y, uchar map)
+CUOMapMeter CWorldMap::CheckMapTerrain(const CUOMapMeter &meterDefault, short x, short y, uchar map)
 {
-	CPointMap pt = { x, y, 0, map };
+    const CPointMap pt = { x, y, 0, map };
 	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
 	if (!pMapBlock)
-		return pDefault;
+        return meterDefault;
 
 	const CUOMapMeter* pMeter = pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
-	if (!pMeter)
-		return pDefault;
+    if (!pMeter || CUOMapMeter::IsTerrainNull(pMeter->m_wTerrainIndex))
+        return meterDefault;
 
-	if (CUOMapMeter::IsTerrainNull(pMeter->m_wTerrainIndex))
-		return pDefault;
-	else
-	{
-		const CUOTerrainInfo land(pMeter->m_wTerrainIndex, false);
-		if ((land.m_flags & UFLAG1_WATER))
-			return pDefault;
-	}
-	return *pMeter;
+    const CUOTerrainInfo land(pMeter->m_wTerrainIndex, false);
+    //if ((land.m_flags & UFLAG1_WATER))
+    //    return meterDefault;
+    //return *pMeter;
+    return (land.m_flags & UFLAG1_WATER) ? meterDefault : *pMeter;
 }
 
 char CWorldMap::GetHeightPoint(const CPointMap & pt, uint64 & uiBlockFlags, bool fHouseCheck) // static

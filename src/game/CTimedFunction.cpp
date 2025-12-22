@@ -26,12 +26,12 @@ bool CTimedFunction::IsDeleted() const // virtual
 }
 
 
-bool CTimedFunction::_CanTick() const // virtual
+bool CTimedFunction::_TickableStateBase() const // virtual
 {
 	return true;
 }
 
-bool CTimedFunction::CanTick() const // virtual
+bool CTimedFunction::TickableStateBase() const // virtual
 {
 	return true;
 }
@@ -85,12 +85,12 @@ bool CTimedFunction::OnTick() // virtual
 	CUID uid;
 	CScript s;
 	{
-		MT_ENGINE_SHARED_LOCK_SET;
+        MT_ENGINE_SHARED_LOCK_SET(this);
 		uid.SetPrivateUID(_uidAttached);
 		s.ParseKey(_ptcCommand);
 	}
 
-	delete this; // This has to be the last function call to ever access this object!
+    delete this; // This has to be the last function/statement call to ever access this object!
 
 	// From now on, this object does NOT exist anymore!
 	return _ExecTimedFunction(std::move(uid), std::move(s));

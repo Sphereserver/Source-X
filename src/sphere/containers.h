@@ -7,7 +7,7 @@
 #define _INC_CONTAINERS_H
 
 #include <list>
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 // a thread-safe implementation of a queue container that doesn't use any locks
 // this only works as long as there is only a single reader thread and writer thread (can be different)
 

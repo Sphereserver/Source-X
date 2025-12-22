@@ -23,6 +23,13 @@ size_t Str_TempLength() noexcept
 [[nodiscard]]
 tchar* Str_GetTemp() noexcept;
 
+[[nodiscard]]
+tchar* Str_CopyToTemp(lpctstr pSrc) noexcept;
+
+[[nodiscard]]
+lpctstr Str_mtEngineGetSafeTemp(lpctstr pSrc) noexcept;
+
+
 //--
 
 // Base abstract class for strings, provides basic information of what should be available
@@ -116,7 +123,6 @@ protected:
 */
 
 
-
 // Temporary string implementation. Works with thread-safe string
 // To create such string:
 // TemporaryString str;
@@ -143,7 +149,7 @@ public:
 	* @brief "Copy" constructor.
 	*
 	* @param pStr string to copy.
-	* #param iLen max number of chars (single-byte) to copy.
+	* @param uiLen max number of chars (single-byte) to copy.
 	*/
 	TemporaryString(lpctstr pStr, size_t uiLen);
 

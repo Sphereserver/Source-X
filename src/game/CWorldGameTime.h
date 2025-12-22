@@ -19,7 +19,7 @@ public:
 
 	static int64 GetCurrentTimeInGameMinutes(int64 basetime) noexcept;	// return game world minutes
 	static int64 GetCurrentTimeInGameMinutes() noexcept;
-	
+
 	static uint GetMoonPhase( bool fMoonIndex = false );
 	static int64 GetNextNewMoon( bool fMoonIndex );
 };

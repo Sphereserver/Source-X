@@ -54,6 +54,7 @@
 ADD(CAccount,				"CAccount");
 ADD(CAccounts,				"CAccounts");
 ADD(CResourceLink,			"CResourceLink");
+ADD(CCChampion,             "CCChampion");
 ADD(CCChampionDef,			"CCChampionDef");
 ADD(CChar,					"CChar");
 ADD(CCharBase,				"CCharBase");
@@ -63,6 +64,7 @@ ADD(CClient,				"CClient");
 ADD(CDialogDef,				"CDialogDef");
 ADD(CDialogResponseArgs,	"CDialogResponseArgs");
 ADD(CEntity,				"CEntity");
+ADD(CExpression,            "CExpression");
 ADD(CSFileObj,				"CSFileObj");
 ADD(CSFileObjContainer,		"CSFileObjContainer");
 ADD(CScriptObj,				"CScriptObj");

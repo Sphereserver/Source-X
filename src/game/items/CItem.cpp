@@ -1,7 +1,8 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../network/CClientIterator.h"
 #include "../../network/send.h"
 #include "../components/CCChampion.h"
@@ -243,7 +244,7 @@ bool CItem::NotifyDelete()
 	ADDTOCALLSTACK("CItem::NotifyDelete");
 	if ((IsTrigUsed(TRIGGER_DESTROY)) || (IsTrigUsed(TRIGGER_ITEMDESTROY)))
 	{
-		if (CItem::OnTrigger(ITRIG_DESTROY, &g_Serv) == TRIGRET_RET_TRUE)
+        if (CItem::OnTrigger(ITRIG_DESTROY, CScriptParserBufs::GetCScriptTriggerArgsPtr(), &g_Serv) == TRIGRET_RET_TRUE)
 			return false;
 	}
 
@@ -452,7 +453,7 @@ CItem * CItem::GenerateScript( CChar * pSrc)
 	CResourceLock s;
 	if ( pItemDef->ResourceLock(s))
 	{
-        OnTrigger(ITRIG_Create, pSrc ? static_cast<CTextConsole*>(pSrc) : static_cast<CTextConsole*>(&g_Serv), nullptr);
+        OnTrigger(ITRIG_Create, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pSrc ? static_cast<CTextConsole*>(pSrc) : static_cast<CTextConsole*>(&g_Serv));
 	}
 	return this;
 }
@@ -650,15 +651,15 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 					continue;
 				{
 					lptstr ptcFunctionName = s.GetArgRaw();
-					std::unique_ptr<CScriptTriggerArgs> pScriptArgs;
-					// Locate arguments for the called function
+                    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                    // Locate arguments for the called function
 					tchar* ptcArgs = strchr(ptcFunctionName, ' ');
 					if (ptcArgs)
 					{
 						*ptcArgs = 0;
 						++ptcArgs;
 						GETNONWHITESPACE(ptcArgs);
-						pScriptArgs = std::make_unique<CScriptTriggerArgs>(ptcArgs);
+                        pScriptArgs->Init(ptcArgs);
 					}
 
 					// use pCont is exist, if not use g_Serv
@@ -666,11 +667,11 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 					{
 						CObjBaseTemplate* pContObjBaseT = pCont->GetTopLevelObj();
 						ASSERT(pContObjBaseT);
-						pItem->r_Call(ptcFunctionName, dynamic_cast<CTextConsole*>(pContObjBaseT), pScriptArgs.get());
+                        pItem->r_Call(ptcFunctionName, pScriptArgs, dynamic_cast<CTextConsole*>(pContObjBaseT));
 					}
 					else
 					{
-						pItem->r_Call(ptcFunctionName, &g_Serv, pScriptArgs.get());
+                        pItem->r_Call(ptcFunctionName, pScriptArgs, &g_Serv);
 					}
 
 					if (pItem->IsDeleted())
@@ -862,7 +863,7 @@ int CItem::FixWeirdness()
 			}
             else
             {
-                DEBUG_ERR(("'%s' Bad Link to 0%x\n", GetName(), (dword)(m_uidLink)));
+                g_Log.EventError("GC: Object '%s' has Bad Link to UID 0%" PRIx32 ".\n", GetName(), m_uidLink.GetObjUID());
                 m_uidLink.InitUID();
                 iResultCode = 0x2205;
                 return iResultCode;	// get rid of it.
@@ -1565,7 +1566,7 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 	pSector->MoveItemToSector(this);	// This also awakes the item
 
 	// Is this area too complex ?
-	if ( ! g_Serv.IsLoading())
+	if ( ! g_Serv.IsLoadingGeneric())
     {
         if (pSector->CheckItemComplexity())
         {
@@ -1624,19 +1625,19 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	TRIGRET_TYPE ttResult = TRIGRET_RET_DEFAULT;
     if (IsTrigUsed(TRIGGER_DROPON_GROUND) || IsTrigUsed(TRIGGER_ITEMDROPON_GROUND))
     {
-        CScriptTriggerArgs args;
-        args.m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
-        //args.m_iN2 = 0;
-        args.m_s1 = ptNewPlace.WriteUsed();
-        ttResult = OnTrigger(ITRIG_DROPON_GROUND, pCharMover, &args);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
+        //args->m_iN2 = 0;
+        pScriptArgs->m_s1 = ptNewPlace.WriteUsed();
+        ttResult = OnTrigger(ITRIG_DROPON_GROUND, pScriptArgs, pCharMover);
 
         if (IsDeleted())
             return false;
 
-        iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
+        iDecayTime = pScriptArgs->m_iN1 * MSECS_PER_TENTH;
 
 		// Warning: here we ignore the read-onlyness of CSString's buffer only because we know that CPointMap constructor won't write past the end, but only replace some characters with '\0'. It's not worth it to build another string just for that.
-		tchar* ptcArgs = const_cast<tchar*>(args.m_s1.GetBuffer());
+        tchar* ptcArgs = const_cast<tchar*>(pScriptArgs->m_s1.GetBuffer());
         const CPointMap ptChanged(ptcArgs);
         if (!ptChanged.IsValidPoint())
             g_Log.EventError("Trying to override item drop P with an invalid P. Using the original one.\n");
@@ -1866,13 +1867,13 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ), Str_TempLength() - len);
 			break;
 		case IT_RUNE:
-			if ( ! m_itRune.m_ptMark.IsCharValid())
+            if ( ! m_itRune.m_ptMark.IsCharValid())
 				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ), Str_TempLength() - len);
 			else if ( ! m_itRune.m_Strength )
 				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_FADED ), Str_TempLength() - len);
 			break;
 		case IT_TELEPAD:
-			if ( ! m_itTelepad.m_ptMark.IsValidPoint())
+            if ( ! m_itTelepad.m_ptMark.IsCharValid())
 				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ), Str_TempLength() - len);
 			break;
 		default:
@@ -2053,14 +2054,16 @@ height_t CItem::GetHeight() const
             return tmpHeight;
     }
 
-	char heightDef[24]{"itemheight_"};
+    auto reader = g_ExprGlobals.mtEngineLockedReader();
+
+    char heightDef[24]{"itemheight_"};
     Str_FromUI(uint(uiDispID), heightDef + 11, sizeof(heightDef) - 11, 16);
-	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+    tmpHeight = static_cast<height_t>(reader->m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
     Str_FromUI(uint(uiDispID), heightDef + 11, sizeof(heightDef) - 11, 10);
-	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+    tmpHeight = static_cast<height_t>(reader->m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
 
@@ -2371,7 +2374,7 @@ void CItem::r_WriteMore1(CSString & sVal)
 
     if (ptcErr)
     {
-        g_Log.EventError("Invalid MORE1 for item 0%" PRIx32 ": %s.\n",
+        g_Log.EventError("Invalid MORE1 for item 0%" PRIx32 ": %s",
             GetUID().GetObjUID(), ptcErr);
     }
 }
@@ -2431,7 +2434,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 
     if (ptcErr)
     {
-        g_Log.EventError("Invalid MORE2 for item 0%" PRIx32 ": %s.\n",
+        g_Log.EventError("Invalid MORE2 for item 0%" PRIx32 ": %s",
             GetUID().GetObjUID(), ptcErr);
     }
 }
@@ -3000,7 +3003,7 @@ void CItem::r_LoadMore1(dword dwVal)
     case IT_SPAWN_CHAR:
     case IT_SPAWN_ITEM:
     case IT_SPAWN_CHAMPION:
-        if (!g_Serv.IsLoading())
+        if (!g_Serv.IsLoadingGeneric())
         {
             CCSpawn* pSpawn = GetSpawn();
             if (pSpawn)
@@ -3270,8 +3273,8 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				bool normcont = LoadSetContainer(CUID(s.GetArgDWVal()), (LAYER_TYPE)GetUnkZ());
 				if (!normcont)
 				{
-					SERVMODE_TYPE iModeCode = g_Serv.GetServerMode();
-					if ((iModeCode == SERVMODE_Loading) || (iModeCode == SERVMODE_GarbageCollection))
+					ServMode iModeCode = g_Serv.GetServerMode();
+                    if ((iModeCode == ServMode::StartupLoadingSaves) || (iModeCode == ServMode::GarbageCollection))
 						Delete();	//	since the item is no longer in container, it should be deleted
 				}
 				return normcont;
@@ -3476,12 +3479,13 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itNormal.m_morep.m_z = s.GetArgCVal();
 			break;
 		case IC_P:
-			// Loading or import ONLY ! others use the r_Verb
+            // Loading or import ONLY ! others use CObjBase::r_Verb
 			if ( ! IsDisconnected() && ! IsItemInContainer() )
 				return false;
 			else
 			{
-				// Will be placed in the world later.
+                // Will be placed in the world later (in CItem::r_Load):
+                //  since we are loading the world, the parent region might not be created/"realized" yet.
 				CPointMap pt;
 				pt.Read( s.GetArgStr());
                 if (pt.IsValidPoint())
@@ -3517,13 +3521,16 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 bool CItem::r_Load( CScript & s ) // Load an item from script
 {
 	ADDTOCALLSTACK("CItem::r_Load");
-	CScriptObj::r_Load( s );
 
-	if ( GetContainer() == nullptr )
-	{
+    CScriptObj::r_Load( s );
+
+    if ( GetContainer() == nullptr )
+    {
         // Actually place the item into the world.
-		if ( GetTopPoint().IsCharValid())
+        if ( GetTopPoint().IsCharValid())
+        {
 			MoveToUpdate( GetTopPoint());
+        }
 	}
 
 	int iResultCode = CObjBase::IsWeird();
@@ -3719,13 +3726,14 @@ void CItem::SetTriggerActive(lpctstr trig)
     _iRunningTriggerId = -1;
 }
 
-TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
+TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItem::OnTrigger");
 
 	if (IsTriggerActive(pszTrigName)) //This should protect any item trigger from infinite loop
 		return TRIGRET_RET_ABORTED;
 
+    ASSERT(pScriptArgs);
 	if ( !pSrc )
 		pSrc = &g_Serv;
 
@@ -3760,7 +3768,7 @@ standard_order:
                 EXC_SET_BLOCK("chardef");
                 const CUID uidOldAct = pChar->m_Act_UID;
                 pChar->m_Act_UID = GetUID();
-                iRet = pChar->OnTrigger(ptcCharTrigName, pSrc, pArgs);
+                iRet = pChar->OnTrigger(ptcCharTrigName, pScriptArgs, pSrc);
                 pChar->m_Act_UID = uidOldAct;
                 if (iRet == TRIGRET_RET_TRUE)
                     goto stopandret; // Block further action.
@@ -3785,7 +3793,7 @@ standard_order:
                 if (!pLink->ResourceLock(s))
                     continue;
 
-                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
                 if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
                     goto stopandret;
 
@@ -3809,7 +3817,7 @@ standard_order:
 			CResourceLock s;
 			if ( !pLink->ResourceLock(s) )
 				continue;
-			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+            iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
 			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 				goto stopandret;
 		}
@@ -3824,7 +3832,7 @@ standard_order:
 			CResourceLock s;
 			if ( !pLink->ResourceLock(s) )
 				continue;
-			iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+            iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
 			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 				goto stopandret;
 		}
@@ -3838,7 +3846,7 @@ standard_order:
 			{
                 const CChar* pChar = pSrc->GetChar();
 				if ( pChar )
-					g_Log.EventError( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName());
+                    g_Log.EventError( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName());
 				else
 					g_Log.EventError( "0%x '%s' has unhandled [TYPEDEF %d]\n", (dword) GetUID(), GetName(), GetType() );
 				SetType(Item_GetDef()->GetType());
@@ -3851,7 +3859,7 @@ standard_order:
 				CResourceLock s;
 				if ( pResourceLink->ResourceLock(s))
 				{
-					iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pSrc, pArgs );
+                    iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pScriptArgs, pSrc );
 					if ( iRet == TRIGRET_RET_TRUE )
 						goto stopandret;
 				}
@@ -3869,7 +3877,7 @@ from_itemdef_first:
             {
                 CResourceLock s;
                 if (pResourceLink->ResourceLock(s))
-                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
             }
 
             // If i'm running the @Create trigger, i jumped here first, but i need to go back and try to run the trigger from the other sources
@@ -3884,15 +3892,15 @@ stopandret:
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("trigger '%s' action '%d' char '0%x' [0%x]\n", pszTrigName, iAction, (pSrc && pSrc->GetChar()) ? (dword)pSrc->GetChar()->GetUID() : 0, (dword)GetUID());
+    g_Log.EventDebug("trigger '%s' action '%d' char '0%x' [0%x]\n", pszTrigName, iAction, ((pSrc && pSrc->GetChar()) ? (dword)pSrc->GetChar()->GetUID() : 0), (dword)GetUID());
 	EXC_DEBUG_END;
 	return iRet;
 }
 
-TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
+TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc )
 {
 	ASSERT((trigger >= 0) && (trigger < ITRIG_QTY));
-	return OnTrigger( CItem::sm_szTrigName[trigger], pSrc, pArgs );
+    return OnTrigger( CItem::sm_szTrigName[trigger], pScriptArgs, pSrc );
 }
 
 // Item type specific stuff.
@@ -5579,21 +5587,22 @@ bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 	return true;
 }
 
-bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting, int64 iDuration)
+bool CItem::OnSpellEffect(SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting, int64 iDuration)
 {
 	ADDTOCALLSTACK("CItem::OnSpellEffect");
-	UnreferencedParameter(bReflecting);	// items are not affected by Magic Reflection
+    UnreferencedParameter(fReflecting);	// items are not affected by Magic Reflection
 	UnreferencedParameter(iDuration);
     // A spell is cast on this item.
     // ARGS:
     //  iSkillLevel = 0-1000 = difficulty. may be slightly larger . how advanced is this spell (might be from a wand)
 
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
-	CScriptTriggerArgs Args( spell, iSkillLevel, pSourceItem );
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(spell, iSkillLevel, 0, pSourceItem);
 
 	if ( IsTrigUsed(TRIGGER_SPELLEFFECT) || IsTrigUsed(TRIGGER_ITEMSPELL) )
 	{
-		switch ( OnTrigger(ITRIG_SPELLEFFECT, pCharSrc, &Args) )
+        switch ( OnTrigger(ITRIG_SPELLEFFECT, pScriptArgs, pCharSrc) )
 		{
 			case TRIGRET_RET_TRUE:
 				return false;
@@ -5608,7 +5617,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	if ( IsTrigUsed(TRIGGER_EFFECT) )
 	{
-		switch (Spell_OnTrigger(spell, SPTRIG_EFFECT, pCharSrc, &Args))
+        switch (Spell_OnTrigger(spell, SPTRIG_EFFECT, pScriptArgs, pCharSrc))
 		{
 			case TRIGRET_RET_TRUE:
 				return false;
@@ -5621,8 +5630,8 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		}
 	}
 
-	spell = (SPELL_TYPE)(Args.m_iN1);
-	iSkillLevel = (int)(Args.m_iN2);
+    spell = (SPELL_TYPE)(pScriptArgs->m_iN1);
+    iSkillLevel = (int)(pScriptArgs->m_iN2);
 	pSpellDef = g_Cfg.GetSpellDef( spell );
     ASSERT(pSpellDef);
 
@@ -5742,8 +5751,8 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
     if ( (iEffectID > ITEMID_NOTHING) && (iEffectID < ITEMID_QTY) )
     {
         bool fExplode = (pSpellDef->IsSpellType(SPELLFLAG_FX_BOLT) && !pSpellDef->IsSpellType(SPELLFLAG_GOOD));		// bolt (chasing) spells have explode = 1 by default (if not good spell)
-        dword dwColor = (dword)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
-        dword dwRender = (dword)(Args.m_VarsLocal.GetKeyNum("EffectRender"));
+        dword dwColor = (dword)(pScriptArgs->m_VarsLocal.GetKeyNum("EffectColor"));
+        dword dwRender = (dword)(pScriptArgs->m_VarsLocal.GetKeyNum("EffectRender"));
 
         if ( pSpellDef->IsSpellType(SPELLFLAG_FX_BOLT) )
             Effect(EFFECT_BOLT, iEffectID, pCharSrc, 5, 1, fExplode, dwColor, dwRender);
@@ -5816,8 +5825,9 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 
 	if ( IsTrigUsed(TRIGGER_DAMAGE) || IsTrigUsed(TRIGGER_ITEMDAMAGE) )
 	{
-		CScriptTriggerArgs Args(iDmg, (int)(uType));
-		if ( OnTrigger( ITRIG_DAMAGE, pSrc, &Args ) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(iDmg, (int)uType, 0, nullptr);
+        if ( OnTrigger( ITRIG_DAMAGE, pScriptArgs, pSrc ) == TRIGRET_RET_TRUE )
 			return 0;
 	}
 
@@ -6148,46 +6158,28 @@ bool CItem::_CanHoldTimer() const
 	return true;
 }
 
-bool CItem::_CanTick() const
+bool CItem::_TickableStateBase() const
 {
-    //ADDTOCALLSTACK_DEBUG("CItem::_CanTick");
-	EXC_TRY("Can tick?");
+    //ADDTOCALLSTACK_DEBUG("CItem::_TickableStateBase");
+    EXC_TRY("Able to tick?");
 
 	const CObjBase* pCont = GetContainer();
-    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
-
-    if (fIgnoreCont)
+    const bool fAllowContained = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
+    const bool fCharCont = pCont && pCont->IsChar();
+    if (fCharCont && fAllowContained)
 	{
-        const bool fCharCont = pCont && pCont->IsChar();
-        if (fCharCont && pCont->IsDisconnected())
-        {
-            const auto pCharCont = static_cast<const CChar*>(pCont);
-            if (pCharCont->Skill_GetActive() != NPCACT_RIDDEN)
-                return false;
+        auto pCharCont = static_cast<const CChar*>(pCont);
+        if (!pCharCont->_CanTick())
+            return false;
+    }
 
-            // Check if this ridden npc is ridden by a logged out char, or not.
-            const CChar *pCharOwner = pCharCont->GetOwner();
-            if (!pCharOwner || pCharOwner->IsDisconnected())
-                return false;
-        }
-
-        return CObjBase::_CanTick();
-	}
-
-    if (IsAttr(ATTR_DECAY) && !pCont)
+    if (!pCont && IsAttr(ATTR_DECAY))
     {
         // If pCont is not a CObjBase, it will most probably be a CSector. Decaying items won't go to sleep.
-        return CObjBase::_CanTick();
+        return CObjBase::_TickableStateBase();
     }
 
-    const bool fCharCont = pCont && pCont->IsChar();
-    if (fCharCont && !pCont->CanTick())
-    {
-        // Is it equipped on a Char?
-        return false;
-    }
-
-    return CObjBase::_CanTick();
+    return CObjBase::_TickableStateBase();
 
 	EXC_CATCH;
 
@@ -6207,7 +6199,7 @@ bool CItem::_OnTick()
 
 	if (!_IsSleeping())
 	{
-		if (!_CanTick())
+        if (!_CanTick(false))
 		{
 			const CSector* pSector = GetTopSector();	// It prints an error if it belongs to an invalid sector.
 			if (pSector && pSector->IsSleeping())
@@ -6225,7 +6217,8 @@ bool CItem::_OnTick()
 
     if (( IsTrigUsed(TRIGGER_TIMER) ) || ( IsTrigUsed(TRIGGER_ITEMTIMER) ))
     {
-        iRet = OnTrigger( ITRIG_TIMER, &g_Serv );
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        iRet = OnTrigger( ITRIG_TIMER, pScriptArgs, &g_Serv );
         if (iRet == TRIGRET_RET_TRUE)
         {
             return true;

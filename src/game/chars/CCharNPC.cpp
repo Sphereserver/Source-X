@@ -1,8 +1,7 @@
 // Actions specific to an NPC.
 
-#include <flat_containers/flat_set.hpp>
 #include "../../common/resource/CResourceLock.h"
-#include "../../common/CException.h"
+//#include "../../common/CException.h" // included in the precompiled header
 #include "../clients/CClient.h"
 #include "../items/CItemContainer.h"
 #include "../CServer.h"
@@ -43,7 +42,7 @@ CCharNPC::CCharNPC( CChar * pChar, NPCBRAIN_TYPE NPCBrain )
 {
 	UnreferencedParameter(pChar);
 	m_Brain = NPCBrain;
-	m_Home_Dist_Wander = INT16_MAX;	// as far as i want.
+	m_Home_Dist_Wander = INT16_MAX;	// as far as I want.
 	m_Act_Motivation = 0;
 	m_bonded = 0;
 #ifndef _WIN32
@@ -79,7 +78,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 		//Set as numbers only
 		case CNC_BONDED:
 			m_bonded = (s.GetArgVal() > 0);
-			if ( !g_Serv.IsLoading() )
+			if ( !g_Serv.IsLoadingGeneric() )
 				pChar->UpdatePropertyFlag();
 			break;
 		case CNC_ACTPRI:
@@ -151,7 +150,7 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 	{
 
 		//return as string or hex number or nullptr if not set
-		//On these ones, check BaseDef too if not found on dynamic
+		// On these, check BaseDef too if not found on dynamic.
 		case CNC_THROWDAM:
 		case CNC_THROWDAMTYPE:
 		case CNC_THROWOBJ:
@@ -159,7 +158,7 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 			sVal = pChar->GetDefStr(ptcKey, false, true);
 			break;
 			//return as decimal number or 0 if not set
-			//On these ones, check BaseDef if not found on dynamic
+			// On these, check BaseDef if not found on dynamic.
 		case CNC_BONDED:
 			sVal.FormatVal( m_bonded );
 			break;
@@ -254,7 +253,7 @@ bool CCharNPC::IsVendor() const
 	return ( (m_Brain == NPCBRAIN_HEALER) || (m_Brain == NPCBRAIN_BANKER) || (m_Brain == NPCBRAIN_VENDOR) || (m_Brain == NPCBRAIN_STABLE) );
 }
 
-int CCharNPC::GetNpcAiFlags( const CChar *pChar ) const 
+int CCharNPC::GetNpcAiFlags( const CChar *pChar ) const
 {
 	CVarDefCont *pVar = pChar->GetKey("OVERRIDE.NPCAI", true );
 	if (pVar != nullptr)
@@ -270,8 +269,8 @@ void CChar::NPC_LoadScript( bool fRestock )
 	{
 		// Set a default brain type til we get the real one from scripts.
 		// should have a default brain. watch out for override vendor.
-		SetNPCBrain(GetNPCBrainAuto());	
-	}					
+		SetNPCBrain(GetNPCBrainAuto());
+	}
 
 	CCharBase * pCharDef = Char_GetDef();
 
@@ -290,7 +289,7 @@ void CChar::NPC_LoadScript( bool fRestock )
 	    if ( fRestock && IsTrigUsed(TRIGGER_NPCRESTOCK) )
             pChar->ReadScriptReducedTrig(pCharDef, CTRIG_NPCRestock);
     }
-	CreateNewCharCheck();	//This one is giving stats, etc to the char, so we can read/set them in the next triggers.
+	CreateNewCharCheck();	// This one is giving stats, etc. to the char, so we can read/set them in the next triggers.
 }
 
 // @Create trigger, NPC version
@@ -299,26 +298,27 @@ void CChar::NPC_CreateTrigger()
 	ADDTOCALLSTACK("CChar::NPC_CreateTrigger");
 	ASSERT(m_pNPC);
 
-	fc::vector_set<const CResourceLink*> executedEvents;
+    std::vector<const CResourceLink*> executedEvents;
 	CCharBase *pCharDef = Char_GetDef();
 
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 	lpctstr pszTrigName = "@Create";
-	CTRIG_TYPE iAction = (CTRIG_TYPE)FindTableSorted(pszTrigName, sm_szTrigName, ARRAY_COUNT(sm_szTrigName) - 1);	
+	CTRIG_TYPE iAction = (CTRIG_TYPE)FindTableSorted(pszTrigName, sm_szTrigName, ARRAY_COUNT(sm_szTrigName) - 1);
 
 	// 2) TEVENTS
 	for (size_t i = 0; i < pCharDef->m_TEvents.size(); ++i)
 	{
 		CResourceLink * pLink = pCharDef->m_TEvents[i].GetRef();
-		if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+        if (!pLink || !pLink->HasTrigger(iAction)
+            || (executedEvents.end() != std::find(executedEvents.begin(), executedEvents.end(), pLink)))
 			continue;
 
 		CResourceLock s;
 		if (!pLink->ResourceLock(s))
 			continue;
 
-		executedEvents.emplace(pLink);
-		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
+        executedEvents.emplace_back(pLink);
+        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
 	}
@@ -327,15 +327,16 @@ void CChar::NPC_CreateTrigger()
 	for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
 	{
 		CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i].GetRef();
-		if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
-			continue;
+        if (!pLink || !pLink->HasTrigger(iAction)
+            || (executedEvents.end() != std::find(executedEvents.begin(), executedEvents.end(), pLink)))
+            continue;
 
 		CResourceLock s;
 		if (!pLink->ResourceLock(s))
 			continue;
 
-		executedEvents.emplace(pLink);
-		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
+        executedEvents.emplace_back(pLink);
+        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
 	}

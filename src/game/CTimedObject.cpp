@@ -1,4 +1,4 @@
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 #include "../sphere/ProfileTask.h"
 #include "../sphere/threads.h"
 #include "CWorldGameTime.h"
@@ -17,7 +17,7 @@ CTimedObject::~CTimedObject()
     ADDTOCALLSTACK("CTimedObject::~CTimedObject");
     EXC_TRY("Cleanup in destructor");
 
-    if (IsTimeoutTickingActive())
+    if (_IsTimeoutTickingActive())
     {
         CWorldTickingList::DelObjSingle(this);
     }
@@ -37,16 +37,16 @@ void CTimedObject::_GoAwake()
     _fIsSleeping = false;
 }
 
-bool CTimedObject::_CanTick() const
+bool CTimedObject::_TickableStateBase() const
 {
-    //ADDTOCALLSTACK_DEBUG("CTimedObject::_CanTick");
+    //ADDTOCALLSTACK_DEBUG("CTimedObject::_TickableStateBase");
     return !_IsSleeping();
 }
 
-bool CTimedObject::CanTick() const
+bool CTimedObject::TickableStateBase() const
 {
-    //ADDTOCALLSTACK_DEBUG("CTimedObject::CanTick");
-    MT_ENGINE_SHARED_LOCK_RETURN(_CanTick());
+    //ADDTOCALLSTACK_DEBUG("CTimedObject::TickableStateBase");
+    MT_ENGINE_SHARED_LOCK_RETURN(_TickableStateBase());
 }
 
 bool CTimedObject::OnTick()
@@ -76,7 +76,7 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
     */
     if (iDelayInMsecs < 0)
     {
-        if (IsTimeoutTickingActive())
+        if (_IsTimeoutTickingActive())
             CWorldTickingList::DelObjSingle(this);
         _ClearTimeoutRaw();
     }
@@ -92,7 +92,7 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
 void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 {
     ADDTOCALLSTACK_DEBUG("CTimedObject::SetTimeout");
-    MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
     _SetTimeout(iDelayInMsecs);
 }
 
@@ -175,13 +175,13 @@ int64 CTimedObject::GetTimerSAdjusted() const noexcept
 
 void CTimedObject::GoSleep()
 {
-    MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
     _GoSleep();
 }
 
 void CTimedObject::GoAwake()
 {
-    MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
     _GoAwake(); // Call virtuals!
 }
 
@@ -192,7 +192,7 @@ PROFILE_TYPE CTimedObject::GetProfileType() const noexcept
 
 void CTimedObject::ClearTimeoutRaw() noexcept
 {
-    MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
     CTimedObject::_ClearTimeoutRaw();
 }
 

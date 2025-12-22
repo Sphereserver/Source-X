@@ -1,10 +1,11 @@
 include(CheckCXXCompilerFlag)
 include(CheckLinkerFlag)
 
-message(STATUS "Checking available compiler flags...")
+message(STATUS "Checking available compiler and linker flags...")
 
 if(NOT MSVC)
-    message(STATUS "-- Compilation options:")
+    message(STATUS "-- Linker options:")
+
 
     # Linker flags.
     if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
@@ -14,9 +15,9 @@ if(NOT MSVC)
         check_linker_flag(CXX -Wl,--fatal-warnings LINKER_HAS_FATAL_WARN)
     endif()
     check_linker_flag(CXX -Wl,--as-needed LINKER_HAS_AS_NEEDED)
-    check_linker_flag(CXX -Wl,--icf=safe LINKER_HAS_ICF) # icf = identical code folding (not supported by mold)
 
 
+    message(STATUS "-- Compiler options:")
     # Compiler option flags. Common to both compilers, but older versions might not support the following.
     #check_cxx_compiler_flag("" COMP_HAS_)
 
@@ -24,15 +25,16 @@ if(NOT MSVC)
     check_cxx_compiler_flag("-fno-expensive-optimizations" COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
 
     # Compiler option flags. Expected to work on Clang but not GCC, at the moment.
+    # check_cxx_compiler_flag(CXX "-fvirtual-function-elimination" COMP_HAS_VFUNC_ELIMINATION) # only for release build? is it stable?
     # check_cxx_compiler_flag("-fforce-emit-vtables" COMP_HAS_F_FORCE_EMIT_VTABLES)
     # -fwhole-program-vtables
     # -fstrict-vtable-pointers
 
     if(${USE_ASAN})
         # Compiler option flags. Sanitizers related (ASAN).
-        message(STATUS "-- Compilation options (Address Sanitizer):")
+        message(STATUS "-- Compiler options (Address Sanitizer):")
 
-        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=address) # link against sanitizer lib, being required by the following compilation test
+        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=address) # link against sanitizer lib, being required by the following compiler flag
         check_cxx_compiler_flag("-fsanitize=address" COMP_HAS_ASAN)
         unset(CMAKE_REQUIRED_LIBRARIES)
         if(NOT COMP_HAS_ASAN)
@@ -48,9 +50,9 @@ if(NOT MSVC)
 
     if(${USE_UBSAN})
         # Compiler option flags. Sanitizers related (UBSAN).
-        message(STATUS "-- Compilation options (Undefined Behavior Sanitizer):")
+        message(STATUS "-- Compiler options (Undefined Behavior Sanitizer):")
 
-        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=undefined) # link against sanitizer lib, being required by the following compilation test
+        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=undefined) # link against sanitizer lib, being required by the following compiler flag
         check_cxx_compiler_flag("-fsanitize=undefined" COMP_HAS_UBSAN)
         unset(CMAKE_REQUIRED_LIBRARIES)
         if(NOT COMP_HAS_UBSAN)
@@ -58,7 +60,7 @@ if(NOT MSVC)
         endif()
 
         check_cxx_compiler_flag("-fsanitize=float-divide-by-zero" COMP_HAS_FSAN_FLOAT_DIVIDE_BY_ZERO)
-        check_cxx_compiler_flag("-fsanitize=unsigned-integer-overflow" COMP_HAS_FSAN_UNSIGNED_INTEGER_OVERFLOW) #Unlike signed integer overflow, this is not undefined behavior, but it is often unintentional.
+        #check_cxx_compiler_flag("-fsanitize=unsigned-integer-overflow" COMP_HAS_FSAN_UNSIGNED_INTEGER_OVERFLOW) #Unlike signed integer overflow, this is not undefined behavior, but it is often unintentional.
         #check_cxx_compiler_flag("-fsanitize=implicit-conversion" COMP_HAS_FSAN_IMPLICIT_CONVERSION)
         #check_cxx_compiler_flag("-fsanitize=local-bounds" COMP_HAS_FSAN_LOCAL_BOUNDS)
         check_cxx_compiler_flag("-fno-sanitize=enum" COMP_HAS_FSAN_NO_ENUM)
@@ -66,9 +68,9 @@ if(NOT MSVC)
 
     if(${USE_LSAN})
         # Compiler option flags. Sanitizers related (LSAN).
-        message(STATUS "-- Compilation options (Leak Sanitizer):")
+        message(STATUS "-- Compiler options (Leak Sanitizer):")
 
-        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=leak) # link against sanitizer lib, being required by the following compilation test
+        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=leak) # link against sanitizer lib, being required by the following compiler flag
         check_cxx_compiler_flag("-fsanitize=leak" COMP_HAS_LSAN)
         unset(CMAKE_REQUIRED_LIBRARIES)
         if(NOT COMP_HAS_LSAN)
@@ -78,9 +80,9 @@ if(NOT MSVC)
 
     if(${USE_MSAN})
         # Compiler option flags. Sanitizers related (UBSAN).
-        message(STATUS "-- Compilation options (Memory Behavior Sanitizer):")
+        message(STATUS "-- Compiler options (Memory Behavior Sanitizer):")
 
-        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=memory) # link against sanitizer lib, being required by the following compilation test
+        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=memory) # link against sanitizer lib, being required by the following compiler flag
         check_cxx_compiler_flag("-fsanitize=memory" COMP_HAS_MSAN)
         unset(CMAKE_REQUIRED_LIBRARIES)
         if(NOT COMP_HAS_MSAN)
@@ -113,10 +115,15 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
                 message(FATAL_ERROR "This compiler doesn't support statically linking libasan. Turn off RUNTIME_STATIC_LINK?")
             endif()
         endif()
+    else()
+        # icf = identical code folding:
+        #  - not supported by mold
+        #  - error when linking with lld and asan or other sanitizers
+        check_linker_flag(CXX -Wl,--icf=safe LINKER_HAS_ICF)
     endif()
 
     if(USE_COMPILER_HARDENING_OPTIONS)
-        message(STATUS "-- Compilation options (code hardening):")
+        message(STATUS "-- Compiler options (code hardening):")
         # Compiler option flags. Other sanitizers or code hardening.
         if(NOT USE_ASAN)
             check_cxx_compiler_flag("-fsanitize=safe-stack" COMP_HAS_F_SANITIZE_SAFE_STACK) # Can't be used with asan!
@@ -135,7 +142,7 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
     endif()
 
     # Compiler warning flags.
-    message(STATUS "-- Compilation options (warnings):")
+    message(STATUS "-- Compiler options (warnings):")
     #check_cxx_compiler_flag("-Wuseless-cast" COMP_HAS_W_USELESS_CAST)
     check_cxx_compiler_flag("-Wnull-dereference" COMP_HAS_W_NULL_DEREFERENCE)
     #check_cxx_compiler_flag("-Wconversion" COMP_HAS_W_CONVERSION) # Temporarily disabled. Implicit type conversions that might change a value, such as narrowing conversions.
@@ -167,7 +174,7 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
     # -Wdate-time
 
     # Compiler warning flags. To be disabled.
-    message(STATUS "-- Compilation options (disable specific warnings):")
+    message(STATUS "-- Compiler options (disable specific warnings):")
     check_cxx_compiler_flag("-Wnonnull-compare" COMP_HAS_WNO_NONNULL_COMPARE)
     check_cxx_compiler_flag("-Wmaybe-uninitialized" COMP_HAS_WNO_MAYBE_UNINIT)
     check_cxx_compiler_flag("-Wlanguage-extension-token" COMP_HAS_WNO_LANGUAGE_EXTENSION_TOKEN)
@@ -177,7 +184,7 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
 
 elseif(MSVC)
     # Compiler warning flags (MSVC).
-    message(STATUS "-- Compilation options (MSVC):")
+    message(STATUS "-- Compiler options (MSVC):")
     check_cxx_compiler_flag("/W5105" COMP_HAS_W_DEFINE_MACRO_EXPANSION) # False positive warning, maybe even a MSVC bug.
     #check_cxx_compiler_flag("" COMP_HAS_)
 

@@ -1,6 +1,7 @@
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../common/CLog.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
@@ -157,29 +158,34 @@ void CItemContainer::Trade_Status( bool bCheck )
 
 	if ( IsTrigUsed(TRIGGER_TRADEACCEPTED) || IsTrigUsed(TRIGGER_CHARTRADEACCEPTED) )
 	{
-		CScriptTriggerArgs Args1(pChar1);
+        CScriptTriggerArgsPtr pScriptArgsPlayer1 = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgsPlayer1->Init(pChar1);
+
+        CScriptTriggerArgsPtr pScriptArgsPlayer2 = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgsPlayer2->Init(pChar2);
+
 		ushort i = 1;
 		for (CSObjContRec* pObjRec : *pPartner)
 		{
 			CItem* pItem = static_cast<CItem*>(pObjRec);
-			Args1.m_VarObjs.Insert(i, pItem, true);
+            pScriptArgsPlayer1->m_VarObjs.Insert(i, pItem, true);
 			++i;
 		}
-		Args1.m_iN1 = --i;
+        pScriptArgsPlayer1->m_iN1 = --i;
 
-		CScriptTriggerArgs Args2(pChar2);
 		i = 1;
 		for (CSObjContRec * pObjRec : *this)
 		{
 			CItem* pItem = static_cast<CItem*>(pObjRec);
-			Args2.m_VarObjs.Insert(i, pItem, true);
+            pScriptArgsPlayer2->m_VarObjs.Insert(i, pItem, true);
 			++i;
 		}
-		Args2.m_iN1 = --i;
+        pScriptArgsPlayer2->m_iN1 = --i;
 
-		Args1.m_iN2 = Args2.m_iN1;
-		Args2.m_iN2 = Args1.m_iN1;
-		if ( (pChar1->OnTrigger(CTRIG_TradeAccepted, pChar2, &Args1) == TRIGRET_RET_TRUE) || (pChar2->OnTrigger(CTRIG_TradeAccepted, pChar1, &Args2) == TRIGRET_RET_TRUE) )
+        pScriptArgsPlayer1->m_iN2 = pScriptArgsPlayer2->m_iN1;
+        pScriptArgsPlayer2->m_iN2 = pScriptArgsPlayer1->m_iN1;
+        if ((pChar1->OnTrigger(CTRIG_TradeAccepted, pScriptArgsPlayer1, pChar2) == TRIGRET_RET_TRUE)
+            || (pChar2->OnTrigger(CTRIG_TradeAccepted, pScriptArgsPlayer2, pChar1) == TRIGRET_RET_TRUE) )
 			return;
 	}
 
@@ -314,11 +320,15 @@ bool CItemContainer::Trade_Delete()
 
 	if ( IsTrigUsed(TRIGGER_TRADECLOSE) )
 	{
-		CChar *pChar2 = dynamic_cast<CChar *>(pPartner->GetParent());
-		CScriptTriggerArgs Args(pChar2);
-		pChar->OnTrigger(CTRIG_TradeClose, pChar, &Args);
-		CScriptTriggerArgs Args2(pChar);
-		pChar2->OnTrigger(CTRIG_TradeClose, pChar, &Args2);
+        CScriptTriggerArgsPtr pScriptArgsPlayer1 = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgsPlayer1->Init(pChar);
+
+        CChar *pChar2 = dynamic_cast<CChar *>(pPartner->GetParent());
+        CScriptTriggerArgsPtr pScriptArgsPlayer2 = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgsPlayer2->Init(pChar2);
+
+        pChar->OnTrigger(CTRIG_TradeClose, pScriptArgsPlayer1,  pChar);
+        pChar2->OnTrigger(CTRIG_TradeClose, pScriptArgsPlayer2, pChar);
 	}
 
 	m_uidLink.InitUID();	// unlink.
@@ -461,48 +471,72 @@ CPointMap CItemContainer::GetRandContainerLoc() const
         { GUMP_CHEST_METAL2, 18, 105, 162, 178 }
 	};
 
-	// Get a random location in the container.
+    // Prepare fallback values, in case we don't have hardcoded one and user didn't define TDATA3/4.
+    short minValX = 0;
+    short minValY = 0;
+    short maxValX = 512;
+    short maxValY = 512;
 
 	const CItemBase *pItemDef = Item_GetDef();
-	GUMP_TYPE gump = pItemDef->m_ttContainer.m_idGump;	// Get the TDATA2
+    // Get gump visual from item TDATA2.
+    const GUMP_TYPE gump = pItemDef->m_ttContainer.m_idGump;
+    // Prepare a random location in the container.
+    const int iRandOnce = CSRand::GetValFast(UINT16_MAX);
 
-	// check for custom values in TDATA3/TDATA4
-	if ( pItemDef->m_ttContainer.m_dwMinXY || pItemDef->m_ttContainer.m_dwMaxXY )
+	// Use custom values in TDATA3/TDATA4, if they are defined.
+	if ( pItemDef->m_ttContainer.m_dwMinXY && pItemDef->m_ttContainer.m_dwMaxXY )
 	{
-		int tmp_MinX = pItemDef->m_ttContainer.m_dwMinXY >> 16;
-		int tmp_MinY = (pItemDef->m_ttContainer.m_dwMinXY & 0x0000FFFF);
-		int tmp_MaxX = pItemDef->m_ttContainer.m_dwMaxXY >> 16;
-		int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
-		//DEBUG_WARN(("Custom container gump id %d for 0%x\n", gump, GetDispID()));
-		return CPointMap(
-			(word)(tmp_MinX + g_Rand.GetValFast(tmp_MaxX - tmp_MinX)),
-			(word)(tmp_MinY + g_Rand.GetValFast(tmp_MaxY - tmp_MinY)),
-			0);
+        minValX = pItemDef->m_ttContainer.m_dwMinXY >> 16;
+        minValY = (pItemDef->m_ttContainer.m_dwMinXY & 0x0000FFFF);
+        maxValX = pItemDef->m_ttContainer.m_dwMaxXY >> 16;
+        maxValY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
+
+	    // Make sure this value aren't same, we can't divide by zero.
+	    if (maxValX == minValX)
+	        maxValX += 1;
+	    if (maxValY == minValY)
+	        maxValY += 1;
+
+	    return {
+	        static_cast<short>(minValX + (iRandOnce % (maxValX - minValX))),
+            static_cast<short>(minValY + (iRandOnce % (maxValY - minValY))),
+            0 };
 	}
 
-	// No TDATA3 or no TDATA4: check if we have hardcoded in sm_ContSize the size of the gump indicated by TDATA2
+    // We may want a keyring with no gump, so no need to show the warning.
+    if (IsType(IT_KEYRING))
+    {
+        return {
+            static_cast<short>(minValX + (iRandOnce % (maxValX - minValX))),
+            static_cast<short>(minValY + (iRandOnce % (maxValY - minValY))),
+            0 };
+    }
 
+	// No TDATA3 and TDATA4: check if we have hardcoded in sm_ContSize the size of the gump indicated by TDATA2.
 	uint i = 0;
-	// We may want a keyring with no gump, so no need to show the warning.
-	if (!IsType(IT_KEYRING))
+	for (; ; ++i)
 	{
-		for (; ; ++i)
+	    // We didn't find anything in hardcoded list.
+		if (i >= std::size(sm_ContSize))
 		{
-			if (i >= ARRAY_COUNT(sm_ContSize))
-			{
-				i = 0;	// set to default
-				g_Log.EventWarn("Unknown container gump id %d for 0%x\n", gump, GetDispID());
-				break;
-			}
-			if (sm_ContSize[i].m_gump == gump)
-				break;
+			g_Log.EventWarn("Container 0%x with gump %d doesn't have TDATA3/4 defined.\n", GetDispID(), gump);
+			break;
+		}
+	    // We got a hardoded gump sizes, use them.
+		if (sm_ContSize[i].m_gump == gump)
+		{
+		    minValX = sm_ContSize[i].m_minx;
+		    minValY = sm_ContSize[i].m_miny;
+		    maxValX = sm_ContSize[i].m_maxx;
+		    maxValY = sm_ContSize[i].m_maxy;
+
+			break;
 		}
 	}
 
-	const int iRandOnce = g_Rand.GetValFast(UINT16_MAX);
 	return {
-		(short)(sm_ContSize[i].m_minx + (iRandOnce % (sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx))),
-		(short)(sm_ContSize[i].m_miny + (iRandOnce % (sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny))),
+		static_cast<short>(minValX + (iRandOnce % (maxValX - minValX))),
+		static_cast<short>(minValY + (iRandOnce % (maxValY - minValY))),
 		0 };
 }
 
@@ -515,7 +549,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	if ( pItem == this )
 		return;	// infinite loop.
 
-	if ( !g_Serv.IsLoading() )
+	if ( !g_Serv.IsLoadingGeneric() )
 	{
         switch (GetType())
         {
@@ -549,27 +583,43 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 
 	// check for custom values in TDATA3/TDATA4
 	CItemBase *pContDef = Item_GetDef();
-	if (pContDef->m_ttContainer.m_dwMinXY || pContDef->m_ttContainer.m_dwMaxXY)
+
+    // Default rectangle defining size of container (best to define them in scripts as tdata3/4 to avoid visual stripping).
+    short minValX = 0;
+    short minValY = 0;
+    short maxValX = 512;
+    short maxValY = 512;
+
+	if (pContDef->m_ttContainer.m_dwMinXY && pContDef->m_ttContainer.m_dwMaxXY)
 	{
 		const short tmp_MinX = (short)( pContDef->m_ttContainer.m_dwMinXY >> 16 );
         const short tmp_MinY = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0x0000FFFF) );
         const short tmp_MaxX = (short)( pContDef->m_ttContainer.m_dwMaxXY >> 16 );
         const short tmp_MaxY = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF) );
-		if (pt.m_x < tmp_MinX)
-			pt.m_x = tmp_MinX;
-		if (pt.m_x > tmp_MaxX)
-			pt.m_x = tmp_MaxX;
-		if (pt.m_y < tmp_MinY)
-			pt.m_y = tmp_MinY;
-		if (pt.m_y > tmp_MaxY)
-			pt.m_y = tmp_MaxY;
+
+	    // Rewrite default size.
+		if (minValX < tmp_MinX)
+		    minValX = tmp_MinX;
+	    if (minValY < tmp_MinY)
+	        minValY = tmp_MinY;
+
+		if (tmp_MaxX > tmp_MinX)
+			maxValX = tmp_MaxX;
+	    else
+			g_Log.EventWarn("Container 0%x has invalid max X size (upper 4 bytes) in TDATA4 (lower than TDATA3)\n", pContDef->GetDispID());
+		if (tmp_MaxY > tmp_MinY)
+			maxValY = tmp_MaxY;
+	    else
+			g_Log.EventWarn("Container 0%x has invalid max Y size (lower 4 bytes) in TDATA4 (lower than TDATA3)\n", pContDef->GetDispID());
 	}
 
     bool fStackInsert = false;
-	if ( pt.m_x <= 0 || pt.m_y <= 0 || pt.m_x > 512 || pt.m_y > 512 )	// invalid container location ?
+
+    // We are dropping item onto container.
+	if (pt.m_x < 0 && pt.m_y < 0)
 	{
 		// Try to stack it.
-		if ( !g_Serv.IsLoading() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
+		if ( !g_Serv.IsLoadingGeneric() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
 		{
 			for (CSObjContRec* pObjRec : *this)
 			{
@@ -582,9 +632,16 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 				}
 			}
 		}
-		if ( !fStackInsert)
+	    // If we are not stacking it, get random location in container.
+		if (!fStackInsert)
 			pt = GetRandContainerLoc();
 	}
+    else
+    {
+        // We might be placing item out of container bounds, clamp it to the side if so.
+        pt.m_x = std::clamp(pt.m_x, minValX, maxValX);
+        pt.m_y = std::clamp(pt.m_y, minValY, maxValY);
+    }
 
     // Try drop it on given container grid index (if not available, drop it on next free index)
 	{
@@ -683,7 +740,7 @@ void CItemContainer::ContentAdd( CItem *pItem, bool bForceNoStack )
 		return;	// already here.
 
 	CPointMap pt;	// invalid point.
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		pt = pItem->GetUnkPoint();
 
 	ContentAdd(pItem, pt, bForceNoStack);

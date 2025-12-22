@@ -2,7 +2,7 @@
 #include "../common/sphere_library/sstringobjs.h"
 #include "../common/CLog.h"
 #include "../sphere/threads.h"
-#include "CExpression.h"
+//#include "CExpression.h" // included in the precompiled header
 #include "CScript.h"
 #include "CTextConsole.h"
 #include "ListDefContMap.h"
@@ -59,7 +59,7 @@ bool CListDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * 
 }
 
 CListDefContElem * CListDefContNum::CopySelf() const
-{ 
+{
 	return new CListDefContNum( GetKey(), m_iVal );
 }
 
@@ -70,7 +70,7 @@ CListDefContElem * CListDefContNum::CopySelf() const
 *
 *
 ***************************************************************************/
-CListDefContStr::CListDefContStr( lpctstr ptcKey, lpctstr pszVal ) : CListDefContElem( ptcKey ), m_sVal( pszVal ) 
+CListDefContStr::CListDefContStr( lpctstr ptcKey, lpctstr pszVal ) : CListDefContElem( ptcKey ), m_sVal( pszVal )
 {
 }
 
@@ -84,8 +84,8 @@ int64 CListDefContStr::GetValNum() const
 	return( Exp_Get64Val(pszStr) );
 }
 
-void CListDefContStr::SetValStr( lpctstr pszVal ) 
-{ 
+void CListDefContStr::SetValStr( lpctstr pszVal )
+{
 	m_sVal.Copy( pszVal );
 }
 
@@ -104,9 +104,9 @@ bool CListDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * 
 	return true;
 }
 
-CListDefContElem * CListDefContStr::CopySelf() const 
-{ 
-	return new CListDefContStr( GetKey(), m_sVal ); 
+CListDefContElem * CListDefContStr::CopySelf() const
+{
+	return new CListDefContStr( GetKey(), m_sVal );
 }
 
 /***************************************************************************
@@ -116,12 +116,12 @@ CListDefContElem * CListDefContStr::CopySelf() const
 *
 *
 ***************************************************************************/
-CListDefCont::CListDefCont( lpctstr ptcKey ) : m_Key( ptcKey ) 
-{ 
+CListDefCont::CListDefCont( lpctstr ptcKey ) : m_Key( ptcKey )
+{
 }
 
 void CListDefCont::SetKey( lpctstr ptcKey )
-{ 
+{
 	m_Key = ptcKey;
 }
 
@@ -135,7 +135,7 @@ CListDefContElem* CListDefCont::GetAt(size_t nIndex) const
     /*
     DefList::const_iterator it = m_listElements.begin();
     std::advance(it, nIndex);
-    
+
     if (it != m_listElements.end())
         return (*it);
     return nullptr;
@@ -444,7 +444,7 @@ CListDefCont* CListDefCont::CopySelf()
 	ADDTOCALLSTACK("CListDefCont::CopySelf");
     if (m_listElements.empty())
         return nullptr;
-	
+
     CListDefCont* pNewList = new CListDefCont(m_Key.GetBuffer());
 	if ( !pNewList )
         return nullptr;
@@ -704,7 +704,7 @@ CListDefCont* CListDefMap::AddList(lpctstr ptcKey)
 {
 	ADDTOCALLSTACK("CListDefMap::AddList");
 	CListDefCont* pListBase = GetKey(ptcKey);
-	
+
 	if ( !pListBase && ptcKey && *ptcKey )
 	{
 		pListBase = new CListDefCont(ptcKey);
@@ -714,7 +714,7 @@ CListDefCont* CListDefMap::AddList(lpctstr ptcKey)
 	return pListBase;
 }
 
-void CListDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix )
+void CListDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix ) const
 {
 	ADDTOCALLSTACK("CListDefMap::DumpKeys");
 	// List out all the keys.
@@ -821,7 +821,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 					DeleteKey(ppCmds[0]);
 					pListBase = nullptr;
 				}
-				
+
 				// Append: Sets each <args> as a new element in LIST.xxx
 				if ( !pListBase )
 				{
@@ -848,7 +848,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 			}
 			else if ( !strnicmp(ppCmds[1], "sort", 4) )
 			{
-				// Re-orders LIST.xxx according to <args>. (possible values are: no args , i , asc , iasc , desc , idesc) 
+				// Re-orders LIST.xxx according to <args>. (possible values are: no args , i , asc , iasc , desc , idesc)
 				if ( !pListBase )
 					return false;
 
@@ -967,7 +967,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 	return false;
 }
 
-bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strVal )
+bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strVal ) const
 {
     ADDTOCALLSTACK("CListDefMap::r_Write");
 	UnreferencedParameter(pSrc);
@@ -1037,7 +1037,7 @@ bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strV
 }
 
 
-void CListDefMap::r_WriteSave( CScript& s )
+void CListDefMap::r_WriteSave( CScript& s ) const
 {
     ADDTOCALLSTACK("CListDefMap::r_WriteSave");
 

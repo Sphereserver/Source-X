@@ -45,7 +45,7 @@ private:
 	dword m_CryptMaskHi;
 	dword m_CryptMaskLo;
 	dword m_seed;	// seed ip we got from the client.
-	
+
 	CONNECT_TYPE m_ConnectType;
 
     CCryptoKeysHolder::CCryptoKey m_Key;    // crypt key used by this CClient
@@ -62,8 +62,8 @@ private:
 	void InitTwoFish();
 	bool DecryptTwoFish( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 	// --------------- EOF TwoFish ----------------------------
-	
-	
+
+
 	// -------------- Blow Fish ------------------------------
 private:
 	static bool  sm_fBFishTablesReady;
@@ -134,7 +134,7 @@ private:
 	bool LoginCryptStart( dword dwIP, const  byte * pEvent, uint inLen );
 	bool GameCryptStart( dword dwIP, const byte * pEvent, uint inLen );
 	bool RelayGameCryptStart( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
-   
+
 };
 
 #endif // _INC_CCRYPTO_H

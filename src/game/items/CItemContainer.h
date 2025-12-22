@@ -73,7 +73,10 @@ public:
 
 	virtual void DupeCopy( const CObjBase * pItem ) override;  // overriding CItem::DupeCopy
 
-	CPointMap GetRandContainerLoc() const;
+    /**
+     * Gets the random location in container based on sizes defined in tdata3/4.
+     */
+    CPointMap GetRandContainerLoc() const;
 
 	void OnOpenEvent( CChar * pCharOpener, const CObjBaseTemplate * pObjTop );
 };

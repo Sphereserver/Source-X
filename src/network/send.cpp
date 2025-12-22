@@ -1,6 +1,6 @@
 
 #include "../common/resource/CResourceLock.h"
-#include "../common/CExpression.h"
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/CLog.h"
 #include "../common/CUOInstall.h"
 #include "../game/chars/CChar.h"
@@ -17,7 +17,9 @@
 #include "../game/items/CItemVendable.h"
 #include "../game/uo_files/uofiles_enums_creid.h"
 #include "../game/CServer.h"
+#include "../game/CServerConfig.h"
 #include "../game/CWorldGameTime.h"
+#include "CNetState.h"
 #include "CNetworkManager.h"
 #include "send.h"
 
@@ -117,6 +119,11 @@ PacketCombatDamage::PacketCombatDamage(const CClient* target, word damage, CUID 
 	writeInt32(defender);
 	writeInt16(damage);
 	push(target);
+}
+
+bool PacketCombatDamage::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_NEWDAMAGE);
 }
 
 
@@ -406,6 +413,11 @@ bool PacketHealthBarUpdateNew::onSend(const CClient* client)
     return client->CanSee(m_character.CharFind());
 }
 
+bool PacketHealthBarUpdateNew::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientEnhanced();
+}
+
 /***************************************************************************
  *
  *
@@ -437,6 +449,11 @@ bool PacketHealthBarUpdate::onSend(const CClient* client)
 		return true;
 
 	return client->CanSee(m_character.CharFind());
+}
+
+bool PacketHealthBarUpdate::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_SA) || state->isClientKR();
 }
 
 
@@ -616,7 +633,8 @@ PacketPlayerStart::PacketPlayerStart(const CClient* target) : PacketSend(XCMD_St
 	writeInt16((word)(character->GetDispID()));
 	writeInt16(pt.m_x);
 	writeInt16(pt.m_y);
-	writeInt16(pt.m_z);
+    writeByte(0);
+	writeByte(pt.m_z);
 	writeByte(character->GetDirFlag());
 	writeByte(0);
 	writeInt32(0xffffffff);
@@ -1012,6 +1030,11 @@ PacketDropAccepted::PacketDropAccepted(const CClient* target) : PacketSend(XCMD_
 	ADDTOCALLSTACK("PacketDropAccepted::PacketDropAccepted");
 
 	push(target);
+}
+
+bool PacketDropAccepted::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientKR();
 }
 
 
@@ -1915,11 +1938,13 @@ void PacketTradeAction::prepareUpdateLedger(const CItemContainer *container, dwo
  *
  *	Packet 0x70 : PacketEffect				displays a visual effect (NORMAL)
  *	Packet 0xC0 : PacketEffect				displays a hued visual effect (NORMAL)
+ *  Packet 0xc7 : PacketEffect              displays a particle effect in Enhanced Client (NORMAL)
  *
  *
  ***************************************************************************/
 // Non hued effect
-PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode) : PacketSend(XCMD_Effect, 20, PRI_NORMAL)
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode)
+    : PacketSend(XCMD_Effect, 20, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect");
 
@@ -1929,7 +1954,8 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 }
 
 // Hued effect
-PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render) : PacketSend(XCMD_EffectEx, 28, PRI_NORMAL)
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render)
+    : PacketSend(XCMD_EffectEx, 28, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect(hued)");
 
@@ -1940,7 +1966,8 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 }
 
 // Particle effect
-PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) : PacketSend(XCMD_EffectParticle, 49, PRI_NORMAL)
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type)
+    : PacketSend(XCMD_EffectParticle, 49, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect(particle)");
 
@@ -2536,6 +2563,11 @@ PacketChangeCharacter::PacketChangeCharacter(CClient* target) : PacketSend(XCMD_
 	skip((count * 60) + 1);
 
 	push(target);
+}
+
+bool PacketChangeCharacter::CanSendTo(const CNetState* state) // static
+{
+    return !(state->isClientKR() || state->isClientEnhanced());
 }
 
 
@@ -4083,6 +4115,11 @@ bool PacketPropertyListVersionOld::onSend(const CClient* client)
 	return true;
 }
 
+bool PacketPropertyListVersionOld::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_TOOLTIP);
+}
+
 
 /***************************************************************************
  *
@@ -4161,7 +4198,7 @@ void PacketDisplayPopup::finalise(void)
  *
  *
  ***************************************************************************/
-PacketCloseUIWindow::PacketCloseUIWindow(const CClient* target, const CObjBase* obj, UIWindow command) : PacketExtended(EXTDATA_CloseUI_Window, 13, PRI_NORMAL)
+PacketCloseUIWindow::PacketCloseUIWindow(const CClient* target, const CObjBase* obj, PacketCloseUIWindowType command) : PacketExtended(EXTDATA_CloseUI_Window, 13, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketCloseUIWindow::PacketCloseUIWindow");
 
@@ -4313,6 +4350,10 @@ PacketStatLocks::PacketStatLocks(const CClient* target, const CChar* character) 
     push(target);
 }
 
+bool PacketStatLocks::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_STATLOCKS);
+}
 
 /***************************************************************************
 *
@@ -4356,6 +4397,11 @@ PacketSpellbookContent::PacketSpellbookContent(const CClient* target, const CIte
 	push(target);
 }
 
+bool PacketSpellbookContent::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_SPELLBOOK);
+}
+
 
 /***************************************************************************
  *
@@ -4394,6 +4440,11 @@ PacketHouseBeginCustomise::PacketHouseBeginCustomise(const CClient* target, cons
 	writeByte(0xFF);
 
 	push(target);
+}
+
+bool PacketHouseBeginCustomise::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_CUSTOMMULTI) || state->isClientKR() || state->isClientEnhanced();
 }
 
 
@@ -4440,6 +4491,10 @@ PacketCombatDamageOld::PacketCombatDamageOld(const CClient* target, byte damage,
 	push(target);
 }
 
+bool PacketCombatDamageOld::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_DAMAGE);
+}
 
 /***************************************************************************
  *
@@ -4656,6 +4711,10 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
 	push(target);
 }
 
+bool PacketDisplayBookNew::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_NEWBOOK) || state->isClientKR() || state->isClientEnhanced();
+}
 
 /***************************************************************************
  *
@@ -4729,6 +4788,11 @@ bool PacketPropertyList::hasExpired(int64 iTimeout) const
 {
 	ADDTOCALLSTACK("PacketPropertyList::hasExpired");
 	return (m_time + iTimeout) < CWorldGameTime::GetCurrentTime().GetTimeRaw();
+}
+
+bool PacketPropertyList::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_TOOLTIP);
 }
 
 
@@ -4902,6 +4966,11 @@ void PacketHouseDesign::finalise(void)
 	seek(endPosition);
 }
 
+bool PacketHouseDesign::CanSendToClient(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_CUSTOMMULTI) || state->isClientKR() || state->isClientEnhanced();
+}
+
 
 /***************************************************************************
  *
@@ -4939,6 +5008,11 @@ bool PacketPropertyListVersion::onSend(const CClient* client)
 		return false;
 
 	return true;
+}
+
+bool PacketPropertyListVersion::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_TOOLTIPHASH);
 }
 
 
@@ -5026,6 +5100,11 @@ PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId) : PacketS
 	push(target);
 }
 
+bool PacketBuff::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_BUFFS);
+}
+
 /***************************************************************************
  *
  *
@@ -5083,6 +5162,11 @@ PacketWaypointAdd::PacketWaypointAdd(const CClient *target, CObjBase *object, MA
     push(target);
 }
 
+bool PacketWaypointAdd::CanSendTo(const CNetState *state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_MAPWAYPOINT) || state->isClientKR() || state->isClientEnhanced();
+}
+
 /***************************************************************************
 *
 *
@@ -5102,6 +5186,11 @@ PacketWaypointRemove::PacketWaypointRemove(const CClient *target, CObjBase *obje
     push(target);
 }
 
+bool PacketWaypointRemove::CanSendTo(const CNetState *state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_MAPWAYPOINT) || state->isClientKR() || state->isClientEnhanced();
+}
+
 /***************************************************************************
  *
  *
@@ -5117,6 +5206,12 @@ PacketToggleHotbar::PacketToggleHotbar(const CClient* target, bool enable) : Pac
 
 	push(target);
 }
+
+bool PacketToggleHotbar::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientKR();
+}
+
 
 /***************************************************************************
  *
@@ -5140,6 +5235,11 @@ PacketTimeSyncResponse::PacketTimeSyncResponse(const CClient* target) : PacketSe
 	writeInt64(llTime);
 
 	push(target);
+}
+
+bool PacketTimeSyncResponse::CanSendTo(const CNetState* state) //static
+{
+    return state->isClientVersionNumber(MINCLIVER_SA) || state->isClientEnhanced() || state->isClientKR();
 }
 
 
@@ -5243,6 +5343,11 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CChar* mobil
 	push(target);
 }
 
+bool PacketItemWorldNew::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_SA) || state->isClientEnhanced();
+}
+
 /***************************************************************************
  *
  *
@@ -5279,6 +5384,11 @@ PacketDisplayMapNew::PacketDisplayMapNew(const CClient* target, const CItemMap* 
 	writeInt16((word)(rect.m_map));
 
 	push(target);
+}
+
+bool PacketDisplayMapNew::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_NEWMAPDISPLAY) || state->isClientEnhanced();
 }
 
 
@@ -5410,6 +5520,12 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint
 	push(target);
 }
 
+bool PacketContainer::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_HS);
+}
+
+
 /***************************************************************************
  *
  *
@@ -5432,4 +5548,9 @@ PacketGlobalChat::PacketGlobalChat(const CClient* target, byte unknown, byte act
 
 	trim();
 	push(target);
+}
+
+bool PacketGlobalChat::CanSendTo(const CNetState* state) // static
+{
+    return state->isClientVersionNumber(MINCLIVER_GLOBALCHAT);
 }

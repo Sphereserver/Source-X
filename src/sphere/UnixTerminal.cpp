@@ -1,7 +1,7 @@
 
 #ifndef _WIN32
 
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 #include "UnixTerminal.h"
 
 #ifndef _USECURSES
@@ -264,8 +264,8 @@ void UnixTerminal::prepareColor()
 
 void UnixTerminal::restore()
 {
-	ADDTOCALLSTACK("UnixTerminal::restore");
-	ASSERT(m_prepared);
+    if (!m_prepared)
+        return;
 
 #ifdef _USECURSES
 	endwin();	// clean up
@@ -307,7 +307,7 @@ void UnixTerminal::tick()
 			{
                 this->ConsoleInterface::_ciQueueCV.wait(lock,
                     [this]() {
-                        return (this->m_terminateRequested || !this->ConsoleInterface::_qOutput.empty());
+                        return (this->m_fTerminateRequested || !this->ConsoleInterface::_qOutput.empty());
                     });
 			}
 
@@ -328,7 +328,7 @@ void UnixTerminal::tick()
 
 void UnixTerminal::waitForClose()
 {
-    this->m_terminateRequested = true;
+    this->m_fTerminateRequested = true;
     this->ConsoleInterface::_ciQueueCV.notify_one();
     //AbstractSphereThread::waitForClose();
     //AbstractThread::terminate(true);

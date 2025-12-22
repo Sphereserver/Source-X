@@ -654,7 +654,6 @@ public:
 	CResourceHashArray m_WebPages;		// These can be linked back to the script.
 
 private:
-	CResourceID ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef );
     char m_iniDirectory[SPHERE_MAX_PATH];
 
 public:
@@ -664,6 +663,12 @@ public:
 
 	CServerConfig(const CServerConfig& copy) = delete;
 	CServerConfig& operator=(const CServerConfig& other) = delete;
+
+private:
+    CResourceID ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef );
+
+    CResourceScript * AddResourceFile( lpctstr pszName );
+    void AddResourceDir( lpctstr pszDirName );
 
 public:
 	virtual bool r_LoadVal( CScript &s ) override;
@@ -706,14 +711,25 @@ public:
 	void Unload( bool fResync );
 	void _OnTick( bool fNow );
 
+    // TODO: add doxygen-style comments
+    CResourceScript * FindResourceFile( lpctstr pszTitle );
+    CResourceScript * LoadResourcesAdd( lpctstr pszNewName );
+
+    void LoadResourcesOpen( CScript * pScript, bool fAddSorted );
+    bool LoadResources(CResourceScript * pScript, bool fAddSorted);
+
+    CResourceScript * GetResourceFile( size_t i );
+
+    bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical = true );
+
     /**
      * @brief   Loads resource section ([SKILL ], [SPELL ], [CHARDEF ]...).
      *
-     * @param [in,out]  pScript If non-null, the script.
+     * @param  pScript to be loaded.
      *
      * @return  true if it succeeds, false if it fails.
      */
-	virtual bool LoadResourceSection( CScript * pScript ) override;
+    bool LoadResourceSection( CScript * pScript, bool fInsertSorted);
 
     /**
      * @brief   Sort all spells in order.
@@ -726,7 +742,7 @@ public:
     *
     * @param   restype Resource Type.
     *
-    * @param   ptcName Resource Name.
+    * @param   pszName Resource Name.
     *
     * @param   wPage Resource Page attribute.
     *
@@ -839,7 +855,7 @@ public:
 	/**
 	* @brief   Get the def for the server in position 'index' in servers list.
 	*
-	* @param   pszText The server index.
+	* @param   index The server index.
 	*
 	* @return  CServerRef of the server.
 	*/
@@ -999,7 +1015,6 @@ public:
      *
      * @param [in,out]  pChar       If non-null, the character.
      * @param [in,out]  pCharTarg   If non-null, the character targ.
-     * @param   skill               The skill.
      *
      * @return  The calculated combat chance to hit.
      */
@@ -1009,7 +1024,7 @@ public:
      * @brief   Calculates the combat chance to parry.
      *
      * @param [in,out]  pChar       If non-null, the character attempting to parry.
-     * @param   skill               The skill.
+     * @param   pItemParry          @todo
      *
      * @return  The calculated combat chance to parry.
      */
@@ -1135,7 +1150,7 @@ public:
     /**
     * @brief   Gets default message (sphere_msgs.scp).
     *
-    * @param   ptcKey  The key.
+    * @param   lKeyNum  The key.
     *
     * @return  The default message.
     */
@@ -1151,7 +1166,6 @@ typedef std::map<dword,dword> KRGumpsMap;
 	bool GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, TemporaryString *pOutput, bool fCheckConflict = true, CVarDefMap* vDefnames = nullptr);
 	bool DumpUnscriptedItems(CTextConsole * pSrc, lpctstr pszFilename);
 } g_Cfg;
-
 
 
 #define IsSetEF(ef)				((g_Cfg._uiExperimentalFlags & ef) != 0)

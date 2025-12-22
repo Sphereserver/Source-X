@@ -10,7 +10,7 @@ set(lib_SOURCES
     bcrypt/wrapper.c
 )
 
-add_library(bcrypt STATIC ${lib_SOURCES})
+add_library(bcrypt OBJECT ${lib_SOURCES})
 
 # make the headers available in the include path (accessible with < >).
 target_include_directories(bcrypt PUBLIC .)

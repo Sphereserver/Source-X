@@ -23,7 +23,7 @@ DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset );
 struct CPointBase	// Non initialized 3d point.
 {
 private:
-	friend class GlobalInitializer;
+    friend struct GlobalInitializer;
 	static void InitRuntimeDefaultValues();
 
 public:
@@ -42,18 +42,26 @@ public:
 	CPointBase& InitPoint() noexcept;
 	CPointBase& ZeroPoint() noexcept;
 
-	CPointBase() noexcept;
+    inline CPointBase() noexcept :
+        m_x(-1), m_y(-1), m_z(0), m_map(0)	// Same thing as calling InitPoint(), but without this extra function call
+    {
+        //InitPoint();
+    }
 
-	// This destructor (and the ones of the child classes) are willingly NOT virtual.
-	// If the class had any virtual method, its size will increase of at least 4-8 bytes (size of a pointer to the virtual table).
-	// It matters the most because CPointBase is used in the union inside CItem. Increasing the size of CPointBase will increase the size of the union.
-	// Moreover, it will disalign the addresses of the data inside the other structs of the union.
-	// Last but not least, remember that deleting an inheriting class without a virtual destructor will delete only a part of the class! It will not call the topmost destructor!
-	~CPointBase() noexcept = default;
-
-	CPointBase(short x, short y, char z = 0, uchar map = 0) noexcept;
-	CPointBase(const CPointBase&) noexcept = default;
+    inline CPointBase(short x, short y, char z, uchar map) noexcept :
+        m_x(x), m_y(y), m_z(z), m_map(map)
+    {
+    }
+    CPointBase(const CPointBase&) noexcept = default;
 	CPointBase(CPointBase&&) noexcept = default;
+
+    // This destructor (and the ones of the child classes) are willingly NOT virtual.
+    // If the class had any virtual method, its size will increase of at least 4-8 bytes (size of a pointer to the virtual table).
+    // It matters the most because CPointBase is used in the union inside CItem. Increasing the size of CPointBase will increase the size of the union.
+    // Moreover, it will disalign the addresses of the data inside the other structs of the union.
+    // Last but not least, remember that deleting an inheriting class without a virtual destructor will delete only a part of the class! It will not call the topmost destructor!
+    ~CPointBase() noexcept = default;
+
 
 	CPointBase& operator = (const CPointBase&) noexcept = default;
 	bool operator == ( const CPointBase & pt ) const noexcept;
@@ -65,19 +73,14 @@ public:
     [[nodiscard]] int GetDist( const CPointBase & pt ) const noexcept;			// Distance between points
     [[nodiscard]] int GetDistSightBase( const CPointBase & pt ) const noexcept;	// Distance between points based on UO sight
     [[nodiscard]] int GetDistSight( const CPointBase & pt ) const noexcept;		// Distance between points based on UO sight
-    [[nodiscard]] int GetDist3D( const CPointBase & pt ) const noexcept;			// 3D Distance between points
+    [[nodiscard]] int GetDist3D( const CPointBase & pt ) const noexcept;		// 3D Distance between points
 
-    [[nodiscard]] inline bool IsValidZ() const noexcept
-    {
-        return ((m_z > -127 /* -UO_SIZE_Z */) && (m_z < 127 /* UO_SIZE_Z */));
-    }
+    //[[nodiscard]] inline bool IsValidZ() const noexcept {
+    //    return ((m_z > -127 /* -UO_SIZE_Z */) && (m_z < 127 /* UO_SIZE_Z */));
+    //}
     [[nodiscard]] bool IsValidXY() const noexcept;
     [[nodiscard]] bool IsCharValid() const noexcept;
-    [[nodiscard]] inline bool IsValidPoint() const noexcept
-	{
-		// Called a LOT of times, it's worth inlining it.
-		return (IsValidXY() && IsValidZ());
-	}
+    [[nodiscard]] bool IsValidPoint() const noexcept;
 
 	void ValidatePoint() noexcept;
 

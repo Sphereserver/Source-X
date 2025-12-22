@@ -36,21 +36,9 @@ protected:
     sl::smart_ptr_view<CResourceDef> ResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
     CResourceDef* ResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
 
-	CResourceScript * AddResourceFile( lpctstr pszName );
-	void AddResourceDir( lpctstr pszDirName );
-
 public:
-    CResourceScript * FindResourceFile( lpctstr pszTitle );
-    CResourceScript * LoadResourcesAdd( lpctstr pszNewName );
-
-	void LoadResourcesOpen( CScript * pScript );
-	bool LoadResources( CResourceScript * pScript );
 	static lpctstr GetResourceBlockName( RES_TYPE restype );
 
-    virtual bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical = true );
-    virtual bool LoadResourceSection( CScript * pScript ) = 0;
-
-	CResourceScript * GetResourceFile( size_t i );
     CResourceID ResourceGetID_EatStr( RES_TYPE restype, lpctstr &pszName, word wPage = 0, bool fCanFail = false );    // this moves forward (changes!) the ptcName pointer!
 	CResourceID ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage = 0, bool fCanFail = false);
 	CResourceID ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
@@ -63,7 +51,7 @@ public:
 
 public:
     lpctstr GetName() const;
-    CResourceHolder() = default;
+    CResourceHolder();
 	virtual ~CResourceHolder() = default;
 
 	CResourceHolder(const CResourceHolder& copy) = delete;

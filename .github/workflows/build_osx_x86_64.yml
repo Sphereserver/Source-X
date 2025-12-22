@@ -20,14 +20,18 @@ on:
 
 jobs:
   macos-x86_64:
-    runs-on: macos-13   # intel
+    runs-on: macos-15-intel
+    permissions:
+      contents: read
+      actions: read
+
     env:
       CMAKE_GEN: Ninja
       CMAKE_TCH: cmake/toolchains/OSX-AppleClang-x86_64.cmake
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
     - name: Install prerequisites
@@ -70,13 +74,17 @@ jobs:
 
   upload_github_release:
     needs: macos-x86_64
+    permissions:
+      contents: read
+      actions: write
+
     # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
     if: contains(fromJson('["master", "main"]'), github.ref_name)
 
     runs-on: ubuntu-latest
     steps:
       - name: Download builds
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Build-osx-x86_64
           merge-multiple: true
@@ -95,11 +103,14 @@ jobs:
   upload_selfhost_release:
     needs: macos-x86_64
     if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
+    permissions:
+      contents: write
+      actions: read
 
     runs-on: ubuntu-latest
     steps:
       - name: Download builds
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Build-osx-x86_64
           merge-multiple: true

@@ -1,5 +1,5 @@
 /**
-* @file CAcount.h
+* @file CAccount.h
 */
 
 #ifndef _INC_CACCOUNT_H
@@ -236,7 +236,6 @@ public:
 	static PLEVEL_TYPE GetPrivLevelText( lpctstr pszFlags );
 	/**
 	* @brief Gets the CAccount PLEVEL.
-	* @param pszFlags TODOC.
 	* @return TODOC.
 	*/
 	PLEVEL_TYPE GetPrivLevel() const { return( m_PrivLevel ); }
@@ -314,7 +313,7 @@ public:
 	bool IsMyAccountChar( const CChar * pChar ) const;
 	/**
 	* @brief Unlink the CChar from this CAccount.
-	* @param CChar to detach.
+	* @param pChar to detach.
 	* @return TODOC.
 	*/
 	size_t DetachChar( CChar * pChar );
@@ -442,13 +441,13 @@ public:
 	* If there is not an CAccount with the providded name, AutoAccount is enabled in sphere.ini and the name is a valid account name, a CAcount is created and a CAccount * of the returned.
 	* Otherwise, nullptr is returned.
 	* @param pszName name of the account.
-	* @param fAutoCreate try to create the account if not exists.
+	* @param fCreate try to create the account if not exists.
 	* @return CAccount * if account exists or created, nullptr otherwise.
 	*/
 	CAccount * Account_FindCreate( lpctstr pszName, bool fCreate = false );
 	/**
 	* @brief Check if a chat name is already used.
-	* @param pszChatName string containing the name.
+	* @param pszName string containing the name.
 	* @return CAccount * if the name is already used, nullptr otherwise.
 	*/
 	CAccount * Account_FindChat( lpctstr pszName );

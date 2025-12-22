@@ -9,12 +9,14 @@
 	#include <sys/stat.h>
 #endif
 
-// CSFile:: Constructors, Destructor, Asign operator.
+// CSFile:: Constructors, Destructor, Assign operator.
 
 CSFile::CSFile()
 {
     _fileDescriptor = _kInvalidFD;
     _uiMode = 0;
+    if (!_fBinaryMode.has_value())
+        _fBinaryMode = true;
 }
 
 CSFile::~CSFile()
@@ -79,7 +81,7 @@ void CSFile::Close()
 {
     ADDTOCALLSTACK("CSFile::Close");
 
-    MT_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET(this);
     CSFile::_Close();
 }
 
@@ -150,7 +152,7 @@ bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
 bool CSFile::Open( lpctstr ptcFilename, uint uiModeFlags )
 {
     ADDTOCALLSTACK("CSFile::Open");
-    MT_UNIQUE_LOCK_RETURN(CSFile::_Open(ptcFilename, uiModeFlags));
+    MT_UNIQUE_LOCK_RETURN(this, CSFile::_Open(ptcFilename, uiModeFlags));
 }
 
 bool CSFile::_IsFileOpen() const
@@ -159,7 +161,7 @@ bool CSFile::_IsFileOpen() const
 }
 bool CSFile::IsFileOpen() const
 {
-    MT_SHARED_LOCK_RETURN(_fileDescriptor != _kInvalidFD);
+    MT_SHARED_LOCK_RETURN(this, _fileDescriptor != _kInvalidFD);
 }
 
 lpctstr CSFile::_GetFilePath() const
@@ -168,7 +170,7 @@ lpctstr CSFile::_GetFilePath() const
 }
 lpctstr CSFile::GetFilePath() const
 {
-    MT_SHARED_LOCK_RETURN(_strFileName.GetBuffer());
+    MT_SHARED_LOCK_RETURN(this, _strFileName.GetBuffer());
 }
 
 bool CSFile::_SetFilePath( lpctstr pszName )
@@ -191,7 +193,7 @@ bool CSFile::_SetFilePath( lpctstr pszName )
 bool CSFile::SetFilePath( lpctstr pszName )
 {
     ADDTOCALLSTACK("CFile::SetFilePath");
-    MT_UNIQUE_LOCK_RETURN(CSFile::_SetFilePath(pszName));
+    MT_UNIQUE_LOCK_RETURN(this, CSFile::_SetFilePath(pszName));
 }
 
 
@@ -221,7 +223,7 @@ int CSFile::_GetLength()
 int CSFile::GetLength()
 {
     ADDTOCALLSTACK("CSFile::GetLength");
-    MT_UNIQUE_LOCK_RETURN(CSFile::_GetLength());
+    MT_UNIQUE_LOCK_RETURN(this, CSFile::_GetLength());
 }
 
 int CSFile::_GetPosition() const
@@ -253,13 +255,13 @@ int CSFile::_GetPosition() const
 int CSFile::GetPosition() const
 {
     ADDTOCALLSTACK("CSFile::GetPosition");
-    MT_UNIQUE_LOCK_RETURN(CSFile::_GetPosition());
+    MT_UNIQUE_LOCK_RETURN(this, CSFile::_GetPosition());
 }
 
 int CSFile::Read( void * pData, int iLength ) const
 {
     ADDTOCALLSTACK("CSFile::Read");
-    MT_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET(this);
 
 #ifdef _WIN32
 	DWORD ret;
@@ -309,7 +311,7 @@ int CSFile::_Seek( int iOffset, int iOrigin )
 int CSFile::Seek( int iOffset, int iOrigin )
 {
     ADDTOCALLSTACK("CSFile::Seek");
-    MT_UNIQUE_LOCK_RETURN(CSFile::_Seek(iOffset, iOrigin));
+    MT_UNIQUE_LOCK_RETURN(this, CSFile::_Seek(iOffset, iOrigin));
 }
 
 void CSFile::_SeekToBegin()
@@ -370,14 +372,14 @@ bool CSFile::_Write( const void * pData, int iLength )
 bool CSFile::Write(const void* pData, int iLength)
 {
     ADDTOCALLSTACK("CSFile::Write");
-    MT_UNIQUE_LOCK_RETURN(CSFile::_Write(pData, iLength));
+    MT_UNIQUE_LOCK_RETURN(this, CSFile::_Write(pData, iLength));
 }
 
 // CSFile:: File name operations.
 
 lpctstr CSFile::GetFilesTitle( lpctstr pszPath )  // static
 {
-	ADDTOCALLSTACK("CSFile::GetFilesTitle");
+    //ADDTOCALLSTACK("CSFile::GetFilesTitle");
 	// strrchr
 	size_t len = strlen(pszPath);
 	while ( len > 0 )
@@ -394,18 +396,18 @@ lpctstr CSFile::GetFilesTitle( lpctstr pszPath )  // static
 
 lpctstr CSFile::_GetFileTitle() const
 {
-    ADDTOCALLSTACK("CFile::_GetFileTitle");
+    //ADDTOCALLSTACK("CFile::_GetFileTitle");
     return CSFile::GetFilesTitle(_strFileName.GetBuffer());
 }
 lpctstr CSFile::GetFileTitle() const
 {
-    ADDTOCALLSTACK("CFile::GetFileTitle");
+    //ADDTOCALLSTACK("CFile::GetFileTitle");
     return CSFile::GetFilesTitle( GetFilePath() );
 }
 
 lpctstr CSFile::GetFilesExt( lpctstr pszName )	// static
 {
-	ADDTOCALLSTACK("CSFile::GetFilesExt");
+    //ADDTOCALLSTACK("CSFile::GetFilesExt");
     // get the EXTension including the .
 	size_t len = strlen( pszName );
 	while ( len > 0 )
@@ -423,7 +425,7 @@ lpctstr CSFile::GetFilesExt( lpctstr pszName )	// static
 
 lpctstr CSFile::GetFileExt() const
 {
-    ADDTOCALLSTACK("CSFile::GetFileExt");
+    //ADDTOCALLSTACK("CSFile::GetFileExt");
     // get the EXTension including the .
     return GetFilesExt(GetFilePath());
 }
@@ -464,31 +466,20 @@ CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 
 // CSFile:: Mode operations.
 
-uint CSFile::_GetFullMode() const
-{
-    return _uiMode;
-}
+
 uint CSFile::GetFullMode() const
 {
-    MT_SHARED_LOCK_RETURN(_uiMode);
+    MT_SHARED_LOCK_RETURN(this, _uiMode);
 }
 
-uint CSFile::_GetMode() const
-{
-    return (_uiMode & 0x0FFFFFFF);
-}
 uint CSFile::GetMode() const
 {
-    MT_SHARED_LOCK_RETURN(_uiMode & 0x0FFFFFFF);
+    MT_SHARED_LOCK_RETURN(this, _uiMode & 0x0FFFFFFF);
 }
 
-bool CSFile::_IsWriteMode() const
-{
-    return (_uiMode & OF_WRITE);
-}
 bool CSFile::IsWriteMode() const
 {
-    MT_SHARED_LOCK_RETURN(_uiMode & OF_WRITE);
+    MT_SHARED_LOCK_RETURN(this, _uiMode & OF_WRITE);
 }
 
 

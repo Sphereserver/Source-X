@@ -1,201 +1,122 @@
 /**
-* @file threads.h
-*
-*/
+ * @file threads.h
+ */
 
 #ifndef _INC_THREADS_H
 #define _INC_THREADS_H
 
 #include "../common/common.h"
 #include "../sphere/ProfileData.h"
+
 #include <atomic>
+#include <memory>
+#include <optional>
+#include <shared_mutex>
 #include <vector>
 
 #ifndef _WIN32
-	#include <pthread.h>
+#include <pthread.h>
 #endif
 
+class CExpression;
 class TemporaryString;
-
-/**
- * Sphere threading system
- * Threads should be inherited from AbstractThread with overridden tick() method
- * Also useful to override onStart() in order to initialise class data variables for ticking
- *   which is triggered whenever the thread is starting/restarting
-**/
-
-// Types definition for different platforms
-#ifdef _WIN32
-	typedef HANDLE spherethread_t;
-	typedef DWORD threadid_t;
-	#define SPHERE_THREADENTRY_RETNTYPE unsigned
-	#define SPHERE_THREADENTRY_CALLTYPE __stdcall
-	#define SPHERE_THREADT_NULL nullptr
-#else
-	typedef pthread_t spherethread_t;
-#   ifdef __APPLE__
-	typedef uint64_t  threadid_t;
-#   else
-	typedef pthread_t threadid_t;
-#endif
-
-	#define SPHERE_THREADENTRY_RETNTYPE void *
-	#define SPHERE_THREADENTRY_CALLTYPE
-#endif
-
-class AbstractThread;
 class AutoResetEvent;
 class ManualResetEvent;
 
 /*
-// stores a value unique to each thread, intended to hold
-// a pointer (e.g. the current AbstractThread instance)
-template<class T>
-class TlsValue
-{
-private:
+ * Platform types for OS thread identity and entry points.
+ */
 #ifdef _WIN32
-	dword _key;
+#include <windows.h>
+typedef HANDLE  spherethread_t;
+typedef DWORD   threadid_t;
+#define SPHERE_THREADENTRY_RETNTYPE unsigned
+#define SPHERE_THREADENTRY_CALLTYPE __stdcall
+#define SPHERE_THREADT_NULL nullptr
 #else
-	pthread_key_t _key;
-#endif
-	bool _ready;
-
-public:
-	TlsValue();
-	~TlsValue();
-
-	TlsValue(const TlsValue& copy) = delete;
-	TlsValue& operator=(const TlsValue& other) = delete;
-
-public:
-	// allows assignment to set the current value
-	TlsValue& operator=(const T& value)
-	{
-		set(value);
-		return *this;
-	}
-
-	// allows a cast to get current value
-	operator T() const { return get(); }
-
-public:
-	void set(const T value); // set the value for the current thread
-	T get() const; // get the value for the current thread
-};
-
-template<class T>
-TlsValue<T>::TlsValue()
-{
-	// allocate thread storage
-#ifdef _WIN32
-	_key = TlsAlloc();
-	_ready = (_key != TLS_OUT_OF_INDEXES);
+//#include <stdint.h>
+#include <pthread.h>
+typedef pthread_t spherethread_t;
+#ifdef __APPLE__
+typedef uint64_t threadid_t; // from pthread_threadid_np
 #else
-	_key = 0;
-	_ready = (pthread_key_create(&_key, nullptr) == 0);
+typedef pthread_t threadid_t;
 #endif
-}
-
-template<class T>
-TlsValue<T>::~TlsValue()
-{
-	// free the thread storage
-	if (_ready)
-#ifdef _WIN32
-		TlsFree(_key);
-#else
-		pthread_key_delete(_key);
+#define SPHERE_THREADENTRY_RETNTYPE void*
+#define SPHERE_THREADENTRY_CALLTYPE
 #endif
-	_ready = false;
-}
 
-template<class T>
-void TlsValue<T>::set(const T value)
-{
-	ASSERT(_ready);
-#ifdef _WIN32
-	TlsSetValue(_key, value);
-#else
-	pthread_setspecific(_key, value);
-#endif
-}
-
-template<class T>
-T TlsValue<T>::get() const
-{
-	if (_ready == false)
-		return nullptr;
-#ifdef _WIN32
-	return reinterpret_cast<T>(TlsGetValue(_key));
-#else
-	return reinterpret_cast<T>(pthread_getspecific(_key));
-#endif
-}
-*/
-
+/*
+ * Priority → tick cadence mapping (ms).
+ */
 enum class ThreadPriority : int
 {
-    Idle,			// tick 1000ms
-    Low,			// tick 200ms
-    Normal,			// tick 100ms
-    High,			// tick 50ms
-    Highest,		// tick 5ms
-    RealTime,		// tick almost instantly
-    Disabled = 0xFF	// tick never
+    Idle,
+    Low,
+    Normal,
+    High,
+    Highest,
+    RealTime,
+    Disabled = 0xFF
 };
 
-// Thread base implementation, without Sphere "extensions".
 class AbstractThread
 {
     friend class ThreadHolder;
 
     static int m_threadsAvailable;
+
 public:
-    static constexpr uint m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
+    static constexpr uint m_nameMaxLength = 16; // OS limits for linux/bsd pthread names
 
 protected:
-    threadid_t m_threadSystemId;
-    int m_threadHolderId;
+    // TODO: move at least m_threadHolderId to AbstractSphereThread,
+    //  since it should theoretically be used only by Sphere custom thread class/AbstractSphereThread?
+    threadid_t m_threadSystemId{0};        // OS thread id for this object (0 => not bound)
+    int        m_threadHolderId{-1};       // logical id in ThreadHolder
 
-    bool _fKeepAliveAtShutdown;
-    volatile std::atomic_bool _thread_selfTerminateAfterThisTick;
-    volatile std::atomic_bool _fIsClosing;
+    bool m_fKeepAliveAtShutdown{false};
+    bool m_fThreadSelfTerminateAfterThisTick{false};
+    bool m_fTerminateRequested{false};
 
-    volatile std::atomic_bool m_terminateRequested;
+    enum class eRunningState : uchar {
+        NeverStarted,
+        Running,
+        Closing
+    };
+    std::atomic<eRunningState> m_uiState{eRunningState::NeverStarted};
+
 private:
-    char m_name[30];
+    char m_name[30]{};                     // internal name (OS name uses trimmed variant)
 
-    // pthread_t type is opaque (platform-defined). It can be an integer, a struct, a ptr something. Memset is the safest and more portable way.
-    //spherethread_t m_handle;
-    // Or, since we need here an "invalid" value, just use optional.
-    std::optional<spherethread_t> m_handle;
+    std::optional<spherethread_t> m_handle; // present if start() spawned an OS thread
 
-	uint m_hangCheck;
-    ThreadPriority m_priority;
-	uint m_tickPeriod;
-    // PImpl
-    std::unique_ptr<AutoResetEvent> m_sleepEvent;
+    uint           m_uiHangCheck{0};
+    ThreadPriority m_priority{ThreadPriority::Normal};
+    uint           m_uiTickPeriod{100};
+
+    std::unique_ptr<AutoResetEvent>   m_sleepEvent;
     std::unique_ptr<ManualResetEvent> m_terminateEvent;
 
 public:
     AbstractThread(const char *name, ThreadPriority priority = ThreadPriority::Normal);
-	virtual ~AbstractThread();
+    virtual ~AbstractThread();
 
-	AbstractThread(const AbstractThread& copy) = delete;
-	AbstractThread& operator=(const AbstractThread& other) = delete;
+    AbstractThread(const AbstractThread&) = delete;
+    AbstractThread& operator=(const AbstractThread&) = delete;
 
 public:
-    threadid_t getId() const noexcept { return m_threadSystemId; }
+    threadid_t     getId() const noexcept { return m_threadSystemId; }
     virtual const char *getName() const noexcept { return m_name; }
 
-    virtual bool isActive() const;
-    virtual bool checkStuck();
+    bool isActive() const;
+    bool checkStuck();
+    bool isClosing() const;
 
     virtual void start();
     virtual void terminate(bool ended);
     virtual void waitForClose();
-	void awaken();
+    void         awaken();
 
     void setPriority(ThreadPriority pri);
     ThreadPriority getPriority() const { return m_priority; }
@@ -203,152 +124,131 @@ public:
     void overwriteInternalThreadName(const char* name) noexcept;
     bool isCurrentThread() const noexcept;
 
-  protected:
+protected:
     virtual void tick() = 0;
 
-    // NOTE: this should not be too long-lasted function, so no world loading, etc here!!!
+    // Called on the OS thread that will execute tick().
     virtual void onStart();
     virtual bool shouldExit() noexcept;
 
-  private:
+private:
     void run();
     static SPHERE_THREADENTRY_RETNTYPE SPHERE_THREADENTRY_CALLTYPE runner(void *callerThread);
 
-  public:
+public:
     static void setThreadName(const char* name);
 
-    bool closing() const noexcept
+    // Inline binding helper: attach/detach without creating a new OS thread.
+    class ThreadBindingScope
     {
-        return _fIsClosing;
-    }
+        AbstractThread* m_pAbstractThread;
+    public:
+        explicit ThreadBindingScope(AbstractThread& t, const char* pcOsName = nullptr) noexcept
+            : m_pAbstractThread(&t) { m_pAbstractThread->attachToCurrentThread(pcOsName); }
+        ~ThreadBindingScope() noexcept { if (m_pAbstractThread) m_pAbstractThread->detachFromCurrentThread(); }
+        ThreadBindingScope(const ThreadBindingScope&) = delete;
+        ThreadBindingScope& operator=(const ThreadBindingScope&) = delete;
+    };
 
-    static inline threadid_t getCurrentThreadSystemId() noexcept
-    {
-#if defined(_WIN32)
-        return ::GetCurrentThreadId();
-#elif defined(__APPLE__)
-        // On OSX, 'threadid_t' is not an integer but a '_opaque_pthread_t *'), so we need to resort to another method.
-        uint64_t threadid = 0;
-        pthread_threadid_np(pthread_self(), &threadid);
-        return threadid;
-#else
-        return pthread_self();
-#endif
-    }
-    static inline bool isSameThreadId(threadid_t firstId, threadid_t secondId) noexcept
-    {
-#if defined(_WIN32) || defined(__APPLE__)
-        return (firstId == secondId);
-#else
-        return pthread_equal(firstId,secondId);
-#endif
-    }
-
-    inline bool isSameThread(threadid_t otherThreadId) const noexcept
-    {
-        return isSameThreadId(getCurrentThreadSystemId(), otherThreadId);
-    }
+    void attachToCurrentThread(const char* osThreadName = nullptr) noexcept;
+    void detachFromCurrentThread() noexcept;
 };
 
-
-// Sphere thread. Have some sphere-specific
 class AbstractSphereThread : public AbstractThread
 {
-	friend class ThreadHolder;
+    friend class ThreadHolder;
 
 #ifdef THREAD_TRACK_CALLSTACK
-	struct STACK_INFO_REC
-	{
-        const char *functionName;
-	};
+    struct STACK_INFO_REC { const char *functionName; };
 
-    STACK_INFO_REC m_stackInfo[0x500];
-    STACK_INFO_REC m_stackInfoCopy[0x500];
-    ssize_t m_iStackPos;
-    bool m_fFreezeCallStack;
-    ssize_t m_iStackUnwindingStackPos;
-    ssize_t m_iCaughtExceptionStackPos;
+    STACK_INFO_REC m_stackInfo[0x500]{};
+    STACK_INFO_REC m_stackInfoCopy[0x500]{};
+
+    ssize_t m_iStackPos{-1};
+    ssize_t m_iStackUnwindingStackPos{-1};
+    ssize_t m_iCaughtExceptionStackPos{-1};
+    bool    m_fFreezeCallStack{false};
 #endif
 
 public:
-    AbstractSphereThread(const char *name, ThreadPriority priority = ThreadPriority::Normal);
-	virtual ~AbstractSphereThread();
+    std::unique_ptr<CExpression> m_pExpr;
 
-	AbstractSphereThread(const AbstractSphereThread& copy) = delete;
-	AbstractSphereThread& operator=(const AbstractSphereThread& other) = delete;
+public:
+    AbstractSphereThread(const char *name, ThreadPriority priority = ThreadPriority::Normal);
+    virtual ~AbstractSphereThread();
+
+    AbstractSphereThread(const AbstractSphereThread&) = delete;
+    AbstractSphereThread& operator=(const AbstractSphereThread&) = delete;
 
     class Strings
     {
         friend class TemporaryString;
         friend tchar* Str_GetTemp() noexcept;
 
-        // allocates a char* with size of THREAD_MAX_LINE_LENGTH characters from the thread local storage
         static char *allocateBuffer() noexcept;
-
-        // allocates a manageable String from the thread local storage
-        static void getBufferForStringObject(TemporaryString &string) noexcept;
+        static void getBufferForStringObject(TemporaryString &string) CANTHROW;
     };
 
 public:
 #ifdef THREAD_TRACK_CALLSTACK
     void signalExceptionCaught() noexcept;
     void signalExceptionStackUnwinding() noexcept;
-    inline bool isExceptionCaught() const noexcept;
-    inline bool isExceptionStackUnwinding() const noexcept;
 
-    inline void freezeCallStack(bool freeze) noexcept;
+    inline bool isExceptionCaught() const noexcept { return (m_iCaughtExceptionStackPos >= 0); }
+    inline bool isExceptionStackUnwinding() const noexcept { return (m_iStackUnwindingStackPos >= 0); }
 
-	void pushStackCall(const char *name) noexcept;
-	void popStackCall() NOEXCEPT_NODEBUG;
+    inline void freezeCallStack(bool freeze) noexcept { m_fFreezeCallStack = freeze; }
 
-	void printStackTrace() noexcept;
+    void pushStackCall(const char *name) noexcept;
+    void popStackCall() NOEXCEPT_NODEBUG;
+
+    void printStackTrace() noexcept;
 #endif
 
-	ProfileData m_profile;	// the current active statistical profile.
+    ProfileData m_profile;
 
 protected:
-	virtual bool shouldExit() noexcept;
+    virtual bool shouldExit() noexcept;
 };
 
-bool AbstractSphereThread::isExceptionCaught() const noexcept
-{
-    return (m_iCaughtExceptionStackPos >= 0);
-}
-
-bool AbstractSphereThread::isExceptionStackUnwinding() const noexcept
-{
-    return (m_iStackUnwindingStackPos >= 0);
-}
-
-void AbstractSphereThread::freezeCallStack(bool freeze) noexcept
-{
-    m_fFreezeCallStack = freeze;
-}
-
-// Dummy thread for context when no thread really exists. To be called only once, at startup.
+/*
+ * DummySphereThread:
+ *  - Exists at startup so code has a safe expression/call-stack context.
+ *  - After entering Run, missing contexts return nullptr by policy.
+ */
 class DummySphereThread : public AbstractSphereThread
 {
 private:
-	static DummySphereThread *_instance;
+    friend struct GlobalInitializer;
+    static DummySphereThread *_instance;
 
 public:
-	static void createInstance();
-	static DummySphereThread *getInstance() noexcept;
+    static void createInstance();
+    static DummySphereThread *getInstance() noexcept;
 
 protected:
-	DummySphereThread();
-	virtual void tick();
+    DummySphereThread();
+    virtual void tick();
 };
 
-
-// Singleton utility class for working with threads. Holds all running threads inside.
+/*
+ * ThreadHolder: registry and state flags. The “current()” hot path is fully inline and lock-free.
+ *
+ * Fast-path policy:
+ *  - If TLS is set (g_tlsCurrentSphereThread != nullptr) → return it. O(1).
+ *  - Else, if servClosing → return nullptr.
+ *  - Else, if still in startup → return Dummy (if exists).
+ *  - Else (Run mode) → return nullptr.
+ *
+ * Slow-path operations (push/remove/getThreadAt) use a mutex; NEVER log while holding it.
+ */
 class ThreadHolder
 {
     friend class AbstractThread;
 
     struct SphereThreadData
     {
-        AbstractThread *m_ptr;
+        AbstractThread *    m_ptr;
         bool m_closed;
     };
     using spherethreadlist_t = std::vector<SphereThreadData>;
@@ -357,76 +257,78 @@ class ThreadHolder
     using spherethreadpair_t = std::pair<threadid_t, AbstractSphereThread *>;
     std::vector<spherethreadpair_t> m_spherethreadpairs_systemid_ptr;
 
-	int m_threadCount;
-    volatile std::atomic_bool m_closingThreads;
-	mutable std::shared_mutex m_mutex;
+    int                         m_threadCount;
+    mutable std::shared_mutex   m_mutex;
 
-	ThreadHolder() noexcept;
+    ThreadHolder() noexcept;
     ~ThreadHolder() noexcept = default;
 
-	friend void atexit_handler(void);
-    friend void Sphere_ExitServer(void);
-	void markThreadsClosing() CANTHROW;
-
-    //SphereThreadData* findThreadData(AbstractThread* thread) noexcept;
-
 public:
-	static constexpr lpctstr m_sClassName = "ThreadHolder";
+    static constexpr lpctstr m_sClassName = "ThreadHolder";
+    static constexpr int m_kiInvalidThreadID = -1;
 
-	static ThreadHolder& get() noexcept;
+    // Singleton instance for slow-path ops
+    static ThreadHolder& get() noexcept;
 
-    bool closing() noexcept;
-	// returns current working thread or DummySphereThread * if no AbstractThread threads are running
-	AbstractThread *current() noexcept;
-	// records a thread to the list. Sould NOT be called, internal usage
-	void push(AbstractThread *thread) noexcept;
-	// removes a thread from the list. Sould NOT be called, internal usage
-	void remove(AbstractThread *thread) CANTHROW;
-	// returns thread at i pos
-	AbstractThread * getThreadAt(size_t at) noexcept;
+    // High-performance fast path for “current” thread lookup.
+    static AbstractThread *current() noexcept;
 
-	// returns number of running threads. Sould NOT be called, unit tests usage
-	inline size_t getActiveThreads() noexcept { return m_threadCount; }
+    // Record that the server entered Run mode (disable startup fallback in fast path).
+    static void markServEnteredRunMode() noexcept;
+
+    // Record that threads are servClosing (fast-path observable).
+    static void markServClosing() noexcept;
+
+    static bool isServClosing() noexcept;
+
+    // Slow-path registry ops
+    void push(AbstractThread *pAbstractThread) noexcept;
+    void remove(AbstractThread *thread) CANTHROW;
+
+    AbstractThread * getThreadAt(size_t at) noexcept;
+    inline size_t getActiveThreads() noexcept { return static_cast<size_t>(m_threadCount); }
+
+    void markThreadStarted(AbstractThread* pThr) CANTHROW;
+
+    // Helper to mark servClosing and set flags.
+    void markThreadsClosing() CANTHROW;
+
+private:
+    bool isSystemIdRegistered(threadid_t sysId, AbstractSphereThread** outExisting) const noexcept;
+
 };
 
-
-// used to hold debug information for the function call stack
 #ifdef THREAD_TRACK_CALLSTACK
 class StackDebugInformation
 {
 private:
-	AbstractSphereThread* m_context;
+    AbstractSphereThread* m_context;
 
 public:
-	StackDebugInformation(const char *name) noexcept;
-	~StackDebugInformation() noexcept;
+    StackDebugInformation(const char *name) noexcept;
+    ~StackDebugInformation() noexcept;
 
-	StackDebugInformation(const StackDebugInformation& copy) = delete;
-	StackDebugInformation& operator=(const StackDebugInformation& other) = delete;
+    StackDebugInformation(const StackDebugInformation&) = delete;
+    StackDebugInformation& operator=(const StackDebugInformation&) = delete;
 
 public:
-	static void printStackTrace() noexcept;
-	static void freezeCallStack(bool freeze) noexcept;
+    static void printStackTrace() noexcept;
+    static void freezeCallStack(bool freeze) noexcept;
 };
 
-// Remember, call stack is disabled on Release builds!
-#define ADDTOCALLSTACK(_function_)	const StackDebugInformation debugStack(_function_)
+#define ADDTOCALLSTACK(_function_)    const StackDebugInformation debugStack(_function_)
 
-// Add to the call stack these functions only in debug mode, to have the most precise call stack
-//  even if these functions are thought to be very safe and (nearly) exception-free.
 #ifdef _DEBUG
-	#define ADDTOCALLSTACK_DEBUG(_function_)	ADDTOCALLSTACK(_function_)
+#define ADDTOCALLSTACK_DEBUG(_function_)  ADDTOCALLSTACK(_function_)
 #else
-	#define ADDTOCALLSTACK_DEBUG(_function_)    (void)0
+#define ADDTOCALLSTACK_DEBUG(_function_)  (void)0
 #endif
 
+#else // ! THREAD_TRACK_CALLSTACK
 
-#else // THREAD_TRACK_CALLSTACK
+#define ADDTOCALLSTACK(_function_)           (void)0
+#define ADDTOCALLSTACK_DEBUG(_function_)     (void)0
 
-#define ADDTOCALLSTACK(_function_)                  (void)0
-#define ADDTOCALLSTACK_DEBUG(_function_)        (void)0
-
-#endif // THREAD_TRACK_CALLSTACK
-
+#endif
 
 #endif // _INC_THREADS_H

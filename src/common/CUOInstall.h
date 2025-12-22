@@ -79,7 +79,7 @@ public:
 
 	bool ReadMulIndex(CSFile &file, dword id, CUOIndexRec &Index);
 	bool ReadMulData(CSFile &file, const CUOIndexRec &Index, void * pData);
-	
+
 public:
 	CUOInstall();
 
@@ -105,7 +105,7 @@ public:
 	void Unload();
 	void Load( CSFile & file );
 	bool FindVerDataBlock( VERFILE_TYPE type, dword id, CUOIndexRec & Index ) const;
-	
+
 public:
 	CVerDataMul();
 	~CVerDataMul();

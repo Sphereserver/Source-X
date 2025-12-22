@@ -64,7 +64,7 @@ void CTimedFunctionHandler::Clear()
 }
 
 TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr ptcCommand, int iLoopsMade, CScriptLineContext StartContext,
-    CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult)
+    CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * pResult)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Loop");
 	for (CSObjContRec* obj : _timedFunctions.GetIterationSafeCont())
@@ -86,7 +86,7 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr ptcCommand, int iLoopsMade, CSc
 				break;
 			}
 
-			TRIGRET_TYPE iRet = pObj->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
+            TRIGRET_TYPE iRet = pObj->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pScriptArgs, pSrc, pResult);
 
 			if (iRet == TRIGRET_BREAK)
 			{

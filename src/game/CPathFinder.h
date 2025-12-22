@@ -95,5 +95,4 @@ protected:
 };
 
 
-
 #endif // _INC_PATHFINDER_H

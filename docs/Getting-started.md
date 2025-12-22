@@ -51,7 +51,7 @@ Once you've extracted your archive, you'll need to move the server's executable
 into the root directory of the server. The file is contained into the 
 `build-xx` folder.
 
-For instance, for a 64 bits linux installation, your root folder's structure 
+For instance, for 64 bits linux installation, your root folder's structure 
 should go from this:
 ```
 - accounts/
@@ -113,7 +113,7 @@ shard.
 Before you can start fiddling with different things, you'll need to agree of
 using a nightly build. A nightly build gets created automatically every night 
 based on the latest changes made by the developers. This means it might contain
-potential bugs. With this settings you agree to take full responsibility of all
+potential bugs. With this setting you agree to take full responsibility of all
 the implications of this choice.
 
 So, let's open the `sphere.ini` file and add a new line to the `SPHERE`
@@ -167,7 +167,7 @@ contain all the assets of the game. This includes (but not limited to):
 
 These files are contained into the Ultima Online client's installation.
 
-**WARNING:** If there a discrepancy between server's muls and client's muls 
+**WARNING:** If there is a discrepancy between server's muls and client's muls 
 players will experience serious bugs or crashes.
 
 For this reason we need to make sure that the server is picking up the mul
@@ -175,7 +175,7 @@ files from the Ultima Online client's installation. There are different ways
 to achieve this.
 
 #### A. Do not change the Sphere.ini file
-If you're using Windows and you've got just one Ultima Online Client installed 
+If you're using Windows, and you've got just one Ultima Online Client installed 
 through the official EA installer, you can just skip this step and move on with
 the next step of this guide.
 
@@ -200,7 +200,7 @@ MulFiles=C:/Program Files/EA Games/Ultima Online/
 ```
 
 #### C. Copy client's files into the server's folder
-Create a new folder into the server's root folder. For instance you can call it
+Create a new folder into the server's root folder. For instance, you can call it
 `mul`. 
 
 For simplicity, copy all the contents of your Ultima Online client's 
@@ -228,7 +228,7 @@ MulFiles=mul/
 **NOTE**: You don't need all the files contained into the Ultima Online client's
 installation. You just need all the `.mul` and `.idx` files.
 
-**NOTE 2**: On linux the name of the files is case sensitive so, make sure all
+**NOTE 2**: On linux the name of the files is case-sensitive so, make sure all
 the file names are lowercase!
 
 ### Configure maps
@@ -265,14 +265,14 @@ Map1=7168,4096,-1,1,1		//ML size
 
 ## Setup Scripts
 We've got a nice server. But it is completely brainless: it doesn't know what
-is a vendor, an npc and what are their behaviours. In order to give it a brain
+is a vendor, a npc and what are their behaviours. In order to give it a brain
 we should add some scripts. If we were to write all of them, it would take 
 ages. For this reason Sphere comes with a pre-made set of scripts to get you
 started in no time.
 
 ### Download scripts
 Head out to the 
-[SphereX Github page](https://github.com/Sphereserver/Scripts-X) click on `Code`
+[SphereX GitHub page](https://github.com/Sphereserver/Scripts-X) click on `Code`
 and hit `Download ZIP`. 
 
 Unzip the content of the package into the server's `scripts` folder.
@@ -410,7 +410,7 @@ Use '?' to view available console commands
 ## Connect to your server
 Now that you've configured the server, you're finally ready to start playing!
 
-By default the Ultima Online Client will connect to the official game servers.
+By default, the Ultima Online Client will connect to the official game servers.
 However, what we want to do is to connect to our server. There are multiple
 tools you can use like Razor - just Google a bit ;). 
 
@@ -434,7 +434,7 @@ configuration you can now try to login with any username and password: this
 operation will automatically create a new user for you.
 
 So, pick a username and password and try to login. Create a new character et 
-voila': you're the first player of your own personal Ultima Online Shard!
+voilà': you're the first player of your own personal Ultima Online Shard!
 
 ## Making yourself an admin
 Well, since this is your server, I guess it's only fair to set yourself as an

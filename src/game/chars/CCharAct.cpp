@@ -1,7 +1,8 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../common/CUOInstall.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/send.h"
@@ -24,7 +25,6 @@
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include <flat_containers/flat_set.hpp>
 
 
 // "GONAME", "GOTYPE", "GOCHAR"
@@ -154,16 +154,17 @@ void CChar::Jail( CTextConsole * pSrc, bool fSet, int iCell )
 {
 	ADDTOCALLSTACK("CChar::Jail");
 
-	CScriptTriggerArgs Args( fSet? 1 : 0, (int64)(iCell), (int64)(0));
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(fSet, (int64)iCell, 0, nullptr);
+
+    if ( IsTrigUsed(TRIGGER_JAILED) )
+    {
+        if ( OnTrigger( CTRIG_Jailed, pScriptArgs, pSrc ) == TRIGRET_RET_TRUE )
+            return;
+    }
 
 	if ( fSet )	// set the jailed flag.
 	{
-		if ( IsTrigUsed(TRIGGER_JAILED) )
-		{
-			if ( OnTrigger( CTRIG_Jailed, pSrc, &Args ) == TRIGRET_RET_TRUE )
-				return;
-		}
-
 		if ( m_pPlayer )	// allow setting of this to offline chars.
 		{
 			CAccount *pAccount = m_pPlayer->GetAccount();
@@ -191,12 +192,6 @@ void CChar::Jail( CTextConsole * pSrc, bool fSet, int iCell )
 	}
 	else	// forgive.
 	{
-		if ( IsTrigUsed(TRIGGER_JAILED) )
-		{
-			if ( OnTrigger( CTRIG_Jailed, pSrc, &Args ) == TRIGRET_RET_TRUE )
-				return;
-		}
-
 		if ( IsClientActive())
 		{
 			if ( ! m_pClient->IsPriv( PRIV_JAILED ))
@@ -225,9 +220,9 @@ void CChar::AddGoldToPack( int iAmount, CItemContainer * pPack, bool fForceNoSta
 	if ( pPack == nullptr )
 		pPack = GetPackSafe();
 
-	if (iAmount > 25000000)
+    if (iAmount > 25'000'000)
 	{
-		iAmount = 25000000;
+        iAmount = 25'000'000;
 		g_Log.EventWarn("The amount of the new Gold to create is too big. Limited to 25.000.000.\n");
 	}
 	word iMax = 0;
@@ -268,7 +263,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 		// NOTE: CanEquipLayer may bounce an item . If it stacks with this we are in trouble !
 	}
 
-	if ( g_Serv.IsLoading() == false )
+	if ( g_Serv.IsLoadingGeneric() == false )
 	{
 		// This takes care of any conflicting items in the slot !
 		layer = CanEquipLayer(pItem, layer, nullptr, false);
@@ -286,10 +281,9 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
         {
 			if ((IsTrigUsed(TRIGGER_MEMORYEQUIP)) || (IsTrigUsed(TRIGGER_ITEMMEMORYEQUIP)))
 			{
-				//CScriptTriggerArgs pArgs;
-                CScriptTriggerArgs pArgs(pItem); // added "argo" argument
-				pArgs.m_iN1 = layer;
-				if (pItem->OnTrigger(ITRIG_MemoryEquip, this, &pArgs) == TRIGRET_RET_TRUE)
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(layer, 0, 0, pItem); // added "argo" argument
+                if (pItem->OnTrigger(ITRIG_MemoryEquip, pScriptArgs, this) == TRIGRET_RET_TRUE)
 				{
 					pItem->Delete();
 					return;
@@ -412,8 +406,8 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
 	LAYER_TYPE layer = pItem->GetEquipLayer();
 	if (( IsTrigUsed(TRIGGER_UNEQUIP) ) || ( IsTrigUsed(TRIGGER_ITEMUNEQUIP) ))
 	{
-		if ( layer != LAYER_DRAGGING && ! g_Serv.IsLoading())
-			pItem->OnTrigger( ITRIG_UNEQUIP, this );
+		if ( layer != LAYER_DRAGGING && ! g_Serv.IsLoadingGeneric())
+            pItem->OnTrigger( ITRIG_UNEQUIP, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this );
 	}
 
 	CContainer::OnRemoveObj( pObRec );
@@ -706,7 +700,7 @@ void CChar::SysMessage( lpctstr pMsg ) const	// Push a message back to the clien
 void CChar::UpdateStatsFlag() const
 {
 	ADDTOCALLSTACK("CChar::UpdateStatsFlag");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		return;
 
 	if ( IsClientActive() )
@@ -718,7 +712,7 @@ void CChar::UpdateStatsFlag() const
 void CChar::UpdateHitsFlag()
 {
 	ADDTOCALLSTACK("CChar::UpdateHitsFlag");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		return;
 
 	m_fStatusUpdate |= SU_UPDATE_HITS;
@@ -730,7 +724,7 @@ void CChar::UpdateHitsFlag()
 void CChar::UpdateModeFlag()
 {
 	ADDTOCALLSTACK("CChar::UpdateModeFlag");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		return;
 
 	m_fStatusUpdate |= SU_UPDATE_MODE;
@@ -739,7 +733,7 @@ void CChar::UpdateModeFlag()
 void CChar::UpdateManaFlag() const
 {
 	ADDTOCALLSTACK("CChar::UpdateManaFlag");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		return;
 
 	if ( IsClientActive() )
@@ -749,7 +743,7 @@ void CChar::UpdateManaFlag() const
 void CChar::UpdateStamFlag() const
 {
 	ADDTOCALLSTACK("CChar::UpdateStamFlag");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		return;
 
 	if ( IsClientActive() )
@@ -2466,7 +2460,7 @@ void CChar::UpdateMode( bool fFull, CClient * pExcludeClient )
 void CChar::UpdateSpeedMode()
 {
 	ADDTOCALLSTACK("CChar::UpdateSpeedMode");
-	if ( g_Serv.IsLoading() || !m_pPlayer )
+	if ( g_Serv.IsLoadingGeneric() || !m_pPlayer )
 		return;
 
 	if ( IsClientActive() )
@@ -2476,7 +2470,7 @@ void CChar::UpdateSpeedMode()
 void CChar::UpdateVisualRange()
 {
 	ADDTOCALLSTACK("CChar::UpdateVisualRange");
-	if ( g_Serv.IsLoading() || !m_pPlayer )
+	if ( g_Serv.IsLoadingGeneric() || !m_pPlayer )
 		return;
 
 	DEBUG_WARN(("CChar::UpdateVisualRange called, m_iVisualRange is %d\n", m_iVisualRange));
@@ -2992,8 +2986,9 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	{
 		if (( IsTrigUsed(CItem::sm_szTrigName[trigger]) ) || ( IsTrigUsed(sm_szTrigName[(CTRIG_itemAfterClick - 1) + trigger]) )) //ITRIG_PICKUP_GROUND, ITRIG_PICKUP_PACK
 		{
-			CScriptTriggerArgs Args( amount );
-			if ( pItem->OnTrigger( trigger, this, &Args ) == TRIGRET_RET_TRUE )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(amount, 0, 0, nullptr);
+            if ( pItem->OnTrigger( trigger, pScriptArgs, this) == TRIGRET_RET_TRUE )
 				return -1;
 		}
 		if (( trigger == ITRIG_PICKUP_PACK ) && (( IsTrigUsed(TRIGGER_PICKUP_SELF) ) || ( IsTrigUsed(TRIGGER_ITEMPICKUP_SELF) )))
@@ -3001,13 +2996,13 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 			CItem * pContItem = dynamic_cast <CItem*> ( pItem->GetContainer() );
 			if ( pContItem )
 			{
-				CScriptTriggerArgs Args1(pItem);
-				if ( pContItem->OnTrigger(ITRIG_PICKUP_SELF, this, &Args1) == TRIGRET_RET_TRUE )
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(pItem);
+                if ( pContItem->OnTrigger(ITRIG_PICKUP_SELF, pScriptArgs, this) == TRIGRET_RET_TRUE )
 					return -1;
 			}
 		}
 	}
-
 
 	if ( amount < iAmountMax && pItem->Item_GetDef()->IsStackableType() && pItem->CanSendAmount() )
 	{
@@ -3018,8 +3013,9 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 
         if (IsTrigUsed(TRIGGER_PICKUP_STACK) || IsTrigUsed(TRIGGER_ITEMPICKUP_STACK))
         {
-            CScriptTriggerArgs Args2(pItemNew);
-            if (pItem->OnTrigger(ITRIG_PICKUP_STACK, this, &Args2) == TRIGRET_RET_TRUE)
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(pItemNew);
+            if (pItem->OnTrigger(ITRIG_PICKUP_STACK, pScriptArgs, this) == TRIGRET_RET_TRUE)
                 return false;
         }
     }
@@ -3096,8 +3092,9 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 		fCanAddToPack = true;
 		if (IsTrigUsed(TRIGGER_DROPON_ITEM))
 		{
-			CScriptTriggerArgs Args(pPack);
-			pItem->OnTrigger(ITRIG_DROPON_ITEM, this, &Args);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(pPack);
+            pItem->OnTrigger(ITRIG_DROPON_ITEM, pScriptArgs, this);
 
 			if (pItem->IsDeleted())	// the trigger had deleted the item
 				return false;
@@ -3106,11 +3103,15 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 		if (IsTrigUsed(TRIGGER_DROPON_SELF) || IsTrigUsed(TRIGGER_ITEMDROPON_SELF))
 		{
 			const CItem* pPrevCont = dynamic_cast<CItem*>(pItem->GetContainer());
-			CScriptTriggerArgs Args(pItem);
-			const TRIGRET_TYPE ret = pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args);
-			if (pItem->IsDeleted())	// the trigger had deleted the item
+
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(pItem);
+            const TRIGRET_TYPE ret = pPack->OnTrigger(ITRIG_DROPON_SELF, pScriptArgs, this);
+
+            if (pItem->IsDeleted())	// the trigger had deleted the item
 				return false;
-			if (ret == TRIGRET_RET_TRUE)
+
+            if (ret == TRIGRET_RET_TRUE)
 			{
 				fCanAddToPack = false;
 				const CItem* pCont = dynamic_cast<const CItem*>(pItem->GetContainer());
@@ -3159,19 +3160,19 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
         TRIGRET_TYPE ttResult = TRIGRET_RET_DEFAULT;
         if (IsTrigUsed(TRIGGER_DROPON_GROUND) || IsTrigUsed(TRIGGER_ITEMDROPON_GROUND))
         {
-            CScriptTriggerArgs args;
-            args.m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
-            args.m_iN2 = 1;
-            args.m_s1 = ptDrop.WriteUsed();
-            ttResult = pItem->OnTrigger(ITRIG_DROPON_GROUND, this, &args);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
+            pScriptArgs->m_iN2 = 1;
+            pScriptArgs->m_s1 = ptDrop.WriteUsed();
+            ttResult = pItem->OnTrigger(ITRIG_DROPON_GROUND, pScriptArgs, this);
 
             if (IsDeleted())
                 return false;
 
-            iDecayTime = args.m_iN1 * MSECS_PER_TENTH;
+            iDecayTime = pScriptArgs->m_iN1 * MSECS_PER_TENTH;
 
 			// Warning: here we ignore the read-onlyness of CSString's buffer only because we know that CPointMap constructor won't write past the end, but only replace some characters with '\0'. It's not worth it to build another string just for that.
-			tchar* ptcArgs = const_cast<tchar*>(args.m_s1.GetBuffer());
+            tchar* ptcArgs = const_cast<tchar*>(pScriptArgs->m_s1.GetBuffer());
 			const CPointMap ptDropNew(ptcArgs);
             if (!ptDropNew.IsValidPoint())
                 g_Log.EventError("Trying to override item drop P with an invalid P. Using the original one.\n");
@@ -3285,9 +3286,12 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	if ( !pCharMsg )
 		pCharMsg = this;
 
+    // Remember original layer, because we need to return to it after equiptest trigger.
+    LAYER_TYPE const requestedLayer = pItem->GetEquipLayer();
+
 	if ( pItem->GetParent() == this )
 	{
-		if ( pItem->GetEquipLayer() != LAYER_DRAGGING ) // already equipped.
+		if ( requestedLayer != LAYER_DRAGGING ) // already equipped.
 			return true;
 	}
 
@@ -3303,8 +3307,14 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
 	if (IsTrigUsed(TRIGGER_EQUIPTEST) || IsTrigUsed(TRIGGER_ITEMEQUIPTEST))
 	{
-		if (pItem->OnTrigger(ITRIG_EQUIPTEST, this) == TRIGRET_RET_TRUE)
+	    // Swap the layer for real one, because if we don't use dclick for equip, real layer gets rewritten with LAYER_DRAGGING.
+            pItem->SetContainedLayer(layer);
+
+            if (pItem->OnTrigger(ITRIG_EQUIPTEST, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE)
 		{
+		    // Reset layer to the original value, that item doesn't get misplaced.
+		    pItem->SetContainedLayer(requestedLayer);
+
 			// since this trigger is called also when creating an item via ITEM=, if the created item has a RETURN 1 in @EquipTest
 			// (or if the NPC has a RETURN 1 in @ItemEquipTest), the item will be created but not placed in the world.
 			// so, if this is an NPC, even if there's a RETURN 1 i need to bounce the item inside his pack
@@ -3314,6 +3324,9 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 				ItemBounce(pItem);
 			return false;
 		}
+
+	    // Reset layer to the original value.
+	    pItem->SetContainedLayer(requestedLayer);
 
 		if (pItem->IsDeleted())
 			return false;
@@ -3332,7 +3345,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
 	if (( IsTrigUsed(TRIGGER_EQUIP) ) || ( IsTrigUsed(TRIGGER_ITEMEQUIP) ))
 	{
-		if ( pItem->OnTrigger(ITRIG_EQUIP, this) == TRIGRET_RET_TRUE )
+        if ( pItem->OnTrigger(ITRIG_EQUIP, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -3446,20 +3459,21 @@ void CChar::EatAnim(CItem* pItem, ushort uiQty)
 	ushort uiStatsLimit = 0;
 	if (IsTrigUsed(TRIGGER_EAT))
 	{
-		CScriptTriggerArgs Args(uiStatsLimit);
-		Args.m_VarsLocal.SetNumNew("Hits", uiHits);
-		Args.m_VarsLocal.SetNumNew("Mana", uiMana);
-		Args.m_VarsLocal.SetNumNew("Stam", uiStam);
-		Args.m_VarsLocal.SetNumNew("Food", uiFood);
-        Args.m_pO1 = pItem;
-		if ( OnTrigger(CTRIG_Eat, this, &Args) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = uiStatsLimit;
+        pScriptArgs->m_VarsLocal.SetNumNew("Hits", uiHits);
+        pScriptArgs->m_VarsLocal.SetNumNew("Mana", uiMana);
+        pScriptArgs->m_VarsLocal.SetNumNew("Stam", uiStam);
+        pScriptArgs->m_VarsLocal.SetNumNew("Food", uiFood);
+        pScriptArgs->m_pO1 = pItem;
+        if ( OnTrigger(CTRIG_Eat, pScriptArgs, this) == TRIGRET_RET_TRUE )
 			return;
 
-		uiHits = (ushort)(Args.m_VarsLocal.GetKeyNum("Hits")) + Stat_GetVal(STAT_STR);
-		uiMana = (ushort)(Args.m_VarsLocal.GetKeyNum("Mana")) + Stat_GetVal(STAT_INT);
-		uiStam = (ushort)(Args.m_VarsLocal.GetKeyNum("Stam")) + Stat_GetVal(STAT_DEX);
-		uiFood = (ushort)(Args.m_VarsLocal.GetKeyNum("Food")) + Stat_GetVal(STAT_FOOD);
-		uiStatsLimit = (ushort)(Args.m_iN1);
+        uiHits = (ushort)(pScriptArgs->m_VarsLocal.GetKeyNum("Hits")) + Stat_GetVal(STAT_STR);
+        uiMana = (ushort)(pScriptArgs->m_VarsLocal.GetKeyNum("Mana")) + Stat_GetVal(STAT_INT);
+        uiStam = (ushort)(pScriptArgs->m_VarsLocal.GetKeyNum("Stam")) + Stat_GetVal(STAT_DEX);
+        uiFood = (ushort)(pScriptArgs->m_VarsLocal.GetKeyNum("Food")) + Stat_GetVal(STAT_FOOD);
+        uiStatsLimit = (ushort)(pScriptArgs->m_iN1);
 	}
 
 	if ( uiHits )
@@ -3485,7 +3499,7 @@ bool CChar::Reveal( uint64 iFlags )
 
     if (IsTrigUsed(TRIGGER_REVEAL))
     {
-        if (OnTrigger(CTRIG_Reveal, this, nullptr) == TRIGRET_RET_TRUE)
+        if (OnTrigger(CTRIG_Reveal, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE)
             return false;
     }
 
@@ -3910,7 +3924,7 @@ ITEMID_TYPE CChar::Horse_GetMountItemID() const
 {
 	tchar* ptcMountID = Str_GetTemp();
 	snprintf(ptcMountID, Str_TempLength(), "mount_0x%x", GetDispID());
-	lpctstr ptcMemoryID = g_Exp.m_VarDefs.GetKeyStr(ptcMountID);			// get the mount item defname from the mount_0x** defname
+    lpctstr ptcMemoryID = g_ExprGlobals.mtEngineLockedReader()->m_VarDefs.GetKeyStr(ptcMountID);			// get the mount item defname from the mount_0x** defname
 
 	CResourceID memoryRid = g_Cfg.ResourceGetID(RES_ITEMDEF, ptcMemoryID);
 	return (ITEMID_TYPE)(memoryRid.GetResIndex());	// get the ID of the memory (mount item)
@@ -3962,12 +3976,13 @@ bool CChar::Horse_Mount(CChar *pHorse)
 
 	if ( IsTrigUsed(TRIGGER_MOUNT) )
 	{
-		CScriptTriggerArgs Args(pHorse);
-        Args.m_iN1 = memoryId;
-   		if ( OnTrigger(CTRIG_Mount, this, &Args) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(pHorse);
+        pScriptArgs->m_iN1 = memoryId;
+        if ( OnTrigger(CTRIG_Mount, pScriptArgs, this) == TRIGRET_RET_TRUE )
 		    return false;
         else
-            memoryId = ITEMID_TYPE(Args.m_iN1);//(ITEMID_TYPE) Args.m_iN1;
+            memoryId = ITEMID_TYPE(pScriptArgs->m_iN1);//(ITEMID_TYPE) Args.m_iN1;
 	}
 
 	// Create the figurine for the horse (Memory item equiped on layer 25 of the player)
@@ -4006,8 +4021,9 @@ bool CChar::Horse_UnMount()
 	CChar * pPet = pMountItem->m_itFigurine.m_UID.CharFind();
 	if (pPet && IsTrigUsed(TRIGGER_DISMOUNT) && pPet->IsDisconnected() && !pPet->IsDeleted() ) // valid horse for trigger
 	{
-		CScriptTriggerArgs Args(pPet);
-		if ( OnTrigger(CTRIG_Dismount, this, &Args) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(pPet);
+        if ( OnTrigger(CTRIG_Dismount, pScriptArgs, this) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -4100,21 +4116,21 @@ bool CChar::OnTickEquip( CItem * pItem )
 				if ( ! m_pPlayer || m_pPlayer->m_wMurders <= 0  )
 					return false;
 
-				CScriptTriggerArgs	args;
-				args.m_iN1 = m_pPlayer->m_wMurders - 1;
-				args.m_iN2 = g_Cfg.m_iMurderDecayTime;
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_iN1 = m_pPlayer->m_wMurders - 1;
+                pScriptArgs->m_iN2 = g_Cfg.m_iMurderDecayTime;
 
 				if ( IsTrigUsed(TRIGGER_MURDERDECAY) )
 				{
-					OnTrigger(CTRIG_MurderDecay, this, &args);
-					if ( args.m_iN1 < 0 ) args.m_iN1 = 0;
-					if ( args.m_iN2 < 1 ) args.m_iN2 = g_Cfg.m_iMurderDecayTime;
+                    OnTrigger(CTRIG_MurderDecay, pScriptArgs, this);
+                    if ( pScriptArgs->m_iN1 < 0 ) pScriptArgs->m_iN1 = 0;
+                    if ( pScriptArgs->m_iN2 < 1 ) pScriptArgs->m_iN2 = g_Cfg.m_iMurderDecayTime;
 				}
 
-				m_pPlayer->m_wMurders = (word)(args.m_iN1);
+                m_pPlayer->m_wMurders = (word)(pScriptArgs->m_iN1);
 				NotoSave_Update();
 				if ( m_pPlayer->m_wMurders == 0 ) return false;
-				pItem->SetTimeout(args.m_iN2);	// update it's decay time.
+                pItem->SetTimeout(pScriptArgs->m_iN2);	// update it's decay time.
 				return true;
 			}
 
@@ -4302,7 +4318,7 @@ CChar::DeathRequestResult CChar::Death()
 
 	if ( IsTrigUsed(TRIGGER_DEATH) )
 	{
-		if ( OnTrigger(CTRIG_Death, this) == TRIGRET_RET_TRUE )
+        if ( OnTrigger(CTRIG_Death, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE )
             return DeathRequestResult::Aborted;
 	}
 	//Dismount now. Later is may be too late and cause problems
@@ -4346,10 +4362,9 @@ CChar::DeathRequestResult CChar::Death()
 		{
 			if ( IsTrigUsed(TRIGGER_KILL) )
 			{
-				CScriptTriggerArgs args(this);
-				args.m_iN1 = GetAttackersCount();
-                args.m_pO1 = this;
-				if ( pKiller->OnTrigger(CTRIG_Kill, pKiller, &args) == TRIGRET_RET_TRUE )
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(GetAttackersCount(), 0, 0, this);
+                if ( pKiller->OnTrigger(CTRIG_Kill, pScriptArgs, pKiller) == TRIGRET_RET_TRUE )
 					continue;
 			}
 
@@ -4397,8 +4412,9 @@ CChar::DeathRequestResult CChar::Death()
 	{
 		if ( IsTrigUsed(TRIGGER_DEATHCORPSE) )
 		{
-			CScriptTriggerArgs Args(pCorpse);
-			OnTrigger(CTRIG_DeathCorpse, this, &Args);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(pCorpse);
+            OnTrigger(CTRIG_DeathCorpse, pScriptArgs, this);
 		}
 	}
 	m_lastAttackers.clear();	// clear list of attackers
@@ -4592,6 +4608,7 @@ bool CChar::ShoveCharAtPosition(CPointMap const& ptDst, ushort *uiStaminaRequire
     // If i'm not pathfinding, ensure that i pass a valid uiStaminaRequirement, since i'll need it for the walk checks.
     ASSERT(fPathFinding || (nullptr != uiStaminaRequirement));
     ushort uiLocalStamReq = 0;
+    bool fRequireFullStamina = true;
 
     CItem *pPoly = LayerFind(LAYER_SPELL_Polymorph);
     auto AreaChars = CWorldSearchHolder::GetInstance(ptDst);
@@ -4613,28 +4630,34 @@ bool CChar::ShoveCharAtPosition(CPointMap const& ptDst, ushort *uiStaminaRequire
         else if ((pPoly && pPoly->m_itSpell.m_spell == SPELL_Wraith_Form) && (GetTopMap() == 0))		// chars under Wraith Form effect can always walk through chars in Felucca
             uiLocalStamReq = 0;
 
+        fRequireFullStamina = true;
+
         TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
         if (!fPathFinding)  //You want to avoid to trig the triggers if it's only a pathfinding evaluation
         {
             if (IsTrigUsed(TRIGGER_PERSONALSPACE))
             {
-                CScriptTriggerArgs Args(uiLocalStamReq);
-                iRet = pChar->OnTrigger(CTRIG_PersonalSpace, this, &Args);
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_iN1 = uiLocalStamReq;
+                pScriptArgs->m_iN3 = fRequireFullStamina;
+                iRet = pChar->OnTrigger(CTRIG_PersonalSpace, pScriptArgs, this);
                 if (iRet == TRIGRET_RET_TRUE)
                     goto set_and_return_false;
-                uiLocalStamReq = (ushort)(Args.m_iN1);
+                uiLocalStamReq = (ushort)(pScriptArgs->m_iN1);
+                fRequireFullStamina = static_cast<bool>(pScriptArgs->m_iN3);
             }
             if (IsTrigUsed(TRIGGER_CHARSHOVE))
             {
-                CScriptTriggerArgs Args(uiLocalStamReq);
-                iRet = this->OnTrigger(CTRIG_charShove, pChar, &Args);
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_iN1 = uiLocalStamReq;
+                iRet = this->OnTrigger(CTRIG_charShove, pScriptArgs, pChar);
                 if (iRet == TRIGRET_RET_TRUE)
                     goto set_and_return_false;
-                uiLocalStamReq = (ushort)(Args.m_iN1);
+                uiLocalStamReq = (ushort)(pScriptArgs->m_iN1);
             }
         }
 
-        if ((uiLocalStamReq > 0) && (Stat_GetVal(STAT_DEX) < Stat_GetMaxAdjusted(STAT_DEX)))
+        if ((uiLocalStamReq > 0) && fRequireFullStamina && (Stat_GetVal(STAT_DEX) < Stat_GetMaxAdjusted(STAT_DEX)))
             goto set_and_return_false;
 
         if (Stat_GetVal(STAT_DEX) < uiLocalStamReq)		// check if we have enough stamina to push the char
@@ -4755,8 +4778,9 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 			//char is falling
 			if ( IsTrigUsed(TRIGGER_FALLING) )
 			{
-                CScriptTriggerArgs Args(ptDst.m_x, ptDst.m_y, ptDst.m_z);
-				OnTrigger(CTRIG_Falling, this, &Args);
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(ptDst.m_x, ptDst.m_y, ptDst.m_z, nullptr);
+                OnTrigger(CTRIG_Falling, pScriptArgs, this);
 			}
 		}
 
@@ -4821,7 +4845,7 @@ void CChar::CheckRevealOnMove()
 		return;
 
 	if ( IsTrigUsed(TRIGGER_STEPSTEALTH) )
-		OnTrigger(CTRIG_StepStealth, this);
+        OnTrigger(CTRIG_StepStealth, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this);
 
     if (g_Cfg.m_iRevealFlags & REVEALF_ONHORSE && IsStatFlag(STATF_ONHORSE))
         Reveal();
@@ -4924,8 +4948,9 @@ TRIGRET_TYPE CChar::CheckLocationEffects(bool fStanding)
             else
             {
                 _uiRecursingItemStep += 1;
-                CScriptTriggerArgs Args(fStanding ? 1 : 0);
-                TRIGRET_TYPE iRet = pItem->OnTrigger(ITRIG_STEP, this, &Args);
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_iN1 = fStanding ? 1 : 0;
+                TRIGRET_TYPE iRet = pItem->OnTrigger(ITRIG_STEP, pScriptArgs, this);
                 _uiRecursingItemStep -= 1;
                 if (iRet == TRIGRET_RET_TRUE) // block walk
                 {
@@ -5080,7 +5105,7 @@ bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
 	if ( m_pArea == pNewArea )
 		return true;
 
-	if ( ! g_Serv.IsLoading())
+	if ( ! g_Serv.IsLoadingGeneric())
 	{
 		if ( fAllowReject && IsPriv( PRIV_GM ))
 		{
@@ -5101,8 +5126,9 @@ bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
 
 			if ( IsTrigUsed(TRIGGER_REGIONLEAVE) )
 			{
-				CScriptTriggerArgs Args(m_pArea);
-				if ( OnTrigger(CTRIG_RegionLeave, this, & Args) == TRIGRET_RET_TRUE )
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(m_pArea);
+                if ( OnTrigger(CTRIG_RegionLeave, pScriptArgs, this) == TRIGRET_RET_TRUE )
 				{
 					if ( pNewArea && fAllowReject )
 						return false;
@@ -5162,8 +5188,9 @@ bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
 			}
 			if ( IsTrigUsed(TRIGGER_REGIONENTER) )
 			{
-				CScriptTriggerArgs Args(pNewArea);
-				if ( OnTrigger(CTRIG_RegionEnter, this, & Args) == TRIGRET_RET_TRUE )
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(pNewArea);
+                if ( OnTrigger(CTRIG_RegionEnter, pScriptArgs, this) == TRIGRET_RET_TRUE )
 				{
 					if ( m_pArea && fAllowReject )
 						return false;
@@ -5186,7 +5213,7 @@ bool CChar::MoveToRoom( CRegion * pNewRoom, bool fAllowReject)
 	if ( m_pRoom == pNewRoom )
 		return true;
 
-	if ( ! g_Serv.IsLoading())
+	if ( ! g_Serv.IsLoadingGeneric())
 	{
 		if ( fAllowReject && IsPriv( PRIV_GM ))
 		{
@@ -5207,8 +5234,9 @@ bool CChar::MoveToRoom( CRegion * pNewRoom, bool fAllowReject)
 
 			if ( IsTrigUsed(TRIGGER_REGIONLEAVE) )
 			{
-				CScriptTriggerArgs Args(m_pRoom);
-				if ( OnTrigger(CTRIG_RegionLeave, this, & Args) == TRIGRET_RET_TRUE )
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(m_pRoom);
+                if ( OnTrigger(CTRIG_RegionLeave, pScriptArgs, this) == TRIGRET_RET_TRUE )
 				{
 					if (fAllowReject )
 						return false;
@@ -5229,8 +5257,9 @@ bool CChar::MoveToRoom( CRegion * pNewRoom, bool fAllowReject)
 			}
 			if ( IsTrigUsed(TRIGGER_REGIONENTER) )
 			{
-				CScriptTriggerArgs Args(pNewRoom);
-				if ( OnTrigger(CTRIG_RegionEnter, this, & Args) == TRIGRET_RET_TRUE )
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(pNewRoom);
+                if ( OnTrigger(CTRIG_RegionEnter, pScriptArgs, this) == TRIGRET_RET_TRUE )
 				{
 					if (fAllowReject )
 						return false;
@@ -5298,12 +5327,17 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocationE
 	if ( !m_fClimbUpdated || fForceFix )
 		FixClimbHeight();
 
-	if ( fSectorChanged && !g_Serv.IsLoading() )
+	if ( fSectorChanged && !g_Serv.IsLoadingGeneric() )
 	{
 		if ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) )
 		{
-			CScriptTriggerArgs Args(ptOld.m_x, ptOld.m_y, ((uchar)ptOld.m_z << 16) | ptOld.m_map);
-			OnTrigger(CTRIG_EnvironChange, this, &Args);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(
+                         ptOld.m_x,
+                         ptOld.m_y,
+                         ((uchar)ptOld.m_z << 16) | ptOld.m_map,
+                         nullptr);
+            OnTrigger(CTRIG_EnvironChange, pScriptArgs, this);
 		}
 	}
 
@@ -5494,13 +5528,14 @@ void CChar::SetTriggerActive(lpctstr trig)
 // 4) CHARDEF
 // 5) EVENTSPET/EVENTSPLAYER set on .ini file
 // RETURNS = TRIGRET_TYPE (in cscriptobj.h)
-TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
+TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CChar::OnTrigger");
 
 	if ( IsTriggerActive( pszTrigName ) ) //This should protect any char trigger from infinite loop
 		return TRIGRET_RET_DEFAULT;
 
+    ASSERT(pScriptArgs);
 	if ( !pSrc )
 		pSrc = &g_Serv;
 
@@ -5528,7 +5563,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
                 EXC_SET_BLOCK("chardef");
                 const CUID uidOldAct = pChar->m_Act_UID;
                 pChar->m_Act_UID = GetUID();
-                iRet = pChar->OnTrigger(ptcCharTrigName, pSrc, pArgs);
+                iRet = pChar->OnTrigger(ptcCharTrigName, pScriptArgs, pSrc);
                 pChar->m_Act_UID = uidOldAct;
                 if (iRet == TRIGRET_RET_TRUE)
                     goto stopandret; // Block further action.
@@ -5542,7 +5577,12 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	//
 	if ( IsTrigUsed(pszTrigName) )
 	{
-		fc::vector_set<const CResourceLink*> executedEvents;
+        std::vector<const CResourceLink*> executedEvents;
+        auto fnShouldSkipLink = [&executedEvents, &iAction](const CResourceLink *pLink) -> bool
+        {
+            return (!pLink || !pLink->HasTrigger(iAction)
+            || (executedEvents.end() != std::find(executedEvents.begin(), executedEvents.end(), pLink)));
+        };
 
         {
             EXC_SET_BLOCK("events");
@@ -5551,15 +5591,15 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
             for (size_t i = 0; i < curEvents; ++i) // EVENTS (could be modifyed ingame!)
             {
                 CResourceLink* pLink = m_OEvents[i].GetRef();
-                if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                if (fnShouldSkipLink(pLink))
                     continue;
 
                 CResourceLock s;
                 if (!pLink->ResourceLock(s))
                     continue;
 
-				executedEvents.emplace(pLink);
-                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                executedEvents.emplace_back(pLink);
+                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
                 if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
                     goto stopandret;
 
@@ -5579,15 +5619,15 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			for ( size_t i = 0; i < pCharDef->m_TEvents.size(); ++i )
 			{
 				CResourceLink * pLink = pCharDef->m_TEvents[i].GetRef();
-				if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                if (fnShouldSkipLink(pLink))
 					continue;
 
 				CResourceLock s;
 				if (!pLink->ResourceLock(s))
 					continue;
 
-				executedEvents.emplace(pLink);
-				iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                executedEvents.emplace_back(pLink);
+                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
 				if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 					goto stopandret;
 			}
@@ -5602,7 +5642,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 				CResourceLock s;
 				if ( pCharDef->ResourceLock(s) )
 				{
-					iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
 					if (( iRet != TRIGRET_RET_FALSE ) && ( iRet != TRIGRET_RET_DEFAULT ))
 						goto stopandret;
 				}
@@ -5616,15 +5656,15 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
 			{
 				CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i].GetRef();
-				if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                if (fnShouldSkipLink(pLink))
 					continue;
 
 				CResourceLock s;
 				if (!pLink->ResourceLock(s))
 					continue;
 
-				executedEvents.emplace(pLink);
-				iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                executedEvents.emplace_back(pLink);
+                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
 				if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 					goto stopandret;
 			}
@@ -5638,15 +5678,15 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			for ( size_t i = 0; i < g_Cfg.m_pEventsPlayerLink.size(); ++i )
 			{
 				CResourceLink *pLink = g_Cfg.m_pEventsPlayerLink[i].GetRef();
-				if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                if (fnShouldSkipLink(pLink))
 					continue;
 
 				CResourceLock s;
 				if (!pLink->ResourceLock(s))
 					continue;
 
-				executedEvents.emplace(pLink);
-				iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                executedEvents.emplace_back(pLink);
+                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
 				if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 					goto stopandret;
 			}
@@ -5664,10 +5704,10 @@ stopandret:
 	return iRet;
 }
 
-TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
+TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc )
 {
 	ASSERT( (trigger > CTRIG_AAAUNUSED) && (trigger < CTRIG_QTY) );
-	return OnTrigger( CChar::sm_szTrigName[trigger], pSrc, pArgs );
+    return OnTrigger( CChar::sm_szTrigName[trigger], pScriptArgs, pSrc);
 }
 
 // process m_fStatusUpdate flags
@@ -5776,10 +5816,10 @@ void CChar::OnTickSkill()
     EXC_CATCHSUB("Skill tick");
 }
 
-bool CChar::_CanTick() const
+bool CChar::_TickableStateBase() const
 {
-    //ADDTOCALLSTACK_DEBUG("CChar::_CanTick");
-	EXC_TRY("Can tick?");
+    //ADDTOCALLSTACK_DEBUG("CChar::_TickableStateBase");
+    EXC_TRY("Able to tick?");
 
     if (IsDisconnected())
 	{
@@ -5787,10 +5827,12 @@ bool CChar::_CanTick() const
         if (Skill_GetActive() == NPCACT_RIDDEN)
             return true;
 
-		return false;
+        //const std::optional<bool> fOverriding = _TickableStateOverride();
+        //return fOverriding.value_or(false);
+        return false;
 	}
 
-    return CObjBase::_CanTick();
+    return CObjBase::_TickableStateBase();
 
 	EXC_CATCH;
 
@@ -5840,32 +5882,47 @@ bool CChar::_OnTick()
 
 	EXC_SET_BLOCK("Can Tick?");
 
-    // This check shouldn't be needed, since it's already done in _CanTick, but we'll leave it here for now until further tests.
-    if (_IsSleeping() || IsDisconnected())
-	{
-        // In this cases, only mounted horses can still get a tick.
-        if (Skill_GetActive() != NPCACT_RIDDEN)
-            return true;
-	}
+    const bool fTickableState  = _CanTick(false);
+    const bool fSleeping       = _IsSleeping();
 
-    if (!_CanTick())
+//#ifdef _DEBUG
+    if (!fTickableState || fSleeping)
+    {
+        g_Log.EventDebug("[Temporary msg] Char '%s' (UID=0x%" PRIx32 ") at P=%s is in the ticking list with unusual CanTick=%d, SleepingState=%d.\n",
+                         GetName(), GetUID().GetObjUID(),
+                         GetTopPoint().WriteUsed(),
+                         (int)fTickableState, (int)fSleeping
+                         );
+    }
+//#endif
+
+    if (!fTickableState)
 	{
         // It can happen that i'm in the ticking list, but for various reasons right now i'm in a non-tickable state.
         // Among the reasons why i can't tick, though, there cannot be being in a sleeping state: when a char goes into sleeping state
         //  it should also be removed from the list (it happens in _GoSleep()).
-		ASSERT(!_IsSleeping());
+        if (!fSleeping) {
+            g_Log.EventDebug("[Temporary msg] CChar sleeping and not in tickable state but in the ticking list? Sector sleep status=%d.\n",
+                             (int)GetTopSector()->IsSleeping());
+        }
+        //ASSERT(!fSleeping);
 
 		if (GetTopSector()->IsSleeping() && !g_Rand.Get16ValFast(15))
 		{
             // Do not make the char sleep right when it enters a sleeping sector. Doing this
             //  will lead to an accumulation of npcs at the edge of the new sector.
 
+//#ifdef _DEBUG
+            g_Log.EventDebug("[Temporary msg] Sent CChar to sleep (random), to be awaken alongside its sector.\n");
+//#endif
+
 			_SetTimeout(1);      //Make it tick after sector's awakening.
 			_GoSleep();
-			return true;
 		}
+        return true;
 	}
-    ASSERT(!_IsSleeping());
+    if (fSleeping)
+        return true;
 
 	EXC_SET_BLOCK("Components Tick");
 	/*
@@ -6024,7 +6081,12 @@ do_status_update:
 int64 CChar::PayGold(CChar * pCharSrc, int64 iGold, CItem * pGold, ePayGold iReason)
 {
     ADDTOCALLSTACK("CChar::PayGold");
-    CScriptTriggerArgs Args(iGold,iReason,pGold);
-    OnTrigger(CTRIG_PayGold,pCharSrc,&Args);
-    return Args.m_iN1;
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(
+                iGold,
+                iReason,
+                0,
+                pGold);
+    OnTrigger(CTRIG_PayGold, pScriptArgs, pCharSrc);
+    return pScriptArgs->m_iN1;
 }

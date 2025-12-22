@@ -1,11 +1,11 @@
 /**
-* @file CQueue.cpp
+* @file CSQueue.cpp
 */
 
 #include <cstring>
 #include "CSQueue.h"
 
-// CSQueueBytes:: Constructors, Destructor, Asign operator.
+// CSQueueBytes:: Constructors, Destructor, Assign operator.
 
 CSQueueBytes::CSQueueBytes() noexcept :
     m_iDataQty(0)

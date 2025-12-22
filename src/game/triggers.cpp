@@ -26,7 +26,7 @@ static std::vector<TRIGGER_T_ID> sm_vTriggersId;
 
 bool IsTrigUsed(E_TRIGGERS id)
 {
-    if ( g_Serv.IsLoading() == true)
+    if ( g_Serv.IsLoadingGeneric() == true)
         return false;
 
     return (( (uint)id < sm_vTriggersId.size() ) && sm_vTriggersId[id].m_used );
@@ -34,7 +34,7 @@ bool IsTrigUsed(E_TRIGGERS id)
 
 bool IsTrigUsed(const char *name)
 {
-    if ( g_Serv.IsLoading() == true)
+    if ( g_Serv.IsLoadingGeneric() == true)
         return false;
 
     const int index = FindTableSorted(name, kOrderedTrigsNames, ARRAY_COUNT(kOrderedTrigsNames));

@@ -94,7 +94,7 @@ set(ZLIB_SRCS
 source_group(lib\\zlib FILES ${ZLIB_PUBLIC_HDRS})
 
 # make the headers available in the include path (accessible with < >).
-add_library(zlib STATIC ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS} ${ZLIB_SRCS})
+add_library(zlib OBJECT ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS} ${ZLIB_SRCS})
 # add to the proper directories in the solution explorer (eg. Visual Studio)
 target_include_directories(zlib PUBLIC .)
 

@@ -5,9 +5,11 @@
 #include "../../../game/CWorld.h"
 #include "../../../game/CWorldGameTime.h"
 #include "../../../network/CClientIterator.h"
+#include "../../../network/send.h"
 #include "../../sphere_library/CSFileList.h"
-#include "../../CException.h"
-#include "../../CExpression.h"
+//#include "../../CException.h" // included in the precompiled header
+//#include "../../CExpression.h" // included in the precompiled header
+//#include "../../CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../sphereversion.h"
 #include "../CResourceLock.h"
 #include "CWebPageDef.h"
@@ -163,10 +165,6 @@ bool CWebPageDef::r_LoadVal( CScript & s ) // Load an item Script
 			return SetSourceFile( s.GetArgStr(), nullptr );
 		case WC_WEBPAGEUPDATE:	// (seconds)
 			m_iUpdatePeriod = s.GetArgVal();
-			if ( m_iUpdatePeriod && (m_type == WEBPAGE_TEXT) )
-			{
-				m_type = WEBPAGE_TEMPLATE;
-			}
 			break;
 		default:
 			return CScriptObj::r_LoadVal( s );
@@ -219,7 +217,14 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					if ( pszArgs[0] == '\0' )
 						pszArgs = "<tr><td>%NAME%</td><td>%REGION.NAME%</td></tr>\n";
 					Str_CopyLimitNull( pszTmp2, pszArgs, Str_TempLength() );
-					pChar->ParseScriptText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
+
+                    CScriptExprContext scpContext{._pScriptObjI = pChar};
+                    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                    CExpression::GetExprParser().ParseScriptText(
+                        Str_MakeFiltered(pszTmp2),
+                        scpContext, pScriptArgs,
+                        &g_Serv, 1 );
+
 					pSrc->SysMessage( pszTmp2 );
 				}
 			}
@@ -231,7 +236,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 				if ( !s.HasArgs() )
 					return false;
 
-				IT_TYPE	needtype = ( iHeadKey == WV_GUILDLIST ) ? IT_STONE_GUILD : IT_STONE_TOWN;
+                const IT_TYPE needtype = ( iHeadKey == WV_GUILDLIST ) ? IT_STONE_GUILD : IT_STONE_TOWN;
 
 				for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 				{
@@ -240,10 +245,16 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 						continue;
 
 					++sm_iListIndex;
-
 					Str_CopyLimitNull(pszTmp2, s.GetArgStr(), Str_TempLength());
-					pStone->ParseScriptText(Str_MakeFiltered(pszTmp2), &g_Serv, 1);
-					pSrc->SysMessage(pszTmp2);
+
+                    CScriptExprContext scpContext{._pScriptObjI = pStone};
+                    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                    CExpression::GetExprParser().ParseScriptText(
+                        Str_MakeFiltered(pszTmp2),
+                        scpContext, pScriptArgs,
+                        &g_Serv, 1);
+
+                    pSrc->SysMessage(pszTmp2);
 				}
 			}
 			break;
@@ -257,7 +268,14 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					CGMPage* pPage = sptrPage.get();
 					++sm_iListIndex;
 					Str_CopyLimitNull( pszTmp2, s.GetArgStr(), Str_TempLength());
-					pPage->ParseScriptText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
+
+                    CScriptExprContext scpContext{._pScriptObjI = pPage};
+                    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                    CExpression::GetExprParser().ParseScriptText(
+                        Str_MakeFiltered(pszTmp2),
+                        scpContext, pScriptArgs,
+                        &g_Serv, 1 );
+
 					pSrc->SysMessage( pszTmp2 );
 				}
 			}
@@ -299,9 +317,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 	if ( pszDstName == nullptr )
 		pszDstName = m_sDstFilePath;
 
-	if ( m_type != WEBPAGE_TEMPLATE ||
-		*pszDstName == '\0' ||
-		m_sSrcFilePath.IsEmpty())
+	if (*pszDstName == '\0' || m_sSrcFilePath.IsEmpty())
 		return false;
 
 	CScript FileRead;
@@ -317,8 +333,8 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 		return false;
 	}
 
+    CExpression& expr_parser = CExpression::GetExprParser();
 	bool fScriptMode = false;
-
 	while ( FileRead.ReadTextLine( false ))
 	{
 		tchar *pszTmp = Str_GetTemp();
@@ -329,9 +345,15 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 		{
 			// Deal with the stuff preceding the scripts.
 			*pszHead = '\0';
-			pszHead += 26;
-			ParseScriptText( pszTmp, pSrc, 1 );
-			FileOut.SysMessage( pszTmp );
+            pszHead += 26;
+
+            CScriptExprContext scpContext{._pScriptObjI = this};
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            expr_parser.ParseScriptText(
+                pszTmp, scpContext, pScriptArgs,
+                pSrc, 1 );
+
+            FileOut.SysMessage( pszTmp );
 			fScriptMode = true;
 		}
 		else
@@ -369,7 +391,11 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 		}
 
 		// Look for stuff we can displace here. %STUFF%
-		ParseScriptText( pszHead, pSrc, 1 );
+        CScriptExprContext scpContext{._pScriptObjI = this};
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        expr_parser.ParseScriptText( pszHead,
+            scpContext, pScriptArgs,
+            pSrc, 1 );
 		FileOut.SysMessage( pszHead );
 	}
 
@@ -380,8 +406,6 @@ void CWebPageDef::WebPageLog()
 {
 	ADDTOCALLSTACK("CWebPageDef::WebPageLog");
 	if ( ! m_iUpdateLog || ! m_iUpdatePeriod )
-		return;
-	if ( m_type != WEBPAGE_TEMPLATE )
 		return;
 
 	CSFileText FileRead;
@@ -417,6 +441,12 @@ lpctstr const CWebPageDef::sm_szPageExt[] =
 	".JPG",
 	".JS",
 	".TXT",
+	".PNG",
+	".SVG",
+    ".WEBP",
+    ".XML",
+    ".CSV",
+    ".JSON",
 };
 
 bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
@@ -425,13 +455,19 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 	static WEBPAGE_TYPE const sm_szPageExtType[] =
 	{
 		WEBPAGE_BMP,
-		WEBPAGE_GIF,
+	    WEBPAGE_GIF,
 		WEBPAGE_TEMPLATE,
         WEBPAGE_TEMPLATE,
 		WEBPAGE_JPG,
 		WEBPAGE_JPG,
-		WEBPAGE_TEXT,
-		WEBPAGE_TEXT
+		WEBPAGE_JS,
+	    WEBPAGE_TEXT,
+	    WEBPAGE_PNG,
+	    WEBPAGE_SVG,
+	    WEBPAGE_WEBP,
+        WEBPAGE_XML,
+        WEBPAGE_CSV,
+        WEBPAGE_JSON,
 	};
 
 	// attempt to set this to a source file.
@@ -444,7 +480,7 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 	if ( pszExt == nullptr || pszExt[0] == '\0' )
 		return false;
 
-	int iType = FindTableSorted( pszExt, sm_szPageExt, ARRAY_COUNT( sm_szPageExt ));
+    const int iType = FindTable(pszExt, sm_szPageExt, ARRAY_COUNT(sm_szPageExt));
 	if ( iType < 0 )
 		return false;
 	m_type = sm_szPageExtType[iType];
@@ -502,11 +538,18 @@ bool CWebPageDef::IsMatch( lpctstr pszMatch ) const
 
 lpctstr const CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
 {
-	"text/html",		// WEBPAGE_TEMPLATE (.htm)
-	"text/html",		// WEBPAGE_TEMPLATE (.html)
-	"image/x-xbitmap",	// WEBPAGE_BMP,
+	"text/html",		// WEBPAGE_TEMPLATE
+	"text/plain",		// WEBPAGE_TEXT
+	"image/bmp",	    // WEBPAGE_BMP,
 	"image/gif",		// WEBPAGE_GIF,
 	"image/jpeg",		// WEBPAGE_JPG,
+	"text/javascript",	// WEBPAGE_JS,
+	"image/png",		// WEBPAGE_PNG,
+	"image/svg+xml",	// WEBPAGE_SVG,
+	"image/webp",		// WEBPAGE_WEBP,
+	"text/xml",		    // WEBPAGE_XML,
+	"application/json",	// WEBPAGE_JSON,
+	"text/csv",		    // WEBPAGE_CSV,
 	nullptr				// WEBPAGE_QTY
 };
 
@@ -534,7 +577,9 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 		CResourceLock s;
 		if ( ResourceLock(s))
 		{
-			if (CScriptObj::OnTriggerScript( s, sm_szTrigName[WTRIG_Load], pClient, nullptr ) == TRIGRET_RET_TRUE)
+            // Taking the script args by this way is allowed only because the web page is parsed by the main thread.
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            if (CScriptObj::OnTriggerScript( s, sm_szTrigName[WTRIG_Load], pScriptArgs, pClient ) == TRIGRET_RET_TRUE)
 				return 0;	// Block further action.
 		}
 	}
@@ -552,7 +597,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 	lpctstr pszName;
 	bool fGenerate = false;
 
-	if ( m_type == WEBPAGE_TEMPLATE ) // my version of cgi
+	if (m_type == WEBPAGE_TEMPLATE || m_type == WEBPAGE_TEXT || m_type == WEBPAGE_XML || m_type == WEBPAGE_JSON || m_type == WEBPAGE_CSV) // my version of cgi
 	{
 		pszName = GetDstName();
 		if ( pszName[0] == '\0' )
@@ -613,7 +658,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 		sm_szPageType[m_type] // type of the file. image/gif, image/x-xbitmap, image/jpeg
 		);
 
-	if ( m_type == WEBPAGE_TEMPLATE )
+	if (m_type == WEBPAGE_TEMPLATE || m_type == WEBPAGE_TEXT || m_type == WEBPAGE_XML || m_type == WEBPAGE_JSON || m_type == WEBPAGE_CSV)
 		iLen += snprintf(szTmp + iLen, uiWebDataBufSize - iLen, "Expires: 0\r\n");
 	else
 		iLen += snprintf(szTmp + iLen, uiWebDataBufSize - iLen, "Last-Modified: %s\r\n",  CSTime(dateChange).FormatGmt(nullptr));
@@ -714,7 +759,9 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 	// B or BTN or BUTTON = the buttons
 	// C or CHK or CHECK = the check boxes
 
-	CDialogResponseArgs resp;
+    // TODO: just split CDialogResponseArgs into two objects (CScriptTriggerArgs and a struct for other data?)
+    //  Or just make CScriptTriggerArgs a member of CDialogResponseArgs... Favor composition over inheritance!
+    auto resp = std::make_shared<CDialogResponseArgs>();
 	dword dwButtonID = UINT32_MAX;
 	for ( int i = 0; i < iArgs; ++i )
 	{
@@ -742,7 +789,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 					continue;
 				if ( atoi(pszNum) )
 				{
-                    resp.m_CheckArray.push_back(iNum);
+                    resp->m_CheckArray.push_back(iNum);
 				}
 				break;
 			case 'T':
@@ -750,7 +797,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 				{
 					tchar *pszData = Str_GetTemp();
 					HtmlDeCode( pszData, pszNum );
-					resp.AddText((word)(iNum), pszData);
+                    resp->AddText((word)(iNum), pszData);
 				}
 				break;
 		}
@@ -766,7 +813,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 	{
 		if ( !s.IsKeyHead("ON", 2) || ( (dword)s.GetArgVal() != dwButtonID ))
 			continue;
-		OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, pClient, &resp);
+        OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, resp, pClient);
 		return true;
 	}
 
