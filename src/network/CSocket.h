@@ -106,7 +106,7 @@ class CSocket
 private:
 	SOCKET  m_hSocket;	// socket connect handle
 
-	void Clear();
+    void Clear() noexcept;
 
 public:
 	static const char *m_sClassName;
@@ -121,10 +121,10 @@ private:
 
 public:
 	static int GetLastError(bool bUseErrno = false);
-	bool IsOpen() const;
+    bool IsOpen() const noexcept;
 
 	void SetSocket(SOCKET socket);
-	SOCKET GetSocket() const;
+    SOCKET GetSocket() const noexcept;
 
 	bool Create();
 	bool Create( int iAf, int iType, int iProtocol );
@@ -159,10 +159,10 @@ public:
 #endif
 
 	int SetNonBlocking(bool bEnable = true);
-	void Close();
+    void Close() noexcept;
 
-	static void CloseSocket( SOCKET hClose );
-	static short GetProtocolIdByName( lpctstr pszName );
+    static void CloseSocket( SOCKET hClose ) noexcept;
+    static short GetProtocolIdByName( lpctstr pszName ) noexcept;
 };
 
 #endif // _INC_CSOCKET_H

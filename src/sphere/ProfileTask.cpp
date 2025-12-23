@@ -4,10 +4,14 @@
 #include "threads.h"
 
 
-ProfileData& GetCurrentProfileData()
+ProfileData& GetCurrentProfileData() noexcept
 {
     auto cur_thread = static_cast<AbstractSphereThread*>(ThreadHolder::get().current());
-    ASSERT(cur_thread);
+    if (!cur_thread)
+    {
+        reserved_stderr_log("CRITICAL: Can't get ProfileData for current thread. Aborting.\n");
+        RaiseImmediateAbort(40);
+    }
     return cur_thread->m_profile;
 }
 
@@ -24,7 +28,7 @@ ProfileTask::ProfileTask(PROFILE_TYPE id) :
 	AbstractThread* icontext = th.current();
 	if (icontext == nullptr)
 	{
-		// Thread was deleted, manually or by app servClosing signal.
+        // Thread was deleted, manually or by app closing signal.
 		return;
 	}
 

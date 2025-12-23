@@ -76,8 +76,8 @@ bool PingServer::shouldExit() noexcept
 	return AbstractSphereThread::shouldExit();
 }
 
-void PingServer::waitForClose()
+void PingServer::waitForClose() noexcept
 {
-	m_socket.Close();
+    m_socket.Close();
 	AbstractSphereThread::waitForClose();
 }

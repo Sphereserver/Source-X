@@ -109,14 +109,14 @@ public:
     threadid_t     getId() const noexcept { return m_threadSystemId; }
     virtual const char *getName() const noexcept { return m_name; }
 
-    bool isActive() const;
-    bool checkStuck();
-    bool isClosing() const;
+    bool isActive() const noexcept;
+    bool checkStuck() noexcept;
+    bool isClosing() const noexcept;
 
     virtual void start();
-    virtual void terminate(bool ended);
-    virtual void waitForClose();
-    void         awaken();
+    virtual void terminate(bool ended) noexcept;
+    virtual void waitForClose() noexcept;
+    void         awaken() noexcept;
 
     void setPriority(ThreadPriority pri);
     ThreadPriority getPriority() const { return m_priority; }
@@ -290,7 +290,7 @@ public:
 
     void markThreadStarted(AbstractThread* pThr) CANTHROW;
 
-    // Helper to mark servClosing and set flags.
+    // Helper to mark closing and set flags.
     void markThreadsClosing() CANTHROW;
 
 private:

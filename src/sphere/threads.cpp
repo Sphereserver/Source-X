@@ -366,7 +366,7 @@ void ThreadHolder::markServEnteredRunMode() noexcept // static
     sg_inStartup.store(false, std::memory_order_relaxed);
 }
 
-// Record that threads are servClosing (fast-path observable).
+// Record that threads are closing (fast-path observable).
 void ThreadHolder::markServClosing() noexcept // static
 {
     sg_servClosing.store(true, std::memory_order_relaxed);
@@ -558,7 +558,7 @@ void AbstractThread::start()
     m_terminateEvent->reset();
 }
 
-void AbstractThread::terminate(bool ended)
+void AbstractThread::terminate(bool ended) noexcept
 {
     if (!isActive())
         return;
@@ -616,7 +616,7 @@ void AbstractThread::run()
         if (shouldExit())
             break;
 
-        bool gotException = false;
+        bool fGotException = false;
 
         if (m_uiHangCheck != 0)
             m_uiHangCheck = 0;
@@ -631,24 +631,24 @@ void AbstractThread::run()
         }
         catch (const CSError& e)
         {
-            gotException = true;
+            fGotException = true;
             g_Log.CatchEvent(&e, "THREADING Exception: CSError in %s::tick", getName());
             GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         }
         catch (const std::exception& e)
         {
-            gotException = true;
+            fGotException = true;
             g_Log.CatchStdException(&e, "THREADING Exception: std::exception in %s::tick", getName());
             GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         }
         catch (...)
         {
-            gotException = true;
+            fGotException = true;
             g_Log.CatchEvent(nullptr, "THREADING Exception: Unknown exception in %s::tick", getName());
             GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         }
 
-        if (gotException)
+        if (fGotException)
         {
             if (lastWasException)
                 ++exceptions;
@@ -696,18 +696,18 @@ SPHERE_THREADENTRY_RETNTYPE SPHERE_THREADENTRY_CALLTYPE AbstractThread::runner(v
 }
 
 
-bool AbstractThread::isActive() const
+bool AbstractThread::isActive() const noexcept
 {
     const bool fRet = m_handle.has_value();
     return fRet;
 }
 
-bool AbstractThread::isClosing() const
+bool AbstractThread::isClosing() const noexcept
 {
     return (m_uiState == eRunningState::Closing);
 }
 
-bool AbstractThread::checkStuck()
+bool AbstractThread::checkStuck() noexcept
 {
     if (!isActive())
         return false;
@@ -730,7 +730,7 @@ bool AbstractThread::checkStuck()
     return false;
 }
 
-void AbstractThread::waitForClose()
+void AbstractThread::waitForClose() noexcept
 {
     if (!isActive())
         return;
@@ -745,7 +745,7 @@ void AbstractThread::waitForClose()
     }
 }
 
-void AbstractThread::awaken()
+void AbstractThread::awaken() noexcept
 {
     m_sleepEvent->signal();
 }

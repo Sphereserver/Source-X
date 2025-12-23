@@ -42,7 +42,7 @@
 	public:
 		virtual void onStart() override;
 		virtual void tick() override;
-		virtual void waitForClose() override;
+        virtual void waitForClose() noexcept override;
 
 	private:
 		void forceClientevent(CNetState *, EventsID);
