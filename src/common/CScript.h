@@ -132,7 +132,7 @@ protected:
 
 	// text only functions:
     friend class CResourceLock;
-protected:  virtual bool _ReadTextLine( bool fRemoveBlanks );	// looking for a section or reading strangly formated section.
+protected:  virtual bool _ReadTextLine( bool fRemoveBlanks );	// looking for a section or reading strangly formatted section.
 public:     virtual bool ReadTextLine( bool fRemoveBlanks );
 public:     bool FindTextHeader( lpctstr pszName ); // Find a section in the current script
 

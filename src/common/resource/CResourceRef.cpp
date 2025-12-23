@@ -67,10 +67,9 @@ lpctstr CResourceRefArray::GetResourceName( size_t iIndex ) const
     return pResourceLink->GetResourceName();
 }
 
-bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
+bool CResourceRefArray::LoadValStr( lptstr ptcCmd, RES_TYPE restype )
 {
-    ADDTOCALLSTACK("CResourceRefArray::r_LoadVal");
-    EXC_TRY("LoadVal");
+    ADDTOCALLSTACK("CResourceRefArray::LoadValStr");
     // A bunch of CResourceLink (CResourceDef) pointers.
     // Add or remove from the list.
     // RETURN: false = it failed.
@@ -79,26 +78,25 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 
     bool fRet = true;
 
-    tchar * pszCmd = s.GetArgStr();
     tchar * ppBlocks[128];	// max is arbitrary
-    int iArgCount = Str_ParseCmds( pszCmd, ppBlocks, ARRAY_COUNT(ppBlocks));
+    int iArgCount = Str_ParseCmds( ptcCmd, ppBlocks, ARRAY_COUNT(ppBlocks));
     for ( int i = 0; i < iArgCount; ++i )
     {
         CResourceLink* pResourceLink = nullptr;
 
-        pszCmd = ppBlocks[i];
-        if ( pszCmd[0] == '-' )
+        ptcCmd = ppBlocks[i];
+        if ( ptcCmd[0] == '-' )
         {
             // remove a frag or all frags.
-            ++pszCmd;
-            if ( pszCmd[0] == '0' || pszCmd[0] == '*' )
+            ++ptcCmd;
+            if ( ptcCmd[0] == '0' || ptcCmd[0] == '*' )
             {
                 clear();
                 fRet = true;
                 continue;
             }
 
-            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.RegisteredResourceGetDefByName( restype, pszCmd ));
+            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.RegisteredResourceGetDefByName( restype, ptcCmd ));
             if (pResourceLink)
             {
                 const iterator pos = std::find(begin(), end(), pResourceLink);
@@ -112,10 +110,10 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
         else
         {
             // Add a single knowledge fragment or appropriate group item.
-            if ( pszCmd[0] == '+' )
-                ++pszCmd;
+            if ( ptcCmd[0] == '+' )
+                ++ptcCmd;
 
-            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.RegisteredResourceGetDefByName( restype, pszCmd ));
+            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.RegisteredResourceGetDefByName( restype, ptcCmd ));
             if ( pResourceLink )
             {
                 // Check if it's already in the list, before adding it
@@ -127,11 +125,20 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
         if (pResourceLink == nullptr)
         {
             fRet = false;
-            g_Log.EventError("Unknown '%s' Resource '%s'\n", CResourceHolder::GetResourceBlockName(restype), pszCmd);
+            g_Log.EventError("Unknown '%s' Resource '%s'\n", CResourceHolder::GetResourceBlockName(restype), ptcCmd);
         }
     }
 
     return fRet;
+}
+
+bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
+{
+    ADDTOCALLSTACK("CResourceRefArray::r_LoadVal");
+
+    EXC_TRY("LoadVal");
+    lptstr ptcCmd = s.GetArgStr();
+    return LoadValStr(ptcCmd, restype);
     EXC_CATCH;
 
     EXC_DEBUG_START;

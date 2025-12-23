@@ -59,6 +59,7 @@ public:
     size_t FindResourceName( RES_TYPE restype, lpctstr ptcKey ) const;
 
     void WriteResourceRefList( CSString & sVal ) const;
+    bool LoadValStr(lptstr ptcScriptText, RES_TYPE restype );
     bool r_LoadVal( CScript & s, RES_TYPE restype );
     void r_Write( CScript & s, lpctstr ptcKey ) const;
 

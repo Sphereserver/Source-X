@@ -23,11 +23,12 @@ size_t Str_TempLength() noexcept
 [[nodiscard]]
 tchar* Str_GetTemp() noexcept;
 
+// Returns a temporary string (from Str_GetTemp) where has been copied the content from ptcSrc
 [[nodiscard]]
-tchar* Str_CopyToTemp(lpctstr pSrc) noexcept;
+tchar* Str_CopyToTemp(lpctstr ptcSrc) noexcept;
 
 [[nodiscard]]
-lpctstr Str_mtEngineGetSafeTemp(lpctstr pSrc) noexcept;
+lpctstr Str_mtEngineGetSafeTemp(lpctstr ptcSrc) noexcept;
 
 
 //--
