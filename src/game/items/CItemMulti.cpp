@@ -24,7 +24,8 @@ CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :  
     CItem(id, pItemDef),
     CCMultiMovable(fTurnable)
 {
-    CItemBaseMulti * pItemBase = static_cast<CItemBaseMulti*>(Base_GetDef());
+    auto pItemBase = dynamic_cast<const CItemBaseMulti*>(Base_GetDef());
+    ASSERT(pItemBase);
     _shipSpeed.period = pItemBase->_shipSpeed.period;
     _shipSpeed.tiles = pItemBase->_shipSpeed.tiles;
     _eSpeedMode = pItemBase->m_SpeedMode;

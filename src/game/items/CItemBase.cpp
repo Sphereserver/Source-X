@@ -1660,17 +1660,30 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 		case IBC_ID:
 			{
-            if ( GetID() < ITEMID_MULTI )
+                const CResourceIDBase& ridMe = GetResourceID();
+                //const RES_TYPE iTypeMe = ridMe.GetResType();
+                const ITEMID_TYPE uiIDMe = (ITEMID_TYPE)ridMe.GetResIndex();
+
+                const CResourceIDBase& ridNew = g_Cfg.ResourceGetIDType( RES_ITEMDEF, s.GetArgStr());
+                //const RES_TYPE iTypeNew = ridNew.GetResType();
+                ITEMID_TYPE uiIDNew = (ITEMID_TYPE)ridNew.GetResIndex();
+
+                //const bool fTypeMismatch = (iTypeMe != iTypeNew);
+
+                const bool fMultiMe = (uiIDMe >= ITEMID_MULTI);
+                const bool fMultiNew = (uiIDNew >= ITEMID_MULTI);
+                const bool fMultiIDMismatch = fMultiMe ^ fMultiNew; // Bitwise XOR
+
+                if (fMultiIDMismatch)
                 {
                     g_Log.EventError( "Setting new ID for base type %s not allowed\n", GetResourceName());
                     return false;
                 }
 
-                ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
-                CItemBase * pItemDef = FindItemBase( id );	// make sure the base is loaded.
+                CItemBase * pItemDef = FindItemBase( uiIDNew );	// make sure the base is loaded.
                 if ( ! pItemDef )
                 {
-                    g_Log.EventError( "Setting unknown base ID=0%x for base type %s\n", id, GetResourceName());
+                    g_Log.EventError( "Setting unknown base ID=0%x for base type %s\n", uiIDNew, GetResourceName());
                     return false;
 				}
 
@@ -1680,12 +1693,12 @@ bool CItemBase::r_LoadVal( CScript &s )
                  * I leave a note here to know developers why I did this changed
                  * xwerswoodx
                  */
-                 if (!pItemDef->IsDupedItem(id))
-                    id = ITEMID_TYPE(pItemDef->m_dwDispIndex);
+                 if (!pItemDef->IsDupedItem(uiIDNew))
+                    uiIDNew = ITEMID_TYPE(pItemDef->m_dwDispIndex);
 
-                if ( ! IsValidDispID(id) )
+                if ( ! IsValidDispID(uiIDNew) )
                 {
-                    if (id >= g_Install.m_tiledata.GetItemMaxIndex())
+                    if (uiIDNew >= g_Install.m_tiledata.GetItemMaxIndex())
                         g_Log.EventError("Setting invalid ID=%s for base type %s (value is greater than the tiledata maximum index).\n", s.GetArgStr(), GetResourceName());
                     else
                         g_Log.EventError( "Setting invalid ID=%s for base type %s\n", s.GetArgStr(), GetResourceName());
@@ -1693,7 +1706,7 @@ bool CItemBase::r_LoadVal( CScript &s )
                 }
 
 				CopyBasic( pItemDef );
-				m_dwDispIndex = id;	// Might not be the default of a DUPEITEM
+                m_dwDispIndex = uiIDNew;	// Might not be the default of a DUPEITEM
 			}
 			break;
 
