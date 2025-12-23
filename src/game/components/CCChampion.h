@@ -114,9 +114,9 @@ private:
     static lpctstr const sm_szVerbKeys[];   ///< Action list.
 
     // Retrieved from CCChampionDef
-    typedef std::vector<CREID_TYPE> idNPC;
-    typedef std::map<uchar, idNPC> idSpawn;
-    idSpawn _spawnGroupsId;     ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
+    typedef std::vector<CREID_TYPE> vecNpcId_t;
+    typedef std::map<uchar, vecNpcId_t> mapIdSpawn_t;
+    mapIdSpawn_t _spawnGroupsId;     ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
     CResourceIDBase _idSpawn;   ///< legacy more1=ID of the Object to Spawn.
     CREID_TYPE _idChampion;     ///< Boss id
     CUID m_ChampionSummoned;    ///< True if the champion's boss has been summoned already (wether it was killed or not).
