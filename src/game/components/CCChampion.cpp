@@ -28,7 +28,7 @@
 #define MAXSPAWN 2400
 #define MAXLEVEL 5
 
-lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
+lpctstr constexpr CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
 {
     "ACTIVE",
     "ADDREDCANDLE",
@@ -53,7 +53,7 @@ lpctstr const CCChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
     nullptr
 };
 
-lpctstr const CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
+lpctstr constexpr CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
 {
     "ADDOBJ",
     "ADDSPAWN",
@@ -87,6 +87,7 @@ void CCChampion::Copy(const CComponent* target)
     UnreferencedParameter(target);
     //I don't see the point of duping a Champion, its insane and makes no sense,
     // if someone wants to totally dupe a champion it can be done from scripts.
+    g_Log.EventWarn("Can't copy a Champion instance.\n");
 }
 
 CCChampion::~CCChampion()
@@ -138,10 +139,10 @@ void CCChampion::Init()
         const CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pResDef);
         */
 
-        const int resId = _idSpawn.GetResIndex();
-        const CResourceIDBase rid(RES_CHAMPION, resId);
-        CResourceDef* pResDef = g_Cfg.RegisteredResourceGetDef(rid);
-        const CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pResDef);
+        const int iResId = _idSpawn.GetResIndex();
+        const CResourceIDBase rid(RES_CHAMPION, iResId);
+        const CResourceDef* pResDef = g_Cfg.RegisteredResourceGetDef(rid);
+        const CCChampionDef* pChampDef = static_cast<const CCChampionDef*>(pResDef);
 
         if (pChampDef != nullptr)
         {
@@ -172,7 +173,7 @@ void CCChampion::Start(CChar *pChar)
 
     if (pChar && IsTrigUsed(TRIGGER_START))
     {
-        // TODO: add source?
+        // TODO: add source/SRC?
         if (OnTrigger(ITRIG_Start, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pChar) == TRIGRET_RET_TRUE)
             return;
     }
@@ -183,7 +184,6 @@ void CCChampion::Start(CChar *pChar)
 
 void CCChampion::Stop(CChar* pChar)
 {
-    // TODO: stop trigger
     ADDTOCALLSTACK("CCChampion::Stop");
     if (pChar)
     {
@@ -219,7 +219,6 @@ void CCChampion::Complete()
     if (_fActive)
         Stop();
 
-    // TODO: add new trigger
     // TODO: Add attacker list in trigger.
     if (IsTrigUsed(TRIGGER_COMPLETE))
     {
@@ -257,8 +256,7 @@ void CCChampion::OnKill(const CUID& uid)
 void CCChampion::SpawnNPC()
 {
     ADDTOCALLSTACK("CCChampion::SpawnNPC");
-    CREID_TYPE pNpc = CREID_INVALID;
-    CResourceIDBase rid;
+    CREID_TYPE idNPC = CREID_INVALID;
 
     bool _fChampionSummoned = false;
     if (_iLevel >= _iLevelMax)
@@ -266,16 +264,17 @@ void CCChampion::SpawnNPC()
         // Max level? Time for boss challenge!
         if (m_ChampionSummoned.IsChar()) //Is boss already spawned?
             return;
+
         _iSpawnsNextWhite = 1;
         _iSpawnsCur = _iSpawnsMax - 1;
         _fChampionSummoned = true;
-        pNpc = _idChampion;
+        idNPC = _idChampion;
     }
     else
     {
         // Not ready for boss fight yet?
         size_t uiSize = _spawnGroupsId[_iLevel].size();
-        idSpawn idGroup;
+        mapIdSpawn_t idGroup;
         if (uiSize > 0)
             idGroup = _spawnGroupsId;
         else
@@ -298,7 +297,7 @@ void CCChampion::SpawnNPC()
         if (uiSize > 0 && uiSize <= UCHAR_MAX)
         {
             uchar ucRand = (uchar)g_Rand.GetVal((int)uiSize);
-            pNpc = idGroup[_iLevel][ucRand]; // Get the npc randomly from the list.
+            idNPC = idGroup[_iLevel][ucRand]; // Get the npc randomly from the list.
         }
         else
         {
@@ -316,11 +315,11 @@ void CCChampion::SpawnNPC()
         return;
     }
 
-    if (!pNpc)
+    if (!idNPC)
         return;
 
-    rid = CResourceIDBase(RES_CHARDEF, pNpc);
-    CResourceDef* pRes = g_Cfg.RegisteredResourceGetDef(rid);
+    const CResourceIDBase rid(RES_CHARDEF, idNPC);
+    const CResourceDef* pRes = g_Cfg.RegisteredResourceGetDef(rid);
     if (!pRes)
         return;
 
@@ -355,7 +354,7 @@ void CCChampion::AddWhiteCandle(const CUID& uid)
     _iSpawnsNextWhite = _iSpawnsNextRed / (CANDLESNEXTRED + 1);
 
     CItem* pCandle = nullptr;
-    CItem* pLink = static_cast<CItem*>(GetLink());
+    const CItem* pLink = static_cast<const CItem*>(GetLink());
     if (uid.IsValidUID())
     {
         _pWhiteCandles.emplace_back(uid);
@@ -364,7 +363,7 @@ void CCChampion::AddWhiteCandle(const CUID& uid)
 
     if (!pCandle)
     {
-        pCandle = pLink->CreateBase(ITEMID_SKULL_CANDLE);
+        pCandle = CItem::CreateBase(ITEMID_SKULL_CANDLE);
         if (!pCandle)
         {
             // If cannot create candle, force boss to spawn to be able to finish.
@@ -420,7 +419,7 @@ void CCChampion::AddRedCandle(const CUID& uid)
     ADDTOCALLSTACK("CCChampion::AddRedCandle");
 
     CItem* pCandle = nullptr;
-    CItem* pLink = static_cast<CItem*>(GetLink());
+    const CItem* pLink = static_cast<const CItem*>(GetLink());
     if (uid.IsValidUID())
     {
         _pRedCandles.emplace_back(uid);
@@ -441,7 +440,7 @@ void CCChampion::AddRedCandle(const CUID& uid)
 
     if (!pCandle)
     {
-        pCandle = pLink->CreateBase(ITEMID_SKULL_CANDLE);
+        pCandle = CItem::CreateBase(ITEMID_SKULL_CANDLE);
         if (!pCandle)
         {
             // If cannot create candle, force boss to spawn to be able to finish.
@@ -547,7 +546,7 @@ void CCChampion::SetLevel(byte iLevel)
     if (_iLevel < 1)
         _iLevel = 1;
 
-    ushort iLevelMonsters = GetMonstersCount();
+    const ushort iLevelMonsters = GetMonstersCount();
     _iCandlesNextLevel += GetCandlesCount();
 
     if (IsTrigUsed(TRIGGER_LEVEL))
@@ -567,8 +566,8 @@ void CCChampion::SetLevel(byte iLevel)
     }
 
     // TODO: As the level increases, the light on the area decreases.
-    ushort iRedMonsters = iLevelMonsters / _iCandlesNextLevel;
-    ushort iWhiteMonsters = iRedMonsters / (CANDLESNEXTRED + 1);
+    const ushort iRedMonsters = iLevelMonsters / _iCandlesNextLevel;
+    const ushort iWhiteMonsters = iRedMonsters / (CANDLESNEXTRED + 1);
     _iSpawnsNextWhite = iWhiteMonsters;
     _iSpawnsNextRed = iRedMonsters;
     GetLink()->SetTimeoutS(60 * 10);
@@ -580,18 +579,18 @@ void CCChampion::InitializeLists()
 
     /*
     * As we have _iLevelMax overrideable, we can't use static switch for it.
-    * The closest algorithm I could fine for it is;
+    * The closest algorithm I could find for it is;
     * [(100 / _iLevelMax) / (_iLevel - 1)] + (_iLevelMax - _iLevel)
     */
     _MonstersList.clear();
     _CandleList.clear();
 
-    uchar uiPerc = 100 / _iLevelMax;
+    const uchar uiPerc = 100 / _iLevelMax;
     uchar uiMonsterTotal = 0;
     uchar uiCandleTotal = 0;
     for (uchar i = (_iLevelMax - 2); i > 0; --i)
     {
-        uchar uiMonster = (uiPerc / i) + (_iLevelMax - (i + 1));
+        const uchar uiMonster = (uiPerc / i) + (_iLevelMax - (i + 1));
         _MonstersList.insert(_MonstersList.begin(), uiMonster); // Push the value from beginning.
         uiMonsterTotal += uiMonster;
     }
@@ -599,7 +598,7 @@ void CCChampion::InitializeLists()
 
     for (uchar i = (_iLevelMax - 1); i > 1; --i)
     {
-        uchar uiCandle = ((16 - uiCandleTotal) / i);
+        const uchar uiCandle = ((16 - uiCandleTotal) / i);
         _CandleList.insert(_CandleList.begin(), uiCandle);
         uiCandleTotal += uiCandle;
     }
@@ -623,8 +622,8 @@ uchar CCChampion::GetCandlesCount()
 
     if (_iLevel <= _CandleList.size())
         return _CandleList[_iLevel - 1];
-    return 16;
 
+    return 16;
 }
 
 ushort CCChampion::GetMonstersCount()
@@ -641,7 +640,7 @@ ushort CCChampion::GetMonstersCount()
 
     if (_iLevel <= _MonstersList.size())
     {
-        ushort ucPerc = (ushort)_MonstersList[_iLevel - 1];
+        const ushort ucPerc = (ushort)_MonstersList[_iLevel - 1];
         return (ucPerc * _iSpawnsMax) / 100;
     }
     return 1;
@@ -654,9 +653,9 @@ void CCChampion::DelWhiteCandle(CANDLEDELREASON_TYPE reason)
     if (_pWhiteCandles.empty())
         return;
 
-    CItem* pCandle;
-    CUID uidLastWhiteCandle = _pWhiteCandles.back();
-    if ((pCandle = uidLastWhiteCandle.ItemFind()))
+    const CUID uidLastWhiteCandle = _pWhiteCandles.back();
+    CItem* pCandle = uidLastWhiteCandle.ItemFind();
+    if (pCandle)
     {
         if (IsTrigUsed(TRIGGER_DELWHITECANDLE))
         {
@@ -667,7 +666,8 @@ void CCChampion::DelWhiteCandle(CANDLEDELREASON_TYPE reason)
                 return;
         }
 
-        if ((pCandle = uidLastWhiteCandle.ItemFind())) // Does the candle still exist after the trigger?
+        pCandle = uidLastWhiteCandle.ItemFind();
+        if (pCandle) // Does the candle still exist after the trigger?
             pCandle->Delete();
     }
     _pWhiteCandles.pop_back();
@@ -680,9 +680,9 @@ void CCChampion::DelRedCandle(CANDLEDELREASON_TYPE reason)
     if (_pRedCandles.empty())
         return;
 
-    CItem* pCandle;
-    CUID uidLastRedCandle = _pRedCandles.back();
-    if ((pCandle = uidLastRedCandle.ItemFind()))
+    const CUID uidLastRedCandle = _pRedCandles.back();
+    CItem* pCandle = uidLastRedCandle.ItemFind();
+    if (pCandle)
     {
         if (IsTrigUsed(TRIGGER_DELREDCANDLE))
         {
@@ -693,7 +693,8 @@ void CCChampion::DelRedCandle(CANDLEDELREASON_TYPE reason)
                 return;
         }
 
-        if ((pCandle = uidLastRedCandle.ItemFind())) // Does the candle still exist after trigger?
+        pCandle = uidLastRedCandle.ItemFind();
+        if (pCandle) // Does the candle still exist after trigger?
             pCandle->Delete();
     }
     _pRedCandles.pop_back();
@@ -744,8 +745,10 @@ void CCChampion::DelObj(const CUID& uid)
     if (pChar)
     {
         // Should it called in any time? As DelObj called when obj deleting?
-        CScript s("-e_spawn_champion");//Removing it here just for safety, preventing any additional DelObj being called from the trigger and causing an infinite loop.
-        pChar->m_OEvents.r_LoadVal(s, RES_EVENTS);  //removing event from the char.
+
+        //Removing it here just for safety, preventing any additional DelObj being called from the trigger and causing an infinite loop.
+        lptstr ptcCmd = Str_CopyToTemp("-e_spawn_champion");
+        pChar->m_OEvents.LoadValStr(ptcCmd, RES_EVENTS);
         OnKill(uid);
     }
     //Not checking HP or anything else, an NPC was created and counted so killing, removing or just taking it out of the lists counts towards the progression.
@@ -759,12 +762,10 @@ void CCChampion::AddObj(const CUID& uid)
     CChar* pChar = uid.CharFind();
     if (pChar)
     {
-        // TODO: check if event exists.
-        // DONE
         if (IsValidResourceDef("e_spawn_champion"))
         {
-            CScript s("events +e_spawn_champion");
-            pChar->r_LoadVal(s);
+            lptstr ptcCmd = Str_CopyToTemp("+e_spawn_champion");
+            pChar->m_OEvents.LoadValStr(ptcCmd, RES_EVENTS);
         }
     }
 }
@@ -773,8 +774,8 @@ void CCChampion::r_Write(CScript& s)
 {
     ADDTOCALLSTACK("CCChampion::r_Write");
 
-    CResourceDef* pRes = g_Cfg.RegisteredResourceGetDef(_idSpawn);
-    CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
+    const CResourceDef* pRes = g_Cfg.RegisteredResourceGetDef(_idSpawn);
+    const CCChampionDef* pChampDef = static_cast<const CCChampionDef*>(pRes);
 
     if (!pChampDef)
     {
@@ -890,7 +891,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString& sVal, CTextConsole* pSrc)
         {
             uchar uiGroup = (uchar)Exp_GetSingle(ptcKey);
             int iSize = (int)_spawnGroupsId[uiGroup].size();    //Try to get custom spawngroups for this champion spawn.
-            idSpawn spawnGroup;
+            mapIdSpawn_t spawnGroup;
             if (iSize > 0)
             {
                 spawnGroup = _spawnGroupsId;
@@ -1020,8 +1021,8 @@ bool CCChampion::r_LoadVal(CScript& s)
             _spawnGroupsId[iGroup].clear();
             for (uint i = 0; i < iArgQty; ++i)
             {
-                CREID_TYPE pCharDef = (CREID_TYPE)g_Cfg.ResourceGetIndexType(RES_CHARDEF, piCmd[i]);
-                if (pCharDef)
+                const CREID_TYPE pCharDef = (CREID_TYPE)g_Cfg.ResourceGetIndexType(RES_CHARDEF, piCmd[i]);
+                if (pCharDef != CREID_INVALID)
                 {
                     _spawnGroupsId[iGroup].emplace_back(pCharDef);
                 }
@@ -1057,12 +1058,12 @@ bool CCChampion::r_LoadVal(CScript& s)
             if (!uid.IsValidResource())
                 return true;
 
-            CResourceIDBase rid(uid.GetPrivateUID());
-            _idSpawn = (rid.GetResType() == RES_CHAMPION ? rid : CResourceIDBase(RES_CHAMPION, rid.GetResIndex()));
+            const CResourceIDBase rid(uid.GetPrivateUID());
+            _idSpawn = ((rid.GetResType() == RES_CHAMPION) ? rid : CResourceIDBase(RES_CHAMPION, rid.GetResIndex()));
 
             if (!_idSpawn.IsValidUID())
             {
-                g_Log.EventDebug("Invalid champion id, champion spawn stopped. uid=0%x\n", (dword)uid);
+                g_Log.EventDebug("Invalid champion id, champion spawn stopped. uid=0%x\n", uid.GetObjUID());
                 Stop();
                 return true;
             }
@@ -1137,7 +1138,7 @@ bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
     {
         case ICHMPV_ADDOBJ:
         {
-            CUID uid(s.GetArgVal());
+            const CUID uid(s.GetArgVal());
             if (uid.ObjFind())
                 AddObj(uid);
             return true;
@@ -1147,7 +1148,7 @@ bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
             return true;
         case ICHMPV_DELOBJ:
         {
-            CUID uid(s.GetArgVal());
+            const CUID uid(s.GetArgVal());
             if (uid.ObjFind())
                 DelObj(uid);
             return true;
@@ -1188,6 +1189,7 @@ TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CScriptTriggerArgsPtr const&
     CResourceLink* pResourceLink = static_cast <CResourceLink*>(pChampDef);
     ASSERT(pResourceLink);
     TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
+
     if (pResourceLink->HasTrigger(trig))
     {
         CResourceLock s;
@@ -1261,6 +1263,7 @@ bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * p
                 sVal.FormatVal(-1);
                 return true;
             }
+
             uchar uiGroup = (uchar)Exp_GetSingle(ptcKey);
             ++ptcKey;
             uchar uiNPC = (uchar)Exp_GetSingle(ptcKey);
@@ -1269,15 +1272,17 @@ bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * p
                 sVal.FormatVal(-1);
                 return true;
             }
+
             int npcCount = (int)_idSpawn.at(uiGroup).size();
             if (npcCount == 0)
             {
                 sVal.FormatVal(-1);
                 return true;
             }
+
             if ( uiNPC < npcCount )
             {
-                auto npc = _idSpawn[uiGroup].at(uiNPC);
+                CREID_TYPE npc = _idSpawn[uiGroup].at(uiNPC);
                 if (npc != CREID_INVALID)
                 {
                     sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, npc));
