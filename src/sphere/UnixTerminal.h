@@ -40,7 +40,7 @@ struct UnixTerminal : public AbstractSphereThread, public ConsoleInterface
 	public:
         virtual void onStart() override;
         virtual void tick() override;
-        virtual void waitForClose() override;
+        virtual void waitForClose() noexcept override;
 		bool isReady();
 		tchar read();
 		void prepare();

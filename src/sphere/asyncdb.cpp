@@ -46,7 +46,7 @@ void CDataBaseAsyncHelper::tick()
     g_Serv._hDb.addQueryResult(currentFunctionPair.first, std::move(theArgs));
 }
 
-void CDataBaseAsyncHelper::waitForClose()
+void CDataBaseAsyncHelper::waitForClose() noexcept
 {
 	{
 		SimpleThreadLock stlThelock(m_queryMutex);

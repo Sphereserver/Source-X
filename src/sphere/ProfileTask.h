@@ -10,7 +10,7 @@
 
 class AbstractSphereThread;
 
-ProfileData& GetCurrentProfileData();
+ProfileData& GetCurrentProfileData() noexcept;
 
 
 class ProfileTask

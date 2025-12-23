@@ -125,7 +125,7 @@ void LinuxEv::tick()
 #endif
 }
 
-void LinuxEv::waitForClose()
+void LinuxEv::waitForClose() noexcept
 {
 	ev_break(m_eventLoop, EVBREAK_ALL);
 

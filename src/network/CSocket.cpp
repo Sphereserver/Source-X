@@ -278,7 +278,7 @@ void CSocket::SetSocket(SOCKET socket)
 	m_hSocket = socket;
 }
 
-void CSocket::Clear()
+void CSocket::Clear() noexcept
 {
 	// Transfer the socket someplace else.
 	m_hSocket = INVALID_SOCKET;
@@ -294,12 +294,12 @@ int CSocket::GetLastError(bool bUseErrno)
 #endif
 }
 
-bool CSocket::IsOpen() const
+bool CSocket::IsOpen() const noexcept
 {
 	return( m_hSocket != INVALID_SOCKET );
 }
 
-SOCKET CSocket::GetSocket() const
+SOCKET CSocket::GetSocket() const noexcept
 {
 	return( m_hSocket );
 }
@@ -489,7 +489,7 @@ int CSocket::SetNonBlocking(bool fEnable)
 #endif
 }
 
-void CSocket::Close()
+void CSocket::Close() noexcept
 {
 	if ( ! IsOpen())
 		return;
@@ -498,7 +498,7 @@ void CSocket::Close()
 	Clear();
 }
 
-void CSocket::CloseSocket( SOCKET hClose )
+void CSocket::CloseSocket( SOCKET hClose ) noexcept // static
 {
 	shutdown( hClose, 2 );
 #ifdef _WIN32
@@ -508,7 +508,7 @@ void CSocket::CloseSocket( SOCKET hClose )
 #endif
 }
 
-short CSocket::GetProtocolIdByName( lpctstr pszName )
+short CSocket::GetProtocolIdByName( lpctstr pszName ) noexcept // static
 {
 	protoent * ppe;
 

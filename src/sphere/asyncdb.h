@@ -33,7 +33,7 @@ public:
 public:
     virtual void onStart() override;
     virtual void tick() override;
-    virtual void waitForClose() override;
+    virtual void waitForClose() noexcept override;
 
 public:
 	void addQuery(bool isQuery, lpctstr sFunction, lpctstr sQuery);

@@ -326,7 +326,7 @@ void UnixTerminal::tick()
     }
 }
 
-void UnixTerminal::waitForClose()
+void UnixTerminal::waitForClose() noexcept
 {
     this->m_fTerminateRequested = true;
     this->ConsoleInterface::_ciQueueCV.notify_one();

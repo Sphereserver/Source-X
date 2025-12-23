@@ -30,7 +30,7 @@ public:
 	virtual void onStart() override;
 	virtual void tick() override;
 	virtual bool shouldExit() noexcept override;
-	virtual void waitForClose() override;
+    virtual void waitForClose() noexcept override;
 };
 
 
