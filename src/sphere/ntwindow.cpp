@@ -197,7 +197,7 @@ void CNTWindow::onStart()
     NTWindow_Init(_NTWInitParams.hInstance, _NTWInitParams.lpCmdLine, _NTWInitParams.nCmdShow);
 }
 
-void CNTWindow::terminate(bool ended)
+void CNTWindow::terminate(bool ended) noexcept
 {
     AbstractSphereThread::terminate(ended);
 }

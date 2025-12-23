@@ -24,7 +24,7 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
     } _NTWInitParams;
 
     virtual void onStart() override;
-    virtual void terminate(bool ended) override;
+    virtual void terminate(bool ended) noexcept override;
     virtual bool shouldExit() noexcept override;
     virtual void tick() override;
 
