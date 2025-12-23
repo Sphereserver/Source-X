@@ -293,13 +293,16 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
 	CItemBase * pItemDef = CItemBase::FindItemBase( id );
 	if ( pItemDef == nullptr )
 	{
+    default_item:
 		idErrorMsg = id;
-		id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, "DEFAULTITEM" ));
+        const CResourceIDBase& rid = g_Cfg.ResourceGetIDType( RES_ITEMDEF, "DEFAULTITEM" );
+        id = (ITEMID_TYPE)rid.GetResIndex();
 		if ( id <= 0 )
 			id = ITEMID_GOLD_C1;
 
 		pItemDef = CItemBase::FindItemBase( id );
 		ASSERT(pItemDef);
+        type = pItemDef->GetType();
 	}
 
 	CItem * pItem = nullptr;
@@ -341,6 +344,14 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
 			break;
 		case IT_MULTI:
         case IT_MULTI_ADDON:
+            if (nullptr == dynamic_cast<CItemBaseMulti*>(pItemDef))
+            {
+                // This workaround is needed because for now we do not have a RES_MULTIDEF, but only RES_ITEMDEF, so we cannot
+                //  differentiate between multis and regular items at a earlier stage
+                // (like CItemBase::r_LoadVal -> IBC_ID, CItemBase::r_LoadVal -> IC_TYPE).
+                g_Log.EventError("Trying to create invalid Multi item, defined with ITEMDEF and not MULTIDEF. Fix it.\n");
+                goto default_item;
+            }
 			pItem = new CItemMulti( id, pItemDef );
 			break;
 		case IT_MULTI_CUSTOM:
@@ -3356,12 +3367,14 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		{
 			lpctstr idstr = s.GetArgStr();
 			const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, idstr);
-			if (rid.GetResType() == RES_TEMPLATE)
+            const RES_TYPE resType = rid.GetResType();
+            const uint uiResID = rid.GetResIndex();
+            if (resType == RES_TEMPLATE)
 			{
 				// here we don't have to check if we are setting the ID in the script's header, because that is handled
 				//	by IBC_ID in CItemBase; here we are under @Create trigger or loading from saves (?)
 
-				CItem * pItemTemp = CItem::CreateTemplate((ITEMID_TYPE)rid.GetResIndex(), nullptr, nullptr);
+                CItem * pItemTemp = CItem::CreateTemplate((ITEMID_TYPE)uiResID, nullptr, nullptr);
 				if (!pItemTemp)
 					return false;
 
@@ -3374,15 +3387,23 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 					g_Log.EventError("The template should not return a container-type item!\n");
 					return false;	// not the kind of template we want...
 				}
-				else
-					return SetID(id);
+
+                return SetID(id);
 			}
-			else
+            else if (resType == RES_ITEMDEF)
             {
-                const RES_TYPE resType = rid.GetResType();
-                if (resType == RES_ITEMDEF || resType == RES_QTY)
-                    return SetID((ITEMID_TYPE)rid.GetResIndex());
+                const bool fMeMulti = (GetID() >= ITEMID_MULTI);
+                const bool fTheyMulti = (uiResID >= ITEMID_MULTI);
+                const bool fMismatch = fMeMulti ^ fTheyMulti; // Bitwise XOR
+                if (fMismatch)
+                {
+                    g_Log.EventError("ITEM can't be assigned ID of a MULTI and vice-versa.\n");
+                    return false;
+                }
             }
+
+            if (resType == RES_ITEMDEF || resType == RES_QTY)
+                return SetID((ITEMID_TYPE)rid.GetResIndex());
             return false;
 		}
 		case IC_LAYER:
@@ -3918,6 +3939,24 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
         if (type == IT_MULTI_CUSTOM)
         {
             g_Log.EventError("Can't dynamically assign type 't_multi_custom' to an item. This type can only be specified in the TYPEDEF.\n");
+            return false;
+        }
+        else if (CItemBase::IsTypeMulti(type) && (nullptr == dynamic_cast<const CItemMulti*>(this)))
+        {
+            lpctstr ptcType = "?";
+            switch (type)
+            {
+                case IT_MULTI:
+                    ptcType = "t_multi";
+                    break;
+                case IT_SHIP:
+                    ptcType = "t_ship";
+                    break;
+                case IT_MULTI_ADDON:
+                    ptcType = "t_multi_addon";
+                    break;
+            }
+            g_Log.EventError("Can't dynamically assign type '%s' to an item. The item has to be declared with MULTIDEF, not ITEMDEF.\n", ptcType);
             return false;
         }
     }
