@@ -1660,32 +1660,33 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 		case IBC_ID:
 			{
-                const CResourceIDBase& ridMe = GetResourceID();
+                //const CResourceIDBase& ridMe = GetResourceID();
                 //const RES_TYPE iTypeMe = ridMe.GetResType();
-                const ITEMID_TYPE uiIDMe = (ITEMID_TYPE)ridMe.GetResIndex();
+                //const ITEMID_TYPE uiIDMe = (ITEMID_TYPE)ridMe.GetResIndex();
+                const ITEMID_TYPE uiIDMe = GetDispID();
 
                 const CResourceIDBase& ridNew = g_Cfg.ResourceGetIDType( RES_ITEMDEF, s.GetArgStr());
                 //const RES_TYPE iTypeNew = ridNew.GetResType();
                 ITEMID_TYPE uiIDNew = (ITEMID_TYPE)ridNew.GetResIndex();
 
-                //const bool fTypeMismatch = (iTypeMe != iTypeNew);
+                const CItemBase * pItemDef = FindItemBase( uiIDNew );	// make sure the base is loaded.
+                if ( ! pItemDef )
+                {
+                    g_Log.EventError( "Setting unknown base ID=0%x for base type %s\n", uiIDNew, GetResourceName());
+                    return false;
+				}
 
+                uiIDNew = pItemDef->GetDispID();
                 const bool fMultiMe = (uiIDMe >= ITEMID_MULTI);
                 const bool fMultiNew = (uiIDNew >= ITEMID_MULTI);
                 const bool fMultiIDMismatch = fMultiMe ^ fMultiNew; // Bitwise XOR
+                //const bool fTypeMismatch = (iTypeMe != iTypeNew);
 
                 if (fMultiIDMismatch)
                 {
                     g_Log.EventError( "Setting new ID for base type %s not allowed\n", GetResourceName());
                     return false;
                 }
-
-                CItemBase * pItemDef = FindItemBase( uiIDNew );	// make sure the base is loaded.
-                if ( ! pItemDef )
-                {
-                    g_Log.EventError( "Setting unknown base ID=0%x for base type %s\n", uiIDNew, GetResourceName());
-                    return false;
-				}
 
                 /*
                  * I add Is Duped Item check to check if item is from DUPELIST of base item, and ID won't change to baseid for unnecessarily.
