@@ -4767,13 +4767,42 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	EXC_TRY("CanMoveWalkTo");
 	EXC_SET_BLOCK("Check Valid Move");
 
-	pArea = CheckValidMove(ptDst, &uiBlockFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &ClimbHeight, fPathFinding);
-	if ( !pArea )
-	{
-		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-            g_Log.EventWarn("CheckValidMove failed\n");
-		return nullptr;
-	}
+// NPCs and pathfinding use full validation
+    if (m_pNPC || fPathFinding)
+    {
+        pArea = CheckValidMove(ptDst, &uiBlockFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &ClimbHeight, fPathFinding);
+        if (!pArea)
+            if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
+                g_Log.EventWarn("CheckValidMove failed\n");
+            return nullptr;
+    }
+    else
+    {
+        // Players: light validation with controlled Z change
+        pArea = ptDst.GetRegion(REGION_TYPE_MULTI | REGION_TYPE_AREA);
+        if (!pArea)
+            return nullptr;
+
+        // Check height properly, but DO NOT allow strict blocking
+        uint64 uiTmpFlags = 0;
+        height_t tmpClimb = 0;
+
+        // Use height logic ONLY to resolve Z, not to block movement
+        CRegion *pHeightArea = CheckValidMove(ptDst, &uiTmpFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &tmpClimb,
+            true // pathfinding = true -> no hard reject
+        );
+
+        // If height check succeeded, accept its Z
+        if (pHeightArea)
+        {
+            ptDst.m_z = ptDst.m_z; // resolved by CheckValidMove
+        }
+        else
+        {
+            // Otherwise, keep original Z (doors, flat tiles)
+            ptDst.m_z = GetTopZ();
+        }
+    }
 
     if (IsPriv(PRIV_GM))
     {
