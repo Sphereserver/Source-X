@@ -4771,37 +4771,62 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
     if (m_pNPC || fPathFinding)
     {
         pArea = CheckValidMove(ptDst, &uiBlockFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &ClimbHeight, fPathFinding);
+
         if (!pArea)
+        {
             if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
                 g_Log.EventWarn("CheckValidMove failed\n");
             return nullptr;
+        }
     }
     else
     {
+        // =========================================================
         // Players: light validation with controlled Z change
-        pArea = ptDst.GetRegion(REGION_TYPE_MULTI | REGION_TYPE_AREA);
+        // =========================================================
+
+        // Must be inside a valid area/multi
+        pArea = ptDst.GetRegion(REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM);
         if (!pArea)
             return nullptr;
 
-        // Check height properly, but DO NOT allow strict blocking
         uint64 uiTmpFlags = 0;
         height_t tmpClimb = 0;
 
-        // Use height logic ONLY to resolve Z, not to block movement
+        // Probe strict logic ONLY to resolve height / detect blockers
         CRegion *pHeightArea = CheckValidMove(ptDst, &uiTmpFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &tmpClimb,
-            true // pathfinding = true -> no hard reject
+            true // pathfinding = true (no strict rejection)
         );
 
-        // If height check succeeded, accept its Z
-        if (pHeightArea)
+        // ---------------------------------------------------------
+        // HARD BLOCK: mount ceiling must still apply
+        // ---------------------------------------------------------
+        if (IsStatFlag(STATF_ONHORSE) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE))
         {
-            ptDst.m_z = ptDst.m_z; // resolved by CheckValidMove
+            const height_t uiHeight = IsSetEF(EF_WalkCheckHeightMounted) ? GetHeightMount() : GetHeight();
+
+            // Re-evaluate ceiling using real blocking data
+            CServerMapBlockingState mountBlock(GetCanMoveFlags(GetCanFlags()), ptDst.m_z, ptDst.m_z + uiHeight, ptDst.m_z + 2, uiHeight);
+
+            CWorldMap::GetHeightPoint(ptDst, mountBlock, true);
+
+            // Same logic as CanStandAt()
+            if (mountBlock.m_Top.m_z <= mountBlock.m_Bottom.m_z + uiHeight)
+            {
+                SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);
+                return nullptr;
+            }
         }
-        else
+
+        // ---------------------------------------------------------
+        // Resolve Z
+        // ---------------------------------------------------------
+        if (!pHeightArea)
         {
-            // Otherwise, keep original Z (doors, flat tiles)
+            // Doors / flat tiles: keep original Z
             ptDst.m_z = GetTopZ();
         }
+        // else: Z already resolved by CheckValidMove()
     }
 
     if (IsPriv(PRIV_GM))
