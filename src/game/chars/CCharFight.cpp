@@ -1365,7 +1365,7 @@ bool CChar::Fight_Clear(CChar *pChar, bool fForced)
     if ( !pChar || !Attacker_Delete(pChar, fForced, ATTACKER_CLEAR_FORCED) )
 		return false;
 
-    if (Skill_GetActive() != SKILL_MAGERY)
+    if (!g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC))
     {
         m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
     }
