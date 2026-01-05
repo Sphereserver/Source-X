@@ -1365,7 +1365,10 @@ bool CChar::Fight_Clear(CChar *pChar, bool fForced)
     if ( !pChar || !Attacker_Delete(pChar, fForced, ATTACKER_CLEAR_FORCED) )
 		return false;
 
-    m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
+    if (Skill_GetActive() != SKILL_MAGERY)
+    {
+        m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
+    }
     m_atFight.m_iRecoilDelay = 0;
     m_atFight.m_iSwingAnimationDelay = 0;
     m_atFight.m_iSwingAnimation = 0;
