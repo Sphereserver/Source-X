@@ -231,7 +231,7 @@ bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 			sVal.FormatVal(_iEraLimitProps);
 			break;
 		case CBC_ID:
-			sVal.FormatHex( GetDispID() );
+			sVal.FormatHex(GetID());
 			break;
 		case CBC_FOODTYPE:
 			{

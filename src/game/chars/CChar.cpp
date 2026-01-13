@@ -3092,7 +3092,7 @@ do_default:
 			sVal.FormatVal(m_Act_Effect);
 			break;
 		case CHC_BODY:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()) );
+			sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, GetID()));
 			break;
 		case CHC_CREATE:
 			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / MSECS_PER_TENTH );  // Displayed in Tenths of Second.
