@@ -2032,10 +2032,10 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, uint64 *uiBlockFlags, DIR_TYP
 	const uint64 uiMovementCan = GetCanMoveFlags(uiCanFlags);  // actions i can perform to step on a tile (some tiles require a specific ability, like to swim for the water)
 
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK && IsPlayer())
-		g_Log.EventWarn("GetCanMoveFlags() (0x%" PRIx64 ").\n", uiMovementCan);
+		g_Log.EventWarn("GetCanMoveFlags() (flags: 0x%" PRIx64 ", uid: 0%x, name: %s, location: %d,%d,%d,%d).\n",
+		    uiMovementCan, static_cast<dword>(GetUID()), GetName(), ptDest.m_x, ptDest.m_y, ptDest.m_z, ptDest.m_map);
 	if (!(uiMovementCan & CAN_C_MOVEMENTCAPABLEMASK))
 		return nullptr;	// cannot move at all, so WTF?
-
 
     const height_t uiHeight = IsSetEF(EF_WalkCheckHeightMounted) ? GetHeightMount() : GetHeight();
     CServerMapBlockingState blockingState(uiMovementCan, ptDest.m_z, ptDest.m_z + m_zClimbHeight + uiHeight, ptDest.m_z + m_zClimbHeight + 3, uiHeight);
