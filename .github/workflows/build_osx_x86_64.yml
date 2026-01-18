@@ -75,8 +75,8 @@ jobs:
   upload_github_release:
     needs: macos-x86_64
     permissions:
-      contents: read
-      actions: write
+      contents: write
+      actions: read
 
     # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
     if: contains(fromJson('["master", "main"]'), github.ref_name)
