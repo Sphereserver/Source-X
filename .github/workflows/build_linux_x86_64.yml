@@ -83,6 +83,57 @@ jobs:
         path: SphereSvrX-linux-x86_64-nightly.tar.gz
         overwrite: true
 
+  linux-x86_64_deb:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install prerequisites
+        run:  |
+          lsb_release -d
+          
+          sudo add-apt-repository universe && sudo sudo apt-get -qq update
+          sudo apt-get install -yq --no-install-recommends \
+            ninja-build gcc-12 g++-12 \
+            dpkg-dev debhelper-compat build-essential \
+            mariadb-client libmariadb-dev
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
+
+      - name: Report building tools
+        run:  |
+          echo "GCC:" && gcc -v
+          echo "Default Linker:" && ld -v
+          echo && echo "CMake:" && cmake --version
+          echo && echo "Ninja:" && ninja --version
+
+      - name: Create package
+        run: |
+          cd packaging
+          cat debian/data/changelog | sed -e "s/@version@/$(git rev-list --count HEAD)/" -e "s/@date@/$(date -R)/" > debian/changelog
+          dpkg-buildpackage -us -uc -b
+          cd ..
+          tar -czf SphereSvrX-linux-x86_64-nightly.deb.tar.gz sphereserver_0.X.nightly-$(git rev-list --count HEAD)_amd64.deb
+      - name: Create package
+        run:  |
+          mkdir accounts logs save scripts
+          tar -czf SphereSvrX-linux-x86_64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C build/bin-x86_64/ SphereSvrX64_nightly -C ../../src sphere.ini sphereCrypt.ini
+
+      # Upload artifact linked to the workflow run - only if the run is for a pull request, or for selected branches
+      - name: Upload artifact
+        if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Build-linux-x86_64_deb
+          path: SphereSvrX-linux-x86_64-nightly.deb.tar.gz
+          overwrite: true
 
   upload_github_release:
     needs: linux-x86_64
