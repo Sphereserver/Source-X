@@ -116,7 +116,7 @@ jobs:
         run: |
           cd packaging
           cat debian/data/changelog | sed -e "s/@version@/$(git rev-list --count HEAD)/" -e "s/@date@/$(date -R)/" > debian/changelog
-          dpkg-buildpackage -us -uc -b
+          dpkg-buildpackage -us -uc -b -d
           cd ..
           tar -czf SphereSvrX-linux-x86_64-nightly.deb.tar.gz sphereserver_0.X.nightly-$(git rev-list --count HEAD)_amd64.deb
       - name: Create package
