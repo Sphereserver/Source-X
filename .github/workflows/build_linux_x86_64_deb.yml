@@ -90,6 +90,7 @@ jobs:
           tag_name: Nightly
           prerelease: true
           files: SphereSvrX-linux-x86_64-nightly.deb
+          fail_on_unmatched_files: false
 
   upload_selfhost_release:
     needs: linux-x86_64_deb
