@@ -387,8 +387,9 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
     [[nodiscard]]
     virtual int GetVisualRange() const override;
 	void SetVisualRange(byte newSight);
+    void ResetVisualRange();
 
-	virtual bool IsResourceMatch( const CResourceID& rid, dword dwArg ) const override;
+    virtual bool IsResourceMatch( const CResourceID& rid, dword dwArg ) const override;
 	bool IsResourceMatch( const CResourceID& rid, dword dwArg, dword dwArgResearch ) const;
 
 	bool IsSpeakAsGhost() const;

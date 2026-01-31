@@ -89,8 +89,8 @@ jobs:
     # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
     if: contains(fromJson('["master", "main"]'), github.ref_name)
     permissions:
-      contents: read
-      actions: write
+        contents: write
+        actions: read
 
     runs-on: ubuntu-latest
     steps:
