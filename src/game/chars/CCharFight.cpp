@@ -737,7 +737,7 @@ effect_bounce:
 			int iArMax = iArmorRating * g_Rand.Get16Val2Fast(7,35) / 100;
 			int iArMin = iArMax / 2;
 
-			int iDef = g_Rand.GetVal2Fast( iArMin, (iArMax - iArMin) + 1 );
+			int iDef = g_Rand.GetVal2Fast( iArMin, iArMax );
 			if ( uiType & DAMAGE_MAGIC )		// magical damage halves effectiveness of defense
 				iDef /= 2;
 
