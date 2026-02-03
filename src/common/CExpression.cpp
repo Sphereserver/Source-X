@@ -1596,10 +1596,10 @@ CExpression::GetConditionalSubexpressions(
 		}
 
         // Helper lambda functions for the next section.
-        auto findLastservClosingBracket = [](lptstr pExpr_) -> lptstr
+        auto findLastClosingBracket = [](lptstr pExpr_) -> lptstr
         {
-            // Returns a pointer to the last servClosing bracket in the string.
-            // If the last character in the string (ignoring comments) is not ')', it means that, if we find a servClosing bracket,
+            // Returns a pointer to the last closing bracket in the string.
+            // If the last character in the string (ignoring comments) is not ')', it means that, if we find a closing bracket,
             //  it's past other characters, so there's other valid text after the ')'.
             // Eg: IF (1+2) > 10. The ')' is not at the end of the line, because there's the remaining part of the script.
             ASSERT(*pExpr_ != '\0');
@@ -1657,7 +1657,7 @@ CExpression::GetConditionalSubexpressions(
         lptstr ptcTopBracket = (ch == '(') ? refStrExpr : nullptr;
 
         // -- Done with preliminar expression analysis. Now look for subexpressions.
-        lptstr ptcLastservClosingBracket = nullptr; // Needs to be preserved in the subexpression parsing.
+        lptstr ptcLastClosingBracket = nullptr; // Needs to be preserved in the subexpression parsing.
 		while (true)
 		{
 			// This loop parses a single subexpression. Remember that we checked for a negation prefix like !( ) in the block before.
@@ -1670,29 +1670,29 @@ CExpression::GetConditionalSubexpressions(
 				if (sCurSubexpr.ptcEnd == nullptr)
 				{
                     sCurSubexpr.ptcEnd = refStrExpr;
-                    if (ptcTopBracket && ptcLastservClosingBracket)
+                    if (ptcTopBracket && ptcLastClosingBracket)
                     {
-                        lptstr ptcLineLastservClosingBracket = findLastservClosingBracket(ptcCurSubexprStart);
-                        // ptcLastservClosingBracket: the last servClosing bracket found while parsing the subexpression (might not be at the end of the line).
-                        // ptcExprLastservClosingBracket: the last servClosing bracket ')', if any, of the string. The function used does NOT check if that's a valid servClosing bracket
-                        //  (eg. if in the string for every opening bracket there is a servClosing bracket).
+                        lptstr ptcLineLastClosingBracket = findLastClosingBracket(ptcCurSubexprStart);
+                        // ptcLastClosingBracket: the last closing bracket found while parsing the subexpression (might not be at the end of the line).
+                        // ptcExprLastclosingBracket: the last closing bracket ')', if any, of the string. The function used does NOT check if that's a valid closing bracket
+                        //  (eg. if in the string for every opening bracket there is a closing bracket).
                         if (uiSubexprQty == 1)
 						{
-                            if (nullptr == ptcLineLastservClosingBracket)
+                            if (nullptr == ptcLineLastClosingBracket)
                             {
-                                // There are other valid characters after the servClosing curly bracket, so leave ptcEnd unchanged, to the end of the string.
+                                // There are other valid characters after the closing curly bracket, so leave ptcEnd unchanged, to the end of the string.
                                 ;
                             }
-							else if (ptcLastservClosingBracket == ptcLineLastservClosingBracket)
+                            else if (ptcLastClosingBracket == ptcLineLastClosingBracket)
 							{
 								// I'm here because the whole expression is enclosed by parentheses
 							    // + 1 because i want to point to the character after the ')', even if it's the string terminator.
-								sCurSubexpr.ptcEnd = ptcLastservClosingBracket + 1;
+                                sCurSubexpr.ptcEnd = ptcLastClosingBracket + 1;
                                 sCurSubexpr.uiType |= SubexprState_t::TopParenthesizedExpr;
 							}
                             else
                             {
-                                sCurSubexpr.ptcEnd = ptcLastservClosingBracket;
+                                sCurSubexpr.ptcEnd = ptcLastClosingBracket;
                             }
 						}
 						// else: // The starting bracket encloses only a part of the expression
@@ -1706,7 +1706,7 @@ CExpression::GetConditionalSubexpressions(
                 if (ptcCurSubexprStart == refStrExpr)
                 {
                     // Start of a subexpression delimited by brackets (it can be preceded by an operator like '!', handled before).
-                    // Now i want only to see where's the matching servClosing bracket.
+                    // Now i want only to see where's the matching closing bracket.
                     sCurSubexpr.ptcStart = refStrExpr;
                 }
                 else
@@ -1731,13 +1731,16 @@ CExpression::GetConditionalSubexpressions(
 				}
 
                 // Just skip what's enclosed in the subexpression.
-                ptcLastservClosingBracket = skipBracketedSubexpression(refStrExpr);
-                if (ptcLastservClosingBracket != nullptr)
-                    refStrExpr = ptcLastservClosingBracket;
+                ptcLastClosingBracket = skipBracketedSubexpression(refStrExpr);
+                if (ptcLastClosingBracket != nullptr)
+                    refStrExpr = ptcLastClosingBracket;
                 else
                 {
                     g_Log.EventError("Expression started with '(' but isn't closed by a ')' character.\n");
-                    sCurSubexpr.ptcEnd = refStrExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last servClosing bracket
+
+                    // Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
+                    sCurSubexpr.ptcEnd = refStrExpr - 1;
+
                     return pSubexprsArena;
                 }
 
@@ -1796,7 +1799,7 @@ CExpression::GetConditionalSubexpressions(
                             if (refStrExpr != pExprSkipped)
 							{
 								// I actually have something enclosed in angular brackets.
-								// The function above moves the pointer after the last servClosing bracket '>', but we want to point here to it, not the character after.
+                                // The function above moves the pointer after the last closing bracket '>', but we want to point here to it, not the character after.
                                 refStrExpr = pExprSkipped;
                                 ch = *refStrExpr;
                                 continue;   // This allows us to skip the "ch = *(++pExpr);" below, we don't want to advance further the pointer.
@@ -2169,13 +2172,18 @@ bool CExpression::EvaluateConditionalSingle(
         g_Log.EventError("Exceeding the limit of 16 subexpressions. Further parsing is halted.\n");
         return false;
     }
-    ++ refExprContext._iEvaluate_Conditional_Reentrant;
+
+    //ASSERT(refSubExprState.ptcEnd >= refSubExprState.ptcStart);
+    if (refSubExprState.ptcEnd < refSubExprState.ptcStart)
+    {
+        g_Log.EventError("Malformed subexpression. Defaulting its value to false.\n");
+        return false;
+    }
 
     // Is this conditional expression is fully enclosed by brackets ?
     const bool fFullyEnclosed = (refSubExprState.uiType & SType::TopParenthesizedExpr);
 
     // Length to copy: include the last valid char (i'm not copying the subsequent char, which can be another char or '\0'
-    ASSERT(refSubExprState.ptcEnd >= refSubExprState.ptcStart);
     size_t len = std::min(Str_TempLength() - 1U, size_t(refSubExprState.ptcEnd - refSubExprState.ptcStart));
     if (len == 0)
     {
@@ -2186,7 +2194,7 @@ bool CExpression::EvaluateConditionalSingle(
     lptstr ptcParsingStart = refSubExprState.ptcStart;
     if (fFullyEnclosed)
     {
-        -- len;     // Exclude the servClosing bracket ')'.
+        -- len;     // Exclude the closing bracket ')'.
         ASSERT(len > 0);
 
         // In this case, we need to start parsing after the opening parenthesis '('; if we start before it and the subexpr is marked with MaybeNestedSubexpr,
@@ -2201,6 +2209,8 @@ bool CExpression::EvaluateConditionalSingle(
     ptcSubexpr = Str_GetTemp();
     memcpy(ptcSubexpr, ptcParsingStart, len);
     ptcSubexpr[len] = '\0';
+
+    ++ refExprContext._iEvaluate_Conditional_Reentrant;
 
     const bool fNested = (refSubExprState.uiType & SType::MaybeNestedSubexpr);
     if (fNested)
@@ -2423,7 +2433,7 @@ int CExpression::ParseScriptText(
     // iFlags & 2: Don't allow recusive bracket count.
     // iFlags & 4: Just parsing a nested QVAL.
     // NOTE:
-    //  html will have opening <script language="SPHERE_FILE"> and then servClosing </script>
+    //  html will have opening <script language="SPHERE_FILE"> and then closing </script>
     // RETURN:
     //  iFlags & 4: Position of the ending bracket/delimiter of a QVAL statement.
     //  Otherwise: New length of the string.
@@ -2502,7 +2512,7 @@ int CExpression::ParseScriptText(
         // Are we inside a QVAL and are we searching where its condition end?
         if ((ch == '?') && (eQval == QvalStatus::Condition))
         {
-            // Now we keep the bracket count to find the servClosing bracket for the QVAL statement.
+            // Now we keep the bracket count to find the closing bracket for the QVAL statement.
             eQval = QvalStatus::Returns;
             continue;
         }
@@ -2517,7 +2527,7 @@ int CExpression::ParseScriptText(
                 lptstr ptcTestNested = ptcResponse + i;
                 lpctstr ptcTestOrig = ptcTestNested;
                 Str_SkipEnclosedAngularBrackets(ptcTestNested);
-                // If i have matching servClosing brackets, so it must be nested angular brackets.
+                // If i have matching closing brackets, so it must be nested angular brackets.
                 if (ptcTestNested == ptcTestOrig)
                 {
                     // Otherwise, it might be the << operator.
@@ -2600,16 +2610,16 @@ int CExpression::ParseScriptText(
             continue;
         }
 
-        // At this point i'm sure that ahead we won't find other open angular brackets, we may find their servClosing one or just plain text.
+        // At this point i'm sure that ahead we won't find other open angular brackets, we may find their closing one or just plain text.
         if ( ch == chEnd )
         {
-            // servClosing bracket found: should we evaluate what's inside the brackets?
+            // closing bracket found: should we evaluate what's inside the brackets?
             if (eQval != QvalStatus::None)
             {
                 // Special handling for QVAL
                 if (eQval == QvalStatus::Returns)
                 {
-                    // I'm after the '?' symbol in QVAL. We are searching for the servClosing bracket.
+                    // I'm after the '?' symbol in QVAL. We are searching for the closing bracket.
                     --iQvalOpenBrackets;
 
                     if (iQvalOpenBrackets == 0)
