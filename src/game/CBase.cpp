@@ -3,6 +3,7 @@
 //#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/common.h"
 #include "CServerConfig.h"
+//#include "CServer.h"
 #include "CBase.h"
 #include <algorithm>
 
@@ -304,6 +305,10 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
     }
 
     int i = FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
+
+    //if (i != 0 && !g_Serv.IsLoadingGeneric())
+    //    return false;   // shouldn't ever happen?
+
 	switch (i)
 	{
 		//Set as Strings
