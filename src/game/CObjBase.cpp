@@ -276,9 +276,11 @@ bool CObjBase::Delete(bool fForce)
     return false;
 }
 
-CBaseBaseDef* CObjBase::Base_GetDef() const noexcept
+CBaseBaseDef* CObjBase::Base_GetDef() const
 {
-	return (static_cast <CBaseBaseDef*>(m_BaseRef.GetRef()));
+    CResourceLink *pBaseLink = m_BaseRef.GetRef();
+    ASSERT(pBaseLink);
+    return (static_cast <CBaseBaseDef*>(pBaseLink));
 }
 
 bool CObjBase::IsContainer() const noexcept
@@ -1873,6 +1875,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 
         case OC_CAN:
             return false;
+
         case OC_CANMASK:
         {
             m_CanMask = s.GetArgULLVal();

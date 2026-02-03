@@ -224,7 +224,7 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CScriptTriggerArgsPtr const& pScri
 {
     ADDTOCALLSTACK("CScriptObj::r_Call (FunctionName)");
 
-    size_t index = r_GetFunctionIndex(pszFunction);
+    const size_t index = r_GetFunctionIndex(pszFunction);
     if ( !r_CanCall(index) )
         return false;
 

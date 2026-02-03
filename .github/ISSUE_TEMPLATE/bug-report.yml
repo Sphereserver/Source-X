@@ -38,13 +38,13 @@ body:
       placeholder: "e.g. 4031 bbfc587bb2c270c53ecb54cb5e1ea2f54cd9031f"
     validations:
       required: true
-   - type: dropdown
-     id: sphere-branch
-     attributes:
-       label: Branch
-       description: "Select the branch you are working with"
-       options:
-          - "master"
-          - "dev"
+  - type: dropdown
+    id: sphere-branch
+    attributes:
+      label: Branch
+      description: "Select the branch you are working with"
+      options:
+         - "master"
+         - "dev"
       validations:
         required: true

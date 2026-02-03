@@ -142,16 +142,17 @@ public:
 	* @brief   Base get definition.
 	* @return  null if it fails, else a pointer to a CBaseBaseDef.
 	*/
-    CBaseBaseDef* Base_GetDef() const noexcept;
+    [[nodiscard]] RETURNS_NOTNULL
+    CBaseBaseDef* Base_GetDef() const;
 
     [[nodiscard]]
-	inline uint64 GetCanFlagsBase() const noexcept
+    inline uint64 GetCanFlagsBase() const
 	{
 		return Base_GetDef()->m_Can;
 	}
 
     [[nodiscard]]
-    inline uint64 GetCanFlags() const noexcept
+    inline uint64 GetCanFlags() const
 	{
 		// m_CanMask is XORed to m_Can:
 		//  If a flag in m_CanMask is enabled in m_Can, it is ignored in this Can check
@@ -161,7 +162,7 @@ public:
 	}
 
     [[nodiscard]]
-	bool Can(uint64 uiCan) const noexcept
+    bool Can(uint64 uiCan) const
 	{
         return (GetCanFlags() & uiCan);
 	}

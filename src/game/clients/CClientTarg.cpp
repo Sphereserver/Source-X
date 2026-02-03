@@ -96,13 +96,25 @@ bool CClient::OnTarg_Obj_Function( CObjBase * pObj, const CPointMap & pt, ITEMID
 	if ( pSpace )
 		GETNONWHITESPACE( pSpace );
 
-    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-    pScriptArgs->Init(pSpace ? pSpace : "");
-    pScriptArgs->m_VarsLocal.SetNum( "ID", id, true );
-    pScriptArgs->m_pO1 = pObj;
-	CSString sVal;
-    m_pChar->r_Call(m_Targ_Text.GetBuffer(), pScriptArgs, this, &sVal );
-	return true;
+    lpctstr ptcFunction = m_Targ_Text.GetBuffer();
+    const size_t uiFunctionIndex = r_GetFunctionIndex(ptcFunction);
+    if ( r_CanCall(uiFunctionIndex) )
+    {
+        // It's a scripted FUNCTION
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(pSpace ? pSpace : "");
+        pScriptArgs->m_VarsLocal.SetNum( "ID", id, true );
+        pScriptArgs->m_pO1 = pObj;
+        CSString sVal;
+        m_pChar->r_Call(m_Targ_Text.GetBuffer(), pScriptArgs, this, &sVal );
+        return true;
+    }
+    return false;
+
+    // TODO: enable this? leave it working only with scripted functions?
+    // This function might not exist at all, or simply it is a hardcoded verb/command...
+    //CScript s(ptcFunction);
+    //return m_pChar->r_Verb(s, nullptr);
 }
 
 
@@ -770,15 +782,17 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 	if ( fTest )
 	{
 		if ( pChar == m_pChar )
-			return( 2 );
+            return 2;
+
 		if ( m_pChar->IsStatFlag( STATF_ONHORSE ) )
 		{
 			CItem * pItem = m_pChar->LayerFind( LAYER_HORSE );
 			if ( pItem && pItem->m_itFigurine.m_UID == uid)
 				return 1;
 		}
+
 		if ( pChar->IsPlayableCharacter())
-			return( g_Rand.GetVal(10));
+            return g_Rand.GetVal(10);
 		return g_Rand.GetVal(60);
 	}
 
@@ -790,7 +804,8 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 	// What kind of animal.
 	if ( pChar->IsIndividualName())
 	{
-		snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_RESULT), pChar->GetName(), pChar->Char_GetDef()->GetTradeName());
+        snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_RESULT),
+            pChar->GetName(), pChar->Char_GetDef()->GetTradeName());
 		addObjMessage(pszTemp, pChar);
 	}
 

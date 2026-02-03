@@ -246,9 +246,10 @@ void CSector::_GoAwake()
 	for (CSObjContRec* pObjRec : m_Chars_Disconnect)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-		const bool fSleeping = pChar->IsSleeping();
+        const bool fCanTick = pChar->_CanTick(false);
 		ASSERT(pChar->IsDisconnected());
-		if (fSleeping)
+        // If disconnected, they will only "partly" go awake: they will only have char periodic ticks.
+        if (fCanTick)
 			pChar->GoAwake();
 	}
 
@@ -976,17 +977,29 @@ void CSector::OnHearItem( CChar * pChar, lpctstr pszText )
 void CSector::MoveItemToSector( CItem * pItem )
 {
 	ADDTOCALLSTACK("CSector::MoveItemToSector");
-	// remove from previous list and put in new.
-	// May just be setting a timer. SetTimer or MoveTo()
+    // Remove from previous list and put in new.
+    // May just be setting a timer. SetTimeout or MoveTo()
 	ASSERT( pItem );
+
+    // Already here?
+    if (IsItemInSector(pItem))
+        return;
+
     m_Items.AddItemToSector(pItem);
 
+    // TODO: might it be redundant to check every time if the sector can/should sleep or not (via CanSleep)?
     if (_IsSleeping())
     {
         if (_CanSleep(true))
         {
             if (!pItem->_CanTick(true))
                 pItem->GoSleep();
+            else
+            {
+                // The item should tick even if the sector shouldn't (_CanTick true parameter).
+                if (pItem->IsSleeping())
+                    pItem->GoAwake();
+            }
         }
         else
         {
@@ -1038,15 +1051,26 @@ bool CSector::MoveCharToSector( CChar * pChar )
 
     if (_IsSleeping())
     {
-        CClient *pClient = pChar->GetClientActive();
-        if (pClient)    // A client just entered
+        if (pChar->GetClientActive() != nullptr)
         {
-            _GoAwake();    // Awake the sector and the chars inside (so, also pChar)
+            // A client just entered.
+
+            // Awake the sector and the chars inside (so, also pChar)
+            _GoAwake();
             ASSERT(!pChar->IsSleeping());
         }
-        else if (!pChar->_CanTick(true))    // An NPC entered, but the sector is sleeping
+        else if (!pChar->_CanTick(true))
         {
-            pChar->GoSleep(); // then make the NPC sleep too.
+            // An NPC entered, but the sector is sleeping
+
+            // Then make the NPC sleep too.
+            pChar->GoSleep();
+        }
+        else
+        {
+            // The char should tick even if the sector shouldn't (_CanTick true parameter).
+            if (pChar->IsSleeping())
+                pChar->GoAwake();
         }
     }
     else
@@ -1427,9 +1451,6 @@ bool CSector::CheckItemComplexity() const noexcept
 
 bool CSector::IsItemInSector( const CItem * pItem ) const
 {
-	if ( !pItem )
-		return false;
-
 	return (pItem->GetParent() == &m_Items);
 }
 
