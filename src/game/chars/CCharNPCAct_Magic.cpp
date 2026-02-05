@@ -169,8 +169,16 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     if ((iSpellCount < 1) && !pWand)
         return false;
 
+    int iMaxDist = ((UO_MAP_VIEW_SIGHT * 3) / 4); // (14 * 3) / 4 = 10
+    if (pChar->_uiRange)
+        iMaxDist = pChar->_uiRange; // char range
+
+    CVarDefCont *pValueMaxDist = GetKey("OVERRIDE.SPELL_MAXDIST", true);
+    if (pValueMaxDist)
+        iMaxDist = (int)pValueMaxDist->GetValNum();
+
     int iDist = GetTopDist3D(pChar);
-    if (iDist > ((UO_MAP_VIEW_SIGHT * 3) / 4))	// way too far away . close in.
+    if (iDist > iMaxDist) // way too far away . close in.
         return false;
 
     if ((iDist <= 1) && (Skill_GetBase(SKILL_TACTICS) > 200) && (!g_Rand.GetVal(2)))
