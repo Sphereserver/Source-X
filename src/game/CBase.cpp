@@ -3,6 +3,7 @@
 //#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/common.h"
 #include "CServerConfig.h"
+//#include "CServer.h"
 #include "CBase.h"
 #include <algorithm>
 
@@ -298,12 +299,16 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
             ptcKey = ptcKey + (fZero ? 5 : 4);
             bool fQuoted = false;
             lpctstr ptcArg = s.GetArgStr(&fQuoted);
-            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, false); // don't change fZero to true! it would break some scripts!
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, false, true); // don't change fZero to true! it would break some scripts!
             return true;
         }
     }
 
     int i = FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
+
+    //if (i != 0 && !g_Serv.IsLoadingGeneric())
+    //    return false;   // shouldn't ever happen?
+
 	switch (i)
 	{
 		//Set as Strings

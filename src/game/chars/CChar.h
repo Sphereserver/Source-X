@@ -378,8 +378,10 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	bool IsPriv( word flag ) const;
 	virtual PLEVEL_TYPE GetPrivLevel() const override;
 
-	CCharBase * Char_GetDef() const;
-	CRegionWorld * GetRegion() const;
+    [[nodiscard]] RETURNS_NOTNULL
+        CCharBase * Char_GetDef() const;
+
+    CRegionWorld * GetRegion() const;
 	CRegion * GetRoom() const;
 
     [[nodiscard]]
@@ -1176,7 +1178,10 @@ public:
 	bool Horse_UnMount(); // Remove horse char and give player a horse item
 
 private:
-	CItem* Horse_GetMountItem() const;
+    [[nodiscard]]
+    CItem* Horse_ValidateMountItem(CItem *pMountItem) const;
+
+    CItem* Horse_GetMountItem() const;
     CChar* Horse_GetMountChar() const;
     CItem* Horse_GetValidMountItem();
     CChar* Horse_GetValidMountChar();
@@ -1186,7 +1191,7 @@ public:
 	bool IsOwnedBy( const CChar * pChar, bool fAllowGM = true ) const;
 	CChar * GetOwner() const;
 	CChar * Use_Figurine( CItem * pItem, bool fCheckFollowerSlots = true );
-	CItem * Make_Figurine( const CUID &uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
+    CItem * Make_Figurine( const CUID uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
     bool FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots = 0, bool fCheckOnly = false );
     short GetFollowerSlots() const;
@@ -1398,13 +1403,14 @@ protected:
 
     bool IsPeriodicTickPending() const;
 
-    virtual bool _TickableState() const override final;
-
 protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills, AI, etc.
 //public:	virtual bool  _OnTick() override final;
 
 public:
-	bool OnTickEquip( CItem * pItem );
+    virtual bool _CanTick(bool fParentGoingToSleep) const override final;
+    bool IsTickableEvenIfDisconnected() const;
+
+    bool OnTickEquip( CItem * pItem );
 	void OnTickFood( ushort uiVal, int HitsHungerLoss );
 
 	virtual void OnTickStatusUpdate() override;

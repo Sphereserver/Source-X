@@ -164,7 +164,7 @@ private:
     void InitializeLists();
 
 public:
-    //static const char *m_sClassName;    ///< Class definition
+    static const char *m_sClassName;    ///< Class definition
 
     CCSpawn* GetSpawnItem();
 

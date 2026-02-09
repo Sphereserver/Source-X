@@ -94,7 +94,7 @@
                 success_acquire_ = true; \
                 break; \
             } catch (const std::system_error& e_) { \
-                STDERR_LOG("[File '%s', line %d, function '%s']. Failed to acquire lock on attempt %u. Exc msg: '%s'.\n", \
+                stderrLog("[File '%s', line %d, function '%s']. Failed to acquire lock on attempt %u. Exc msg: '%s'.\n", \
                            __FILE__, __LINE__, __func__, spin_attempt_ + 1, e_.what()); \
             } \
         } \
@@ -151,7 +151,7 @@ public:
     public:
         [[nodiscard]]
         LockedReader(const GuardedAccess& owner)
-            : lock_(owner->pmutex_), ptr_(&owner.data_)
+            : lock_(owner.mutex_), ptr_(&owner.data_)
         {}
         RETURNS_NOTNULL
         const T* operator->() const { return ptr_; }
@@ -195,7 +195,7 @@ public:
     public:
         [[nodiscard]]
         LockedWriter(GuardedAccess& owner)
-            : lock_(owner->pmutex_), ptr_(&owner.data_)
+            : lock_(owner.mutex_), ptr_(&owner.data_)
         {}
         RETURNS_NOTNULL
         T*       operator->()       { return ptr_; }

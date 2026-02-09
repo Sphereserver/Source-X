@@ -548,9 +548,7 @@ void CChar::SetDisconnected(CSector* pNewSector)
     if ( IsDisconnected() )
         return;
 
-	// If the char goes offline, we don't want its items to tick anymore when the timer expires.
-	// Unless it's a summoned creature that we are riding.
-	if (!IsStatFlag(STATF_RIDDEN|STATF_CONJURED|STATF_PET))
+    if (!IsTickableEvenIfDisconnected())
 		_GoSleep();
 
     RemoveFromView();	// Remove from views.
@@ -947,22 +945,27 @@ int CChar::FixWeirdness()
 	}
 	if ( IsStatFlag( STATF_RIDDEN ))
 	{
-		// Move the ridden creature to the same location as it's rider.
-		if ( m_pPlayer || ! IsDisconnected())
+        // Move the ridden creature to the same location as its rider.
+        if ( m_pPlayer || ! IsDisconnected())
+        {
 			StatFlag_Clear( STATF_RIDDEN );
-		else
+        }
+        else
 		{
-			if ( Skill_GetActive() != NPCACT_RIDDEN )
+            // For some historical reasons, disconnected NPCs should be in "ridden" state...
+            if ( Skill_GetActive() != NPCACT_RIDDEN )
 			{
 				iResultCode = 0x1203;
 				return iResultCode;
 			}
+
 			const CItem * pFigurine = Horse_GetValidMountItem();
 			if ( pFigurine == nullptr )
 			{
 				iResultCode = 0x1204;
 				return iResultCode;
 			}
+
 			const CPointMap& pt = pFigurine->GetTopLevelObj()->GetTopPoint();
 			if ( pt != GetTopPoint())
 			{
@@ -1615,7 +1618,10 @@ void CChar::SetID( CREID_TYPE id )
 
 	ASSERT(pCharDef != nullptr);
 
-	CCharBase* pCharOldDef = Char_GetDef();
+    CCharBase* pCharOldDef = nullptr;
+    if (m_BaseRef.GetRef())
+        pCharOldDef = Char_GetDef();
+
 	if ( pCharDef == pCharOldDef )
 		return;
 
@@ -1623,7 +1629,8 @@ void CChar::SetID( CREID_TYPE id )
 	{
 		pCharOldDef->DelInstance();
 	}
-	pCharDef->AddInstance();	// Increase object instance counter (different from the resource reference counter!)
+
+    pCharDef->AddInstance();	// Increase object instance counter (different from the resource reference counter!)
 	m_BaseRef.SetRef(pCharDef);	// Among the other things, it increases the new resource reference counter and decreases the old, if any
 
 	if ( _iPrev_id == CREID_INVALID )
@@ -3872,7 +3879,7 @@ bool CChar::r_LoadVal( CScript & s )
             _uiStatFlag = (_uiStatFlag & uiFlagsNoChange) | (uiNewFlags & ~uiFlagsNoChange);
             if (uiCurFlags != uiNewFlags)
             {
-                const bool fDoFullUpdate = (uiCurFlags & uiFlagsRequireFullUpdate) != (uiNewFlags & uiFlagsRequireFullUpdate);
+                const bool fDoFullUpdate =  HAS_FLAGS_ANY(uiCurFlags, uiFlagsRequireFullUpdate);
                 NotoSave_Update(fDoFullUpdate);
             }
 			break;
@@ -4161,7 +4168,7 @@ void CChar::r_Write( CScript & s )
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
     if (m_CanMask)
-        s.WriteKeyVal("CANMASK", m_CanMask);
+        s.WriteKeyHex("CANMASK", m_CanMask);
 
     const CREID_TYPE iDispID = GetDispID();
     if (iDispID != GetID())

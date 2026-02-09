@@ -166,7 +166,7 @@ BOOL CNTWindow::CStatusDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM l
 CNTWindow::CNTWindow() : AbstractSphereThread("T_ConsoleWindow", ThreadPriority::Highest),
     _NTWInitParams{}, m_zCommands {{}}
 {
-    _fKeepAliveAtShutdown = true;
+    m_fKeepAliveAtShutdown = true;
 
 	m_iLogTextLen		= 0;
 	m_fLogScrollLock	= false;
@@ -188,7 +188,7 @@ void CNTWindow::exitActions()
 {
     g_Serv.SetExitFlag(5);
     NTWindow_DeleteIcon();
-    _thread_selfTerminateAfterThisTick = true;
+    m_fThreadSelfTerminateAfterThisTick = true;
 }
 
 void CNTWindow::onStart()
@@ -594,6 +594,9 @@ bool CNTWindow::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl )
         }
         theApp.m_wndAbout.ShowWindow(SW_NORMAL);
         theApp.m_wndAbout.SetForegroundWindow();
+        break;
+    case IDM_CLEAR_CONSOLE:
+        List_Clear();
         break;
 	case IDM_MINIMIZE:
 		// SC_MINIMIZE

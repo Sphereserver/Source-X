@@ -20,7 +20,7 @@ on:
 
 jobs:
   macos-x86_64:
-    runs-on: macos-13   # intel
+    runs-on: macos-15-intel
     permissions:
       contents: read
       actions: read
@@ -103,6 +103,9 @@ jobs:
   upload_selfhost_release:
     needs: macos-x86_64
     if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
+    permissions:
+      contents: write
+      actions: read
 
     runs-on: ubuntu-latest
     steps:

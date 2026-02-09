@@ -17,7 +17,7 @@ CTimedObject::~CTimedObject()
     ADDTOCALLSTACK("CTimedObject::~CTimedObject");
     EXC_TRY("Cleanup in destructor");
 
-    if (IsTimeoutTickingActive())
+    if (_IsTimeoutTickingActive())
     {
         CWorldTickingList::DelObjSingle(this);
     }
@@ -35,18 +35,6 @@ void CTimedObject::_GoAwake()
         CWorldTickingList::AddObjSingle(_GetTimeoutRaw(), this, true);
     }
     _fIsSleeping = false;
-}
-
-bool CTimedObject::_TickableState() const
-{
-    //ADDTOCALLSTACK_DEBUG("CTimedObject::_TickableState");
-    return !_IsSleeping();
-}
-
-bool CTimedObject::TickableState() const
-{
-    //ADDTOCALLSTACK_DEBUG("CTimedObject::_TickableState");
-    MT_ENGINE_SHARED_LOCK_RETURN(_TickableState());
 }
 
 bool CTimedObject::OnTick()
@@ -76,7 +64,7 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
     */
     if (iDelayInMsecs < 0)
     {
-        if (IsTimeoutTickingActive())
+        if (_IsTimeoutTickingActive())
             CWorldTickingList::DelObjSingle(this);
         _ClearTimeoutRaw();
     }

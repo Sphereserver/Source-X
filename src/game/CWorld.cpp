@@ -615,20 +615,18 @@ void CWorldThread::GarbageCollection_UIDs()
 			int iResultCode = FixObj(pObj, i);
 			if ( iResultCode )
 			{
-				// FixObj directly calls Delete method
-				//if (pObj->_IsBeingDeleted() || pObj->IsDeleted())
-				//{
+                if (pObj->_IsBeingDeleted() || pObj->IsDeleted())
+                {
 					// Do an immediate delete here instead of Delete()
 					delete pObj;
 					FreeUID(i);	// Get rid of junk uid if all fails..
-				//}
-				/*
-				else
+                }
+                else
 				{
+                    // FixObj doesn't always delete the item on failure/result code != 0.
 					pObj->Delete();
 				}
-				*/
-				continue;
+                continue;
 			}
 
 			if ((iCount & 0x1FF ) == 0)
@@ -1260,9 +1258,9 @@ void CWorld::SaveStatics()
 			if ( !g_MapList.IsMapSupported(m) )
                 continue;
 
-            for (int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s)
+            for (int s = 0, qty = _Sectors.GetMapSectorDataUnchecked(m).iSectorQty; s < qty; ++s)
 			{
-                CSector* pSector = _Sectors.GetSectorByIndex(m, s);
+                CSector* pSector = _Sectors.GetSectorByIndexUnchecked(m, s);
 				if ( !pSector )
                     continue;
 
@@ -1282,7 +1280,7 @@ void CWorld::SaveStatics()
 
 		m_FileStatics.WriteSection( "EOF" );
 		m_FileStatics.Close();
-		g_Log.Event(LOGM_SAVE, "Statics data saved (%s).\n", static_cast<lpctstr>(m_FileStatics.GetFilePath()));
+        g_Log.Event(LOGM_SAVE, "Statics data saved (%s).\n", m_FileStatics.GetFilePath());
 	}
 	catch (const CSError& e)
 	{
@@ -1387,8 +1385,10 @@ bool CWorld::LoadWorld() // Load world from script
 	int iPrevSaveCount = m_iSaveCountID;
 	for (;;)
 	{
+        g_Log.Event(LOGM_INIT, "\n");
 		InitUIDs();
 
+        /* TODO: why aren't we checking also for successful loading of spheredata and spherestatics? */
 		LoadFile(sDataName, false);
 		LoadFile(sStaticsName, false);
 		if ( LoadFile(sWorldName, false) && LoadFile(sCharsName, false) && LoadFile(sMultisName, false))
@@ -1436,9 +1436,9 @@ bool CWorld::LoadWorld() // Load world from script
 		sDataName = sArchive;
 	}
 
-	g_Log.Event(LOGL_WARN | LOGM_INIT, "No previous backup available ?\n");
+    g_Log.Event(LOGL_WARN | LOGM_INIT, "No previous backup available?\n");
     if ( !Save(true) )
-        g_Log.Event(LOGL_FATAL | LOGM_INIT, "No save found unable to create new one.\n");
+        g_Log.Event(LOGL_FATAL | LOGM_INIT, "No save found and unable to create new one.\n");
     else
         return true;
     EXC_CATCH;
@@ -1470,11 +1470,11 @@ bool CWorld::LoadAll() // Load world from script
 		if (!g_MapList.IsMapSupported(m))
 			continue;
 
-        for (int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s)
+        for (int s = 0, qty = _Sectors.GetMapSectorDataUnchecked(m).iSectorQty; s < qty; ++s)
 		{
 			EXC_TRYSUB("Load");
 
-            CSector* pSector = _Sectors.GetSectorByIndex(m, s);
+            CSector* pSector = _Sectors.GetSectorByIndexUnchecked(m, s);
 			ASSERT(pSector);
 
             if (!pSector->IsLightOverriden())
@@ -1491,6 +1491,8 @@ bool CWorld::LoadAll() // Load world from script
 	EXC_TRYSUB("Load");
 	GarbageCollection();
 	EXC_CATCHSUB("Garbage collect");
+
+    g_Log.Event(LOGM_INIT, "\n");
 
 	// Set the current version now.
 	r_SetVal("VERSION", SPHERE_VER_ID_STR);	// Set m_iLoadVersion
@@ -1658,11 +1660,11 @@ void CWorld::RespawnDeadNPCs()
 		if ( !g_MapList.IsMapSupported(m) )
             continue;
 
-        for (int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s)
+        for (int s = 0, qty = _Sectors.GetMapSectorDataUnchecked(m).iSectorQty; s < qty; ++s)
 		{
 			EXC_TRY("OnSector");
 
-            CSector* pSector = _Sectors.GetSectorByIndex(m, s);
+            CSector* pSector = _Sectors.GetSectorByIndexUnchecked(m, s);
 			ASSERT(pSector);
 			pSector->RespawnDeadNPCs();
 
@@ -1698,11 +1700,11 @@ void CWorld::Restock()
 		if ( !g_MapList.IsMapSupported(m) )
 			continue;
 
-        for ( int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s )
+        for ( int s = 0, qty = _Sectors.GetMapSectorDataUnchecked(m).iSectorQty; s < qty; ++s )
 		{
 			EXC_TRY("OnSector");
 
-            CSector	*pSector = _Sectors.GetSectorByIndex(m, s);
+            CSector	*pSector = _Sectors.GetSectorByIndexUnchecked(m, s);
 			ASSERT(pSector);
 			pSector->Restock();
 

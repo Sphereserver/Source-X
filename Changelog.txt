@@ -3659,7 +3659,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: @DelRedCandle trigger that triggers while red candle removing.
 	Args:
 	- I: Champion spawner uid.
-	- ARGO: Candle uid.
+	- ARGO: Candle uid. [Read Only]
 	- ARGN1: Reason of removing. [Read Only]
 		1: Timeout
 		2: User Command
@@ -3669,7 +3669,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: @DelWhiteCandle trigger that triggers while white candle removing.
 	Args:
 	- I: Champion spawner uid.
-	- ARGO: Candle uid.
+	- ARGO: Candle uid. [Read Only]
 	- ARGN1: Reason of removing. [Read Only]
 		1: Timeout
 		2: User Command
@@ -4063,6 +4063,38 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 30-09-2025, Mulambo
 - Changed: Login rejection (packet `0x82`) is now sent to all clients trying to log in (used to be only to clients, that Sphere could identify).
 
-01-10-2025, Mulambo
+03-11-2025, Nolok
+- Fixed: Corner cases issues with number parsing from scripts (Issue #1448).
+- Fixed: Function call stack messed up ordering.
+- Fixed: Wrong script line pointed to in console log messages.
+- Fixed: Changing Char flags didn't always trigger a full update packet.
+- Fixed: Sector indexing issue.
+- Changed: Made both Windows and Linux load scripts in a folder in alphabetical order.
+- Added: "Old VarDef value..." log message when overwriting a DEF value during startup in debug builds (Issue #1437).
+
+17-11-2025, Nolok
+- Fixed: CAN_O_NOSLEEP was not considered/honored at server startup (Issue #1440).
+- Fixed: Chars not always going in sleeping state when appropriate (Issue #1249).
+- Changed: Object timers are now saved in worldsave files as TIMERMS, to avoid ambiguity and reliance on git build number to
+    determine if TIMER expressed a number in seconds or milliseconds.
+- Changed: Added 5 seconds timeout to DNS hostname resolution at startup (avoid getting stuck when connectivity is enabled but not working).
+- Changed: CANMASK formatted in worldsave files as hexadecimal number, instead of decimal.
+
+2-12-2025, canerksk
+- Changed: Duplicate message deleted. (Issue #1519).
+
+3-12-2025, Nolok
+- Fixed: Items were always put into 'sleeping' ticking state when moved inside a container (Issue #1272).
+- Fixed: Failed assertion when a char speaks in a sector with a communication crystal and other items (Issue #1429).
+- Fixed: "Old VarDef value..." log message being shown while resyncing a file even if the VarDef (DEF) didn't change (Issue #1437).
+- Fixed: Str_To* methods (for string to number conversion) didn't correctly parse a single '0' if interpreting it as a hex number. This caused also 'mobtypes.txt' to not being parsed correctly.
+- Added: SERV.MAP.n.SECTOR.n returns 1 if the sector number is valid, 0 otherwise.
+- Added: Clear Console entry on taskbar icon of sphere console window on Windows OS (Issue - feature request #1516).
+
+4-12-2025, Nolok
+- Fixed: Malformed spell flags being returned via scripts.
+- Fixed: REGION ISEVENT didn't (always?) find REGIONTYPES.
+
+09-02-2026, Mulambo
 - Added: New experimental flag EF_WalkBypassMonsters. This will override hardcoded client behaviour that prevents stepping over NPCs without max stamina (like GM can). However, this could cause flickering or lags to clients and should be used with caution.
 - Added: New option flag OF_DontInterruptHealOnHit. Healing won't be interrupted on hit. This will allow you to implement your own healing interrupts in combat.

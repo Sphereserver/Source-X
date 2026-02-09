@@ -33,7 +33,8 @@ class CWorldTicker;
 DIR_TYPE GetDirStr(lpctstr pszDir);
 
 
-class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps, public virtual CTimedObject
+class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps,
+                 public virtual CTimedObject    /* TODO: can we get rid of virtual inheritance in the future? */
 {
 	static lpctstr const sm_szLoadKeys[];   // All Instances of CItem or CChar have these base attributes.
 	static lpctstr const sm_szVerbKeys[];   // All Instances of CItem or CChar have these base attributes.
@@ -141,16 +142,17 @@ public:
 	* @brief   Base get definition.
 	* @return  null if it fails, else a pointer to a CBaseBaseDef.
 	*/
-    CBaseBaseDef* Base_GetDef() const noexcept;
+    [[nodiscard]] RETURNS_NOTNULL
+    CBaseBaseDef* Base_GetDef() const;
 
     [[nodiscard]]
-	inline uint64 GetCanFlagsBase() const noexcept
+    inline uint64 GetCanFlagsBase() const
 	{
 		return Base_GetDef()->m_Can;
 	}
 
     [[nodiscard]]
-    inline uint64 GetCanFlags() const noexcept
+    inline uint64 GetCanFlags() const
 	{
 		// m_CanMask is XORed to m_Can:
 		//  If a flag in m_CanMask is enabled in m_Can, it is ignored in this Can check
@@ -160,7 +162,7 @@ public:
 	}
 
     [[nodiscard]]
-	bool Can(uint64 uiCan) const noexcept
+    bool Can(uint64 uiCan) const
 	{
         return (GetCanFlags() & uiCan);
 	}
@@ -922,14 +924,8 @@ protected:
      */
     virtual void OnTickStatusUpdate();
 
-    virtual bool _TickableState() const override;
-    //virtual bool  TickableState() const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
-
-    std::optional<bool> _TickableStateOverride() const;
-
-    bool _CanTick(bool fParentGoingToSleep = false) const;
-
 public:
+    virtual bool _CanTick(bool fParentGoingToSleep) const;
 
     /**
      * @fn  PacketPropertyList* CObjBase::GetPropertyList(void) const

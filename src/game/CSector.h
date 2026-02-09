@@ -8,7 +8,7 @@
 
 #include "../common/CScriptObj.h"
 #include "CSectorEnviron.h"
-#include "CSectorTemplate.h"
+#include "CSectorBase.h"
 #include "CTimedObject.h"
 
 

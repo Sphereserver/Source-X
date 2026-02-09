@@ -81,7 +81,7 @@ public:
         return IsChar(m_dwInternalVal);
     }
 
-    inline constexpr bool IsObjDisconnected() const noexcept // Called very frequently
+    constexpr bool IsObjDisconnected() const noexcept // Called very frequently
     {
         // Not in the game world for some reason.
         return ((m_dwInternalVal & (UID_F_RESOURCE | UID_O_DISCONNECT)) == UID_O_DISCONNECT);
@@ -100,7 +100,7 @@ public:
 	void SetObjContainerFlags(dword dwFlags) noexcept;
     void RemoveObjFlags(dword dwFlags) noexcept;
 
-    // Internal UID, which also has special flags not understood by the client.
+    // Internal UID with flags used only by the core, not scripts nor understood by the client.
     inline constexpr void SetPrivateUID(dword dwVal) noexcept {
         m_dwInternalVal = dwVal;
     }
@@ -108,7 +108,7 @@ public:
         return m_dwInternalVal;
     }
 
-    // Most often you want to use ObjUID, which also is the one sent to the client.
+    // Most often you want to use ObjUID, which is the one sent to the client and used/shown in scripts.
 	dword GetObjUID() const noexcept;
 	void SetObjUID(dword dwVal) noexcept;
 

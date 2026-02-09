@@ -87,8 +87,8 @@ void CUOMobTypes::Load()
                 if (!iconv.has_value())
                 {
                     g_Log.EventError(
-                        "Mobtypes.txt: Invalid flags for char ID %" PRIu32 " on line %" PRIuSIZE_T ".\n",
-                        uiAnimIndex, uiLineCount);
+                        "Mobtypes.txt: Invalid flags '%s' for char ID %" PRIu32 " on line %" PRIuSIZE_T ".\n",
+                        pptcSplitArray[2], uiAnimIndex, uiLineCount);
                     continue;
                 }
                 mobTypesRow.m_uiFlags = *iconv;
