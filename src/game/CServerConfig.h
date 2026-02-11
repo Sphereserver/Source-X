@@ -1009,16 +1009,17 @@ public:
      * @return  The calculated combat attack speed.
      */
 	int Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pWeapon ) const;
+    int Calc_CombatChanceToHit(const CChar *pChar, const CChar *pCharTarg) const;
 
     /**
-     * @brief   Calculates the combat chance to hit.
+     * Compares attacker skill vs defender skill to calculate the hit chance in combat.
      *
-     * @param [in,out]  pChar       If non-null, the character.
-     * @param [in,out]  pCharTarg   If non-null, the character targ.
+     * @param pChar Attacking character.
+     * @param pCharTarg Defending character.
      *
-     * @return  The calculated combat chance to hit.
+     * @return The calculated chance to hit in combat (0-100%).
      */
-	int Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg);
+	int Calc_CombatChanceToHit(const CChar * pChar, const CChar * pCharTarg);
 
     /**
      * @brief   Calculates the combat chance to parry.
