@@ -133,101 +133,103 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
     return iSwingSpeed;
 }
 
-int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
+int CServerConfig::Calc_CombatChanceToHit(const CChar * pChar, const CChar * pCharTarg)
 {
 	ADDTOCALLSTACK("CServerConfig::Calc_CombatChanceToHit");
-	// Combat: Compare attacker skill vs target skill
-	// to calculate the hit chance on combat.
-	//
-	// RETURN:
-	//  0-100 percent chance to hit.
 
+    // Must be a training dummy.
 	if (!pCharTarg)
-		return 50;	// must be a training dummy
+		return 50;
+
+    // Guards with `GuardsInstantKill` enabled in sphere.ini don't miss.
 	if (pChar->m_pNPC && (pChar->m_pNPC->m_Brain == NPCBRAIN_GUARD) && m_fGuardsInstantKill)
 		return 100;
-	SKILL_TYPE skillAttacker = pChar->Fight_GetWeaponSkill();
-	SKILL_TYPE skillTarget = pCharTarg->Fight_GetWeaponSkill();
-	switch (m_iCombatHitChanceEra)
+
+	const SKILL_TYPE skillAttacker = pChar->Fight_GetWeaponSkill();
+	const SKILL_TYPE skillTarget = pCharTarg->Fight_GetWeaponSkill();
+
+    switch (m_iCombatHitChanceEra)
 	{
+		// Sphere custom formula.
 		default:
 		case 0:
 		{
-			// Sphere custom formula
+		    // Paralyzed or sleeping target. It should be easy.
 			if (pCharTarg->IsStatFlag(STATF_SLEEPING | STATF_FREEZE))
 				return(g_Rand.GetVal(10));
 
-			int iSkillVal = pChar->Skill_GetAdjusted(skillAttacker);
+		    // Get a value of weapon skill attacker is using.
+			const int iSkillVal = pChar->Skill_GetAdjusted(skillAttacker);
 
-			// Offensive value mostly based on your skill and TACTICS.
-			// 0 - 1000
-			int iSkillAttack = (iSkillVal + pChar->Skill_GetAdjusted(SKILL_TACTICS)) / 2;
-			// int iSkillAttack = ( iSkillVal * 3 + pChar->Skill_GetAdjusted( SKILL_TACTICS )) / 4;
+			// Offensive value based on weapon skill and tactics.
+			const int iSkillAttack = (iSkillVal + pChar->Skill_GetAdjusted(SKILL_TACTICS)) / 2;
 
-			// Defensive value mostly based on your tactics value and random DEX,
-			// 0 - 1000
+		    // Get stamina of defending character.
+		    const int iStam = pCharTarg->Stat_GetVal(STAT_DEX);
+
+			// Defensive value based on tactics skill.
 			int iSkillDefend = pCharTarg->Skill_GetAdjusted(SKILL_TACTICS);
 
-			// Make it easier to hit people havin a bow or crossbow due to the fact that its
-			// not a very "mobile" weapon, nor is it fast to change position while in
-			// a fight etc. Just use 90% of the statvalue when defending so its easier
-			// to hit than defend == more fun in combat.
-			int iStam = pCharTarg->Stat_GetVal(STAT_DEX);
-			if (g_Cfg.IsSkillFlag(skillTarget, SKF_RANGED) &&
-				!g_Cfg.IsSkillFlag(skillAttacker, SKF_RANGED))
-				// The defender uses ranged weapon and the attacker is not.
-				// Make just a bit easier to hit.
+		    // Make it easier to hit target having a ranged weapon.
+			if (g_Cfg.IsSkillFlag(skillTarget, SKF_RANGED) && !g_Cfg.IsSkillFlag(skillAttacker, SKF_RANGED))
 				iSkillDefend = (iSkillDefend + iStam * 9) / 2;
+			// The defender doesn't have a ranged weapon or both do.
 			else
-				// The defender is using a nonranged, or they both use bows.
 				iSkillDefend = (iSkillDefend + iStam * 10) / 2;
 
 			int iDiff = (iSkillAttack - iSkillDefend) / 5;
-
 			iDiff = (iSkillVal - iDiff) / 10;
-			if (iDiff < 0)
-				iDiff = 0;	// just means it's very easy.
-			else if (iDiff > 100)
-				iDiff = 100;	// just means it's very hard.
 
-			return g_Rand.GetVal(iDiff);	// always need to have some chance. );
+		    // Impossible to hit.
+			if (iDiff < 0)
+				iDiff = 0;
+		    // Always hit.
+			else if (iDiff > 100)
+				iDiff = 100;
+
+		    // Always need to have some chance.
+			return g_Rand.GetVal(iDiff);
 		}
+		// Pre-AOS formula.
 		case 1:
 		{
-			// pre-AOS formula
-			int iAttackerSkill = pChar->Skill_GetBase(skillAttacker) + 500;
-			int iTargetSkill = pCharTarg->Skill_GetBase(skillTarget) + 500;
-
+			const int iAttackerSkill = pChar->Skill_GetBase(skillAttacker) + 500;
+			const int iTargetSkill = pCharTarg->Skill_GetBase(skillTarget) + 500;
 			int iChance = iAttackerSkill * 100 / (iTargetSkill * 2);
-			if (iChance < 0)
+
+		    if (iChance < 0)
 				iChance = 0;
 			else if (iChance > 100)
 				iChance = 100;
-			return iChance;
+
+		    return iChance;
 		}
+		// AOS formula.
 		case 2:
 		{
-			// AOS formula
 			int iAttackerSkill = pChar->Skill_GetBase(skillAttacker);
 			int iAttackerHitChance = (int)(pChar->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEHITCHANCE, true));
 			if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_DEADLYAIM) && pChar->IsGargoyle())
 			{
-				// Racial traits: Deadly Aim. Gargoyles always have +5 Hit Chance Increase and a minimum of 20.0 Throwing skill (not shown in skills gump)
+				// Racial traits: Deadly Aim. Gargoyles always have +5 Hit Chance Increase and a minimum of 20.0 Throwing skill (not shown in skills gump).
 				if (skillAttacker == SKILL_THROWING && iAttackerSkill < 200)
 					iAttackerSkill = 200;
 				iAttackerHitChance += 5;
 			}
-			iAttackerSkill = ((iAttackerSkill / 10) + 20) * (100 + minimum(iAttackerHitChance, 45));
+			iAttackerSkill = ((iAttackerSkill / 10) + 20) * (100 + std::min(iAttackerHitChance, 45));
 
-			int iTargetIncreaseDefChance = (int)(pChar->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEDEFCHANCE, true));
-			int iTargetSkill = ((pCharTarg->Skill_GetBase(skillTarget) / 10) + 20) * (100 + minimum(iTargetIncreaseDefChance, 45));
+			const int iTargetIncreaseDefChance = (int)(pChar->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEDEFCHANCE, true));
+			const int iTargetSkill = ((pCharTarg->Skill_GetBase(skillTarget) / 10) + 20) * (100 + std::min(iTargetIncreaseDefChance, 45));
 
 			int iChance = iAttackerSkill * 100 / (iTargetSkill * 2);
-			if (iChance < 2)
-				iChance = 2;	// minimum hit chance is 2%
+
+		    // Minimum hit chance is 2%.
+		    if (iChance < 2)
+				iChance = 2;
 			else if (iChance > 100)
 				iChance = 100;
-			return iChance;
+
+		    return iChance;
 		}
 	}
 }
