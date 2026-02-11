@@ -54,6 +54,7 @@ enum EF_TYPE
     EF_UsePingServer = 0x0008000,    // Enable the experimental Ping Server (for showing pings on the server list, uses UDP port 12000)
     EF_FixCanSeeInClosedConts = 0x0020000,    // Change CANSEE to return 0 for items inside containers that a client hasn't opened
     EF_WalkCheckHeightMounted = 0x0040000,    // Unlike the client does, assume an height increased by 4 in walkchecks if the char is mounted. Enabling this may prevent mounted characters to walk under places they could before.
+    EF_WalkBypassMonsters = 0x0080000 // Allows to bypass client hardcoded behaviour, that prevents characters stepping over NPCs without maximum stamina. This behaviour defaults to GM only. WARNING: This is resource intensive and could cause movement flickering to clients!
 };
 
 /**
@@ -90,7 +91,8 @@ enum OF_TYPE
     OF_EnableGuildAlignNotoriety   = 0x02000000,   // If enabled, guilds with the same alignment will see each other as enemy or ally.
     OF_NoDclickEquip               = 0x04000000,   // If enabled, double-click does not equip items.
     OF_PetBehaviorOwnerNeutral     = 0x08000000,   // Should my pets always appear natural to me?
-    OF_NPCMovementOldStyle         = 0x10000000    // Required setting to make NPCs run like in the old version.
+    OF_NPCMovementOldStyle         = 0x10000000,   // Required setting to make NPCs run like in the old version.
+    OF_DontInterruptHealOnHit      = 0x20000000    // Getting hit won't interrupt healing. You can still implement your own interrupt in triggers (like @Hit / @GetHit).
 };
 
 /**

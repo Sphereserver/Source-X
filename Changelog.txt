@@ -4094,3 +4094,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 4-12-2025, Nolok
 - Fixed: Malformed spell flags being returned via scripts.
 - Fixed: REGION ISEVENT didn't (always?) find REGIONTYPES.
+
+09-02-2026, Mulambo
+- Added: New experimental flag EF_WalkBypassMonsters. This will override hardcoded client behaviour that prevents stepping over NPCs without max stamina (like GM can). However, this could cause flickering or lags to clients and should be used with caution.
+- Added: New option flag OF_DontInterruptHealOnHit. Healing won't be interrupted on hit. This will allow you to implement your own healing interrupts in combat.
