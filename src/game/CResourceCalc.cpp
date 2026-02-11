@@ -176,6 +176,10 @@ int CServerConfig::Calc_CombatChanceToHit(const CChar * pChar, const CChar * pCh
 			int iChance = (iSkillAttack - iSkillDefend) / 5;
 			iChance = (iSkillVal - iChance) / 10;
 
+		    // Modify chance with IncreaseHit and IncreaseDef properties.
+		    iChance += static_cast<int>(pChar->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEHITCHANCE, true));
+		    iChance -= static_cast<int>(pCharTarg->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEDEFCHANCE, true));
+
 		    // Impossible to hit.
 			if (iChance < 0)
 				iChance = 0;
