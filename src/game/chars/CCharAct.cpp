@@ -4770,7 +4770,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	pArea = CheckValidMove(ptDst, &uiBlockFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &ClimbHeight, fPathFinding);
 	if ( !pArea )
 	{
-		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
+		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK && IsPlayer())
             g_Log.EventWarn("CheckValidMove failed\n");
 		return nullptr;
 	}
