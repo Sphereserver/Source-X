@@ -154,10 +154,6 @@ int CServerConfig::Calc_CombatChanceToHit(const CChar * pChar, const CChar * pCh
 		default:
 		case 0:
 		{
-		    // Paralyzed or sleeping target. It should be easy.
-			if (pCharTarg->IsStatFlag(STATF_SLEEPING | STATF_FREEZE))
-				return(g_Rand.GetVal(10));
-
 		    // Get a value of weapon skill attacker is using.
 			const int iSkillVal = pChar->Skill_GetAdjusted(skillAttacker);
 
@@ -177,18 +173,21 @@ int CServerConfig::Calc_CombatChanceToHit(const CChar * pChar, const CChar * pCh
 			else
 				iSkillDefend = (iSkillDefend + iStam * 10) / 2;
 
-			int iDiff = (iSkillAttack - iSkillDefend) / 5;
-			iDiff = (iSkillVal - iDiff) / 10;
+			int iChance = (iSkillAttack - iSkillDefend) / 5;
+			iChance = (iSkillVal - iChance) / 10;
 
 		    // Impossible to hit.
-			if (iDiff < 0)
-				iDiff = 0;
+			if (iChance < 0)
+				iChance = 0;
 		    // Always hit.
-			else if (iDiff > 100)
-				iDiff = 100;
+			else if (iChance > 100)
+				iChance = 100;
 
-		    // Always need to have some chance.
-			return g_Rand.GetVal(iDiff);
+		    // Paralyzed or sleeping target. It should be easy.
+		    if (pCharTarg->IsStatFlag(STATF_SLEEPING | STATF_FREEZE) && iChance < 80)
+		        iChance = 80;
+
+			return iChance;
 		}
 		// Pre-AOS formula.
 		case 1:
@@ -218,7 +217,7 @@ int CServerConfig::Calc_CombatChanceToHit(const CChar * pChar, const CChar * pCh
 			}
 			iAttackerSkill = ((iAttackerSkill / 10) + 20) * (100 + std::min(iAttackerHitChance, 45));
 
-			const int iTargetIncreaseDefChance = (int)(pChar->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEDEFCHANCE, true));
+			const int iTargetIncreaseDefChance = (int)(pCharTarg->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEDEFCHANCE, true));
 			const int iTargetSkill = ((pCharTarg->Skill_GetBase(skillTarget) / 10) + 20) * (100 + std::min(iTargetIncreaseDefChance, 45));
 
 			int iChance = iAttackerSkill * 100 / (iTargetSkill * 2);
