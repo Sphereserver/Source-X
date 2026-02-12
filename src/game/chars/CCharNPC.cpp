@@ -340,4 +340,6 @@ void CChar::NPC_CreateTrigger()
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
 	}
+	if (m_pNPC)
+		NPC_GetAllSpellbookSpells();
 }
