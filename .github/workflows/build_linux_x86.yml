@@ -1,25 +1,23 @@
 name: Linux x86
 
 on:
+  workflow_dispatch:
   push:
-#    branches:
-#      - 'master'
-#      - 'main'
-#      - 'dev'
-      paths-ignore:
-        - '.gitignore'
-        - '.gitattributes'
-        - '**.txt'
-        - '**.md'
-        - '**.rc'
-  pull_request:
     branches:
       - 'master'
       - 'main'
       - 'dev'
     paths-ignore:
-      - '*.txt'
-      - '*.md'
+      - '.gitignore'
+      - '.gitattributes'
+      - '**.txt'
+      - '**.md'
+      - '**.rc'
+  pull_request:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
 
 jobs:
   linux-x86:
@@ -33,12 +31,13 @@ jobs:
       uses: actions/checkout@v5
       with:
         fetch-depth: 0
+
     - name: Install prerequisites
       run:  |
             lsb_release -d
 
             echo && echo "** Setting up repos" && echo
-            sudo sudo dpkg --add-architecture i386
+            sudo dpkg --add-architecture i386
             sudo add-apt-repository universe && sudo apt-get -qq update > /dev/null
             echo "Done"
 
@@ -55,20 +54,18 @@ jobs:
             wget --quiet --output-document=dep1.deb http://launchpadlibrarian.net/367327733/libssl1.1_1.1.0g-2ubuntu4_i386.deb
             sudo dpkg -r --force-all libssl1.1
             sudo dpkg -i --force-all dep1.deb
-            #sudo apt install --fix-broken ./dep1.deb
             echo "Done"
 
             # Workaround: there are no official packages built for i386 on this OS. Let's install from previous Ubuntu LTS versions repo.
-
             echo "Downloading MariaDB i386 manually from Bionic repo..."
             wget --quiet --output-document=temp1.deb http://launchpadlibrarian.net/355877539/libmariadb3_3.0.3-1build1_i386.deb
             wget --quiet --output-document=temp2.deb http://launchpadlibrarian.net/355877538/libmariadb-dev_3.0.3-1build1_i386.deb
-
+            
             #echo "Downloading MariaDB i386 manually from Focal repo..."
             #wget --quiet --output-document=temp1.deb http://launchpadlibrarian.net/448491536/libmariadb3_10.3.18-1_i386.deb
             # No libmariadb-dev ?
             #wget --quiet --output-document=temp2.deb http://launchpadlibrarian.net/355877538/libmariadb-dev_3.0.3-1build1_i386.deb
-
+            
             # Third choice: directly download and install packages from Debian repos?
             #echo "Packages to be installed by libmariadb3:"
             #dpkg-deb -c temp1.deb
@@ -129,9 +126,34 @@ jobs:
         overwrite: true
 
 
+  upload_github_release_dev:
+    needs: linux-x86
+    if: github.ref_name == 'dev'
+    permissions:
+      contents: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download builds
+        uses: actions/download-artifact@v5
+        with:
+          name: Build-linux-x86
+          merge-multiple: true
+          run-id: ${{ github.run_id }}
+      - name: Create DEV release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Dev Nightly
+          tag_name: Dev
+          prerelease: true
+          files: SphereSvrX-linux-x86-nightly.tar.gz
+
+
   upload_github_release:
     needs: linux-x86
-    # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
+    # Upload artifact linked to GitHub RELEASE we are creating
     if: contains(fromJson('["master", "main"]'), github.ref_name)
     permissions:
       contents: write
@@ -146,7 +168,7 @@ jobs:
           merge-multiple: true
           run-id: ${{ github.run_id }}
 
-      - name: Create release
+      - name: Create Nightly release
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -162,7 +184,6 @@ jobs:
     if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
     permissions:
       contents: write
-      actions: read
 
     runs-on: ubuntu-latest
     steps:
@@ -172,6 +193,7 @@ jobs:
           name: Build-linux-x86
           merge-multiple: true
           run-id: ${{ github.run_id }}
+
       - name: Push release
         run: |
           curl -sST "{SphereSvrX-linux-x86-nightly.tar.gz}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}
