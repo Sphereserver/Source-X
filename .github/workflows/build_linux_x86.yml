@@ -157,6 +157,7 @@ jobs:
     if: contains(fromJson('["master", "main"]'), github.ref_name)
     permissions:
       contents: write
+      actions: read
 
     runs-on: ubuntu-latest
     steps:
