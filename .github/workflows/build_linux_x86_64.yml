@@ -83,7 +83,6 @@ jobs:
         path: SphereSvrX-linux-x86_64-nightly.tar.gz
         overwrite: true
 
-
   upload_github_release:
     needs: linux-x86_64
     # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
