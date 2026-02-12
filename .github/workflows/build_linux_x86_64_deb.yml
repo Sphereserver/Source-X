@@ -31,7 +31,7 @@ jobs:
       - name: Install prerequisites
         run:  |
           lsb_release -d
-          
+
           sudo add-apt-repository universe && sudo sudo apt-get -qq update
           sudo apt-get install -yq --no-install-recommends \
             ninja-build gcc-12 g++-12 \
@@ -110,3 +110,4 @@ jobs:
       - name: Push release
         run: |
           curl -sST "{SphereSvrX-linux-x86_64-nightly.deb}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}
+          curl -sST "{SphereSvrX-linux-x86_64-nightly.deb}" --ftp-pasv --ssl --ssl-reqd -u '${{secrets.FTP_USER}}:${{secrets.FTP_PASS}}' ${{secrets.FTP_LOC}}/release/prod/
