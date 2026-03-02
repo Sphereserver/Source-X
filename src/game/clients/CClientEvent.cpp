@@ -3175,17 +3175,24 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
             {
                 // Get absolute value (since left side is - and right +).
                 const int sideDistanceAbsolute = abs(sideDistance);
+
+                // Assign priority, spot we're standing on and the one in front of us are the best.
+                if (forwardDistance == 0 && sideDistanceAbsolute == 0)
+                    return 1;
                 if (forwardDistance == 1 && sideDistanceAbsolute == 0)
                     return 1;
+                // Spots on the front side and 2 tiles front.
                 if (forwardDistance == 1 && sideDistanceAbsolute == 1)
                     return 2;
                 if (forwardDistance == 2 && sideDistanceAbsolute == 0)
                     return 2;
+                // Spots on the sides and 2 tiles in front sides.
                 if (forwardDistance == 0 && sideDistanceAbsolute == 1)
                     return 3;
                 if (forwardDistance == 2 && sideDistanceAbsolute == 1)
                     return 3;
-                if (forwardDistance ==-1 && sideDistanceAbsolute <= 1)
+                // Behind us or 3 tiles in front.
+                if (forwardDistance == -1 && sideDistanceAbsolute <= 1)
                     return 4;
                 if (forwardDistance == 3 && sideDistanceAbsolute == 0)
                     return 4;
