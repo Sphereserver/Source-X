@@ -3220,10 +3220,18 @@ bool CChar::Spell_CastDone()
 				CItemCorpse* pCorpse = dynamic_cast <CItemCorpse*> (pObj); //This is probably redundant.
                 if (pCorpse == nullptr)
                 {
-                    SysMessage("That is not a corpse!");
+                    SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_NC);
                     return false;
                 }
-                Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
+
+			    pSummon = CreateBasic(pCorpse->GetCorpseType());
+			    if (!pSummon)
+			    {
+					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_FAIL);
+			        return false;
+			    }
+
+			    Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
                 if (!pSummon->RaiseCorpse(pCorpse))
 				{
 					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_FAIL);
