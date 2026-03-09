@@ -99,3 +99,4 @@ jobs:
       - name: Push release
         run: |
           curl -sST "{SphereSvrX-win-x86-nightly.zip}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}
+          curl -sST "{SphereSvrX-win-x86-nightly.zip}" --ftp-pasv --ssl --ssl-reqd -u '${{secrets.FTP_USER}}:${{secrets.FTP_PASS}}' ${{secrets.FTP_LOC}}/release/prod/
