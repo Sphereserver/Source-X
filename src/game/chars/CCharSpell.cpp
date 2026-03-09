@@ -3224,7 +3224,13 @@ bool CChar::Spell_CastDone()
                     return false;
                 }
 
-			    pSummon = CreateBasic(pCorpse->GetCorpseType());
+			    m_atMagery.m_uiSummonID = pCorpse->GetCorpseType();
+			    // Necromancers do not raise humans, but zombies.
+			    if (CCharBase::IsPlayableID(m_atMagery.m_uiSummonID))
+			    {
+			        m_atMagery.m_uiSummonID = CREID_ZOMBIE;
+			    }
+			    pSummon = CreateBasic(m_atMagery.m_uiSummonID);
 			    if (!pSummon)
 			    {
 					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_FAIL);
