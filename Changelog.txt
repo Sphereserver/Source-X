@@ -4097,5 +4097,11 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 09-03-2026, Mulambo
 - Changed: Debug DEBUGF_WALK now works only for players (was for monster too), to increase readility in logs.
+- Changed: Improved OpenDoor Macro (Issue #1510) to use following formula with priorities (1 is best, 5 is worst, arrow is player facing):
+    5|4|4|4|5
+    5|3|↓|3|5
+    5|2|1|2|5
+    5|3|2|3|5
+    5|5|4|5|5
 - Added: Exposed skill effect (local.effect, I/O) in @start and @skillStart triggers (usable for changing the value with some formula, rather than range / flat value from skill effect property.
 
