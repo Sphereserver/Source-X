@@ -59,8 +59,8 @@ jobs:
     # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
     if: contains(fromJson('["master", "main"]'), github.ref_name)
     permissions:
-      contents: read
-      actions: write
+      contents: write
+      actions: read
 
     runs-on: ubuntu-latest
     steps:
@@ -98,3 +98,4 @@ jobs:
       - name: Push release
         run: |
           curl -sST "{SphereSvrX-win-x86_64-nightly.zip}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}
+          curl -sST "{SphereSvrX-win-x86_64-nightly.zip}" --ftp-pasv --ssl --ssl-reqd -u '${{secrets.FTP_USER}}:${{secrets.FTP_PASS}}' ${{secrets.FTP_LOC}}/release/prod/
