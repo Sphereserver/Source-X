@@ -3094,34 +3094,157 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 			return;
 		}
 
-		case EXTCMD_DOOR_AUTO:	// open door macro
+	    // OpenDoor macro.
+		case EXTCMD_DOOR_AUTO:
 		{
-			CPointMap pt = m_pChar->GetTopPoint();
-			char iCharZ = pt.m_z;
+			const CPointMap pt = m_pChar->GetTopPoint();
+			const char iCharZ = pt.m_z;
 
-			pt.Move(m_pChar->m_dirFace);
+		    /**
+		     * Calculates distance to the doors relative to the location character is facing based on absolute values.
+		     *
+		     * @param[in] int distanceX, distanceY World distance to object.
+		     * @param[out] int forwardDistance, sideDistance Character relative distance to object.
+		     */
+            auto GetFacingDistance = [&](const int distanceX, const int distanceY, int &forwardDistance, int &sideDistance)
+            {
+                // Rotate world-space to character-facing space.
+                switch (m_pChar->m_dirFace & ~DIR_MASK_RUNNING)
+                {
+                    case DIR_N:
+                        forwardDistance = -distanceY;
+                        sideDistance = distanceX;
+                        break;
+                    case DIR_NE:
+                        forwardDistance = -distanceY + distanceX;
+                        sideDistance = distanceY + distanceX;
+                        break;
+                    case DIR_E:
+                        forwardDistance = distanceX;
+                        sideDistance = distanceY;
+                        break;
+                    case DIR_SE:
+                        forwardDistance = distanceY + distanceX;
+                        sideDistance = distanceY - distanceX;
+                        break;
+                    case DIR_S:
+                        forwardDistance = distanceY;
+                        sideDistance = -distanceX;
+                        break;
+                    case DIR_SW:
+                        forwardDistance = distanceY - distanceX;
+                        sideDistance = -distanceY - distanceX;
+                        break;
+                    case DIR_W:
+                        forwardDistance = -distanceX;
+                        sideDistance = -distanceY;
+                        break;
+                    case DIR_NW:
+                        forwardDistance = -distanceY - distanceX;
+                        sideDistance = -distanceX + distanceY;
+                        break;
+                    default:
+                        forwardDistance = distanceY;
+                        sideDistance = -distanceX;
+                        break;
+                }
+                // Diagonal direction.
+                if (m_pChar->m_dirFace & 1)
+                {
+                    forwardDistance = (forwardDistance + 1) / 2;
+                    sideDistance = (sideDistance + 1) / 2;
+                }
+            };
+
+		    /**
+		     * Get priority of the checked doors.
+		     *
+		     * Doors are selected by the following table (where arrow is the location character is facing).
+		     * 5|4|4|4|5
+             * 5|3|↓|3|5
+             * 5|2|1|2|5
+             * 5|3|2|3|5
+             * 5|5|4|5|5
+             *
+		     * @param int forwardDistance How far is the door in front / back of us.
+		     * @param int sideDistance How far is the door in left / right side of us.
+		     *
+		     * @return Priority of the checked doors (1 is best, 5 is worst).
+		     */
+            auto GetDoorPriority = [&](const int forwardDistance, const int sideDistance) -> int
+            {
+                // Get absolute value (since left side is - and right +).
+                const int sideDistanceAbsolute = abs(sideDistance);
+
+                // Assign priority, spot we're standing on and the one in front of us are the best.
+                if (forwardDistance == 0 && sideDistanceAbsolute == 0)
+                    return 1;
+                if (forwardDistance == 1 && sideDistanceAbsolute == 0)
+                    return 1;
+                // Spots on the front side and 2 tiles front.
+                if (forwardDistance == 1 && sideDistanceAbsolute == 1)
+                    return 2;
+                if (forwardDistance == 2 && sideDistanceAbsolute == 0)
+                    return 2;
+                // Spots on the sides and 2 tiles in front sides.
+                if (forwardDistance == 0 && sideDistanceAbsolute == 1)
+                    return 3;
+                if (forwardDistance == 2 && sideDistanceAbsolute == 1)
+                    return 3;
+                // Behind us or 3 tiles in front.
+                if (forwardDistance == -1 && sideDistanceAbsolute <= 1)
+                    return 4;
+                if (forwardDistance == 3 && sideDistanceAbsolute == 0)
+                    return 4;
+                return 5;
+            };
+
+		    // Search for the doors in area around character with size defined by bDoorAutoDist.
             auto Area = CWorldSearchHolder::GetInstance(pt, bDoorAutoDist);
-			for (;;)
-			{
-				CItem *pItem = Area->GetItem();
-				if ( !pItem )
-					return;
+            CItem *pBestDoor = nullptr;
+            int iBestPriority = 6;
 
-				switch ( pItem->GetType() )
-				{
-					case IT_DOOR:
-					case IT_DOOR_LOCKED:
-					case IT_PORTCULIS:
-					case IT_PORT_LOCKED:
-						if ( abs(iCharZ - pItem->GetTopPoint().m_z) < 20 )
-						{
-							m_pChar->SysMessageDefault(DEFMSG_MACRO_OPENDOOR);
-							m_pChar->Use_Obj(pItem, true);
-							return;
-						}
-				}
-			}
-			return;
+            for (;;)
+            {
+                CItem *pItem = Area->GetItem();
+                if (!pItem)
+                    break;
+
+                switch (pItem->GetType())
+                {
+                    case IT_DOOR:
+                    case IT_DOOR_LOCKED:
+                    case IT_PORTCULIS:
+                    case IT_PORT_LOCKED:
+                    {
+                        const CPointMap itemPt = pItem->GetTopPoint();
+                        // Item is above / below us.
+                        if (abs(iCharZ - itemPt.m_z) >= 20)
+                            break;
+
+                        // Calculate distance of the doors and where are we facing relatively to them.
+                        const int distanceX = itemPt.m_x - m_pChar->GetTopPoint().m_x;
+                        const int distanceY = itemPt.m_y - m_pChar->GetTopPoint().m_y;
+                        int forwardDistance;
+                        int sideDistance;
+                        GetFacingDistance(distanceX, distanceY, forwardDistance, sideDistance);
+
+                        // We have found doors with better priority, mark them.
+                        if (const int priority = GetDoorPriority(forwardDistance, sideDistance); priority < iBestPriority)
+                        {
+                            iBestPriority = priority;
+                            pBestDoor = pItem;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (pBestDoor)
+            {
+                m_pChar->SysMessageDefault(DEFMSG_MACRO_OPENDOOR);
+                m_pChar->Use_Obj(pBestDoor, true);
+            }
 		}
 
 		case EXTCMD_INVOKE_VIRTUE:

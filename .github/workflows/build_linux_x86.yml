@@ -175,3 +175,4 @@ jobs:
       - name: Push release
         run: |
           curl -sST "{SphereSvrX-linux-x86-nightly.tar.gz}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}
+          curl -sST "{SphereSvrX-linux-x86-nightly.tar.gz}" --ftp-pasv --ssl --ssl-reqd -u '${{secrets.FTP_USER}}:${{secrets.FTP_PASS}}' ${{secrets.FTP_LOC}}/release/prod/
