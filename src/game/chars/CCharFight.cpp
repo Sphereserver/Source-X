@@ -2200,6 +2200,13 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
         }
 	}
 
+    // BAD BAD Healing fix.. Cant think of something else -- Radiant
+    if ( pCharTarg->m_Act_SkillCurrent == SKILL_HEALING )
+    {
+        pCharTarg->SysMessageDefault(DEFMSG_HEALING_INTERRUPT);
+        pCharTarg->Skill_Cleanup();
+    }
+
 	if ( pAmmo )
 	{
 		if ( pCharTarg->m_pNPC && (40 >= g_Rand.Get16ValFast(100)) )
