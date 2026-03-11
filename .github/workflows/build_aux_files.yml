@@ -20,21 +20,51 @@ jobs:
       actions: read
 
     runs-on: ubuntu-latest
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-
+      # Step 1: Determine Tag and Release Name based on branch
+      # This sets environment variables for the rest of the workflow
+      # name is different if it's dev branch or other (main or master)
+      - name: Set Release Variables
+        run: |
+          if [[ "${{ github.ref_name }}" == "dev" ]]; then
+            echo "TARGET_TAG=Development" >> $GITHUB_ENV
+            echo "RELEASE_NAME=Development Build" >> $GITHUB_ENV
+          else
+            echo "TARGET_TAG=Nightly" >> $GITHUB_ENV
+            echo "RELEASE_NAME=Nightly Build" >> $GITHUB_ENV
+          fi
+          
+      # Step 2: Update Tag using native Git commands
+      - name: Update Git Tag
+        run: |
+          # Configure identity
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Force the tag locally and push it to origin
+          # Use the environment variable set in Step 1
+          git tag -f ${{ env.TARGET_TAG }}
+          git push -f origin ${{ env.TARGET_TAG }}
+      
+      # Step 3: Generate the file to upload    
       - name: Generate changelog
         run: git log --pretty=format:"%ad %an %s" --date=short > Git-Changelog.txt
-
+      
+      # Step 4: Update the GitHub Release page
       - name: Add auxiliary files to the release
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: Nightly
-          tag_name: Nightly
+          # Use dynamic variables
+          name: "${{ env.RELEASE_NAME }}"
+          tag_name: ${{ env.TARGET_TAG }}
           prerelease: true
           files: Git-Changelog.txt
+          # Overwrite existing assets with the same name
+          overwrite_files: true
