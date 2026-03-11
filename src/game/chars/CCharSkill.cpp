@@ -4474,6 +4474,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
         CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
         pScriptArgs->m_iN1 = skill;
         pScriptArgs->m_iN2 = iWaitTime;
+        pScriptArgs->m_VarsLocal.SetNum("Effect", m_Act_Effect);
         pScriptArgs->m_VarsLocal.SetNumNew("Sound", sound);
         pScriptArgs->m_VarsLocal.SetNumNew("Anim", anim);
 		// Execute the @START trigger and pass various craft parameters there
@@ -4522,6 +4523,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
             anim = (ANIM_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("Anim"));
 		}
         iWaitTime = (int)pScriptArgs->m_iN2;
+	    m_Act_Effect = static_cast<int>(pScriptArgs->m_VarsLocal.GetKeyNum("Effect"));
 		if (IsSkillBase(skill) && iWaitTime > 0)
 			SetTimeoutD(iWaitTime);		// How long before complete skill.
 

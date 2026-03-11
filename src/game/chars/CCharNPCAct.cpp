@@ -849,7 +849,18 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 	if ( !pChar->IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_STONE) || pChar->Can(CAN_C_STATUE) || (pChar->m_pNPC && pChar->m_pNPC->m_bonded) )
 		return false;
 
-	static lpctstr const sm_szHealerRefuseEvils[] =
+    UpdateDir(pChar);
+
+    // Character is too far.
+    if (GetDist(pChar) > 3)
+    {
+        if (g_Rand.Get16ValFast(5))
+            return false;
+        Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_HEALER_RANGE));
+        return true;
+    }
+
+    static lpctstr const sm_szHealerRefuseEvils[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_REF_EVIL_1 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_REF_EVIL_2 ),
@@ -876,47 +887,37 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_RES_5 )
 	};
 
-	UpdateDir( pChar );
-
 	lpctstr pszRefuseMsg;
 
-	int iDist = GetDist( pChar );
-
-	if ( iDist > 3 )
-	{
-		if ( g_Rand.Get16ValFast(5))
-			return false;
-		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_RANGE ) );
-		return true;
-	}
-
-	// What noto is this char to me ?
-	bool ImEvil = Noto_IsEvil();
-	bool ImNeutral = Noto_IsNeutral();
-	NOTO_TYPE NotoThem = pChar->Noto_GetFlag( this, true );
+	// What noto is this char to me?
+    const NOTO_TYPE NotoThem = pChar->Noto_GetFlag(this, true);
 
 	if ( !IsStatFlag( STATF_CRIMINAL ) && NotoThem == NOTO_CRIMINAL )
 	{
 		pszRefuseMsg = sm_szHealerRefuseCriminals[ g_Rand.GetValFast( ARRAY_COUNT( sm_szHealerRefuseCriminals )) ];
-		if ( g_Rand.Get16ValFast(5) || iDist > 3 )
+		if (g_Rand.Get16ValFast(5))
 			return false;
 		Speak( pszRefuseMsg );
 		return true;
 	}
 
-	if (( !ImNeutral && !ImEvil) && NotoThem >= NOTO_NEUTRAL )
+    // My karma status.
+    const bool fImEvil = Noto_IsEvil();
+    const bool fImNeutral = Noto_IsNeutral();
+
+	if (!fImNeutral && !fImEvil && NotoThem >= NOTO_NEUTRAL)
 	{
 		pszRefuseMsg = sm_szHealerRefuseEvils[ g_Rand.GetValFast( ARRAY_COUNT( sm_szHealerRefuseEvils )) ];
-		if ( g_Rand.Get16ValFast(5) || iDist > 3 )
+		if (g_Rand.Get16ValFast(5))
 			return false;
 		Speak( pszRefuseMsg );
 		return true;
 	}
 
-	if (( ImNeutral || ImEvil ) && NotoThem == NOTO_GOOD )
+	if ((fImNeutral || fImEvil ) && NotoThem == NOTO_GOOD)
 	{
 		pszRefuseMsg = sm_szHealerRefuseGoods[ g_Rand.GetValFast( ARRAY_COUNT( sm_szHealerRefuseGoods )) ];
-		if ( g_Rand.Get16ValFast(5) || iDist > 3 )
+		if (g_Rand.Get16ValFast(5))
 			return false;
 		Speak( pszRefuseMsg );
 		return true;
