@@ -54,6 +54,7 @@ enum EF_TYPE
     EF_UsePingServer = 0x0008000,    // Enable the experimental Ping Server (for showing pings on the server list, uses UDP port 12000)
     EF_FixCanSeeInClosedConts = 0x0020000,    // Change CANSEE to return 0 for items inside containers that a client hasn't opened
     EF_WalkCheckHeightMounted = 0x0040000,    // Unlike the client does, assume an height increased by 4 in walkchecks if the char is mounted. Enabling this may prevent mounted characters to walk under places they could before.
+    EF_WalkBypassMonsters = 0x0080000 // Allows to bypass client hardcoded behaviour, that prevents characters stepping over NPCs without maximum stamina. This behaviour defaults to GM only. WARNING: This is resource intensive and could cause movement flickering to clients!
 };
 
 /**
