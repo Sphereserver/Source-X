@@ -1376,8 +1376,6 @@ bool CChar::Fight_Clear(CChar *pChar, bool fForced)
         m_atFight.m_iSwingAnimationDelay = 0;
         m_atFight.m_iSwingAnimation = 0;
         m_atFight.m_iSwingIgnoreLastHitTag = 0;
-	{
-        m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
 		m_Fight_Targ_UID.InitUID();
     }
 
