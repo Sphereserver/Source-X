@@ -680,7 +680,7 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
 
 	if ( IsStatFlag(STATF_INVUL) )
 		mode |= CHARMODE_YELLOW;
-	if ( GetPrivLevel() > PLEVEL_Player )
+	if (GetPrivLevel() > PLEVEL_Player || IsSetEF(EF_WalkBypassMonsters))
 		mode |= CHARMODE_IGNOREMOBS;
 	if ( IsStatFlag(STATF_WAR) )
 		mode |= CHARMODE_WAR;
