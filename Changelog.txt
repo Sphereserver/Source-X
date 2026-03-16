@@ -4111,3 +4111,5 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 11-03-2026, Mulambo
 - Added: New experimental flag EF_WalkBypassMonsters. This will override hardcoded client behaviour that prevents stepping over NPCs without max stamina (like GM can). However, this could cause flickering or lags to clients and should be used with caution.
 
+16-03-2026, Mulambo
+- Changed: Sphere now accepts passwords with length up to 30 characters (was 16). WARNING: most clients still has a cap of 16 characters, be carefull with longer passwords.

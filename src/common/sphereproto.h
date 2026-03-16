@@ -754,7 +754,7 @@ enum RACE_TYPE		// character race, used in new character creation (0x8D) and sta
 #define MAX_NAME_SIZE       30
 
 #define MAX_ACCOUNT_NAME_SIZE       MAX_NAME_SIZE
-#define MAX_ACCOUNT_PASSWORD_ENTER  16	// client only allows n chars.
+#define MAX_ACCOUNT_PASSWORD_SIZE  30 // Max size defined by Login Request (0x80) packet.
 #define ACCOUNT_NAME_VALID_CHAR     " !\"#$%&()*,/:;<=>?@[\\]^{|}~"
 #define MAX_CHARS_PER_ACCT	   (byte) 7
 
