@@ -1224,7 +1224,10 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pClient->removeBuff(BI_STRANGLE);
 					pClient->addBuff(BI_STRANGLE, 1075794, 1075795, wTimerEffect);
 				}
-                wStatEffectRef = (pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) / 100);
+		        if (pCaster != nullptr)
+		        {
+		            wStatEffectRef = (pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) / 100);
+		        }
 				if (wStatEffectRef < 4)
                     wStatEffectRef = 4;
 				pSpell->m_itSpell.m_spellcharges = wStatEffectRef;
@@ -1302,10 +1305,13 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 						pSpell->m_itSpell.m_spellcharges += 2;
 						//TO-DO If the spell targets someone already affected by the Pain Spike spell, only 3 to 7 points of DIRECT damage will be inflicted.
 				}
-				if (m_pNPC)
-                    wStatEffectRef = ((pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 10) + 30;
-				else
-                    wStatEffectRef = ((pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 100) + 18;
+		        if (pCaster != nullptr)
+		        {
+		            if (m_pNPC)
+		                wStatEffectRef = ((pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 10) + 30;
+		            else
+		                wStatEffectRef = ((pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 100) + 18;
+		        }
 				pSpell->m_itSpell.m_spellcharges = 10;
 			}
 			return;
@@ -1315,18 +1321,24 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				if (pClient)
 				{
-					Str_CopyLimitNull(NumBuff[0], pCaster->GetName(), uiBuffElemSize);
-					Str_CopyLimitNull(NumBuff[1], pCaster->GetName(), uiBuffElemSize);
+				    if (pCaster != nullptr)
+				    {
+				        Str_CopyLimitNull(NumBuff[0], pCaster->GetName(), uiBuffElemSize);
+				        Str_CopyLimitNull(NumBuff[1], pCaster->GetName(), uiBuffElemSize);
+				    }
 					pClient->removeBuff(BI_BLOODOATHCURSE);
 					pClient->addBuff(BI_BLOODOATHCURSE, 1075659, 1075660, wTimerEffect, pNumBuff, 2);
 				}
-				CClient *pCasterClient = pCaster->GetClientActive();
-				if (pCasterClient)
-				{
-					Str_CopyLimitNull(NumBuff[0], GetName(), uiBuffElemSize);
-					pCasterClient->removeBuff(BI_BLOODOATHCASTER);
-					pCasterClient->addBuff(BI_BLOODOATHCASTER, 1075661, 1075662, wTimerEffect, pNumBuff, 1);
-				}
+			    if (pCaster != nullptr)
+			    {
+			        CClient *pCasterClient = pCaster->GetClientActive();
+			        if (pCasterClient)
+			        {
+			            Str_CopyLimitNull(NumBuff[0], GetName(), uiBuffElemSize);
+			            pCasterClient->removeBuff(BI_BLOODOATHCASTER);
+			            pCasterClient->addBuff(BI_BLOODOATHCASTER, 1075661, 1075662, wTimerEffect, pNumBuff, 1);
+			        }
+			    }
 			}
 			return;
 		case LAYER_SPELL_Corpse_Skin:
@@ -1392,7 +1404,10 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case SPELL_Reactive_Armor:
 			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
-                wStatEffectRef = 15 + (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
+			    if (pCaster != nullptr)
+			    {
+			        wStatEffectRef = 15 + (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
+			    }
 
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -1408,7 +1423,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				int iSkill = -1;
 				const bool fValidSkill = pSpellDef->GetPrimarySkill(&iSkill, nullptr);
 				ASSERT_ALWAYS(fValidSkill);
-				pSpell->m_itSpell.m_PolyStr = (int16)pSpellDef->m_vcEffect.GetLinear(pCaster->Skill_GetBase((SKILL_TYPE)iSkill)) / 10;	// % of damage reflected.
+
+			    if (pCaster != nullptr)
+			    {
+			        pSpell->m_itSpell.m_PolyStr = (int16)pSpellDef->m_vcEffect.GetLinear(pCaster->Skill_GetBase((SKILL_TYPE)iSkill)) / 10;	// % of damage reflected.
+			    }
 			}
 			if (pClient && IsSetOF(OF_Buffs))
 			{
@@ -1618,10 +1637,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				{
 					if ( IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 						 wStatEffectRef = (400 + pCaster->Skill_GetBase(SKILL_EVALINT) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 10;
-
-					if ( wStatEffectRef > Stat_GetVal(STAT_INT) )
-                        wStatEffectRef = (word)(Stat_GetVal(STAT_INT));
 				}
+
+                if ( wStatEffectRef > Stat_GetVal(STAT_INT) )
+                    wStatEffectRef = (word)(Stat_GetVal(STAT_INT));
+
 				UpdateStatVal( STAT_INT, -wStatEffectRef );
 			}
 			return;
@@ -1629,7 +1649,10 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			StatFlag_Set( STATF_REFLECTION );
 			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
-                wStatEffectRef = 25 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
+			    if (pCaster != nullptr)
+			    {
+			        wStatEffectRef = 25 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
+			    }
 
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -1665,19 +1688,28 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				int iMagicResist = 0;
 				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
-					ushort uiCasterEvalInt = pCaster->Skill_GetBase(SKILL_EVALINT), uiCasterMeditation = pCaster->Skill_GetBase(SKILL_MEDITATION);
-					ushort uiCasterInscription = pCaster->Skill_GetBase(SKILL_INSCRIPTION);
-					ushort uiMyMagicResistance = Skill_GetBase(SKILL_MAGICRESISTANCE), uiMyInscription = Skill_GetBase(SKILL_INSCRIPTION);
-                    wStatEffectRef = (uiCasterEvalInt + uiCasterMeditation + uiCasterInscription) / 40;
-                    wStatEffectRef = minimum(75, wStatEffectRef);
+				    int iPhysicalResistMin = 0;
 
-					iPhysicalResist = 15 - (uiCasterInscription / 200);
-					int iPhysicalResistMin = minimum(INT16_MAX, iPhysicalResist);
-					pSpell->m_itSpell.m_PolyStr = (short)(maximum(-INT16_MAX, iPhysicalResistMin ));
+				    if (pCaster != nullptr)
+				    {
+				        ushort uiCasterEvalInt = pCaster->Skill_GetBase(SKILL_EVALINT);
+				        ushort uiCasterMeditation = pCaster->Skill_GetBase(SKILL_MEDITATION);
+				        ushort uiCasterInscription = pCaster->Skill_GetBase(SKILL_INSCRIPTION);
+				        wStatEffectRef = (uiCasterEvalInt + uiCasterMeditation + uiCasterInscription) / 40;
 
-					iMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
-					int iMagicResistMin = minimum(INT16_MAX, iMagicResist);
-					pSpell->m_itSpell.m_PolyDex = (short)(maximum(-INT16_MAX, iMagicResistMin));
+				        iPhysicalResist = 15 - (uiCasterInscription / 200);
+				        iPhysicalResistMin = minimum(INT16_MAX, iPhysicalResist);
+				    }
+
+				    wStatEffectRef = minimum(75, wStatEffectRef);
+				    pSpell->m_itSpell.m_PolyStr = (short)(maximum(-INT16_MAX, iPhysicalResistMin ));
+
+				    ushort uiMyMagicResistance = Skill_GetBase(SKILL_MAGICRESISTANCE);
+				    ushort uiMyInscription = Skill_GetBase(SKILL_INSCRIPTION);
+				    iMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
+				    int iMagicResistMin = minimum(INT16_MAX, iMagicResist);
+
+				    pSpell->m_itSpell.m_PolyDex = (short)(maximum(-INT16_MAX, iMagicResistMin));
 
 					/*
 					* The method _CheckLimitEffectSkill checks if the skill will go above the current skill cap value, but because
