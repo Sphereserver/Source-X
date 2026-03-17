@@ -193,7 +193,7 @@ int CServerConfig::Calc_CombatChanceToHit(const CChar * pChar, const CChar * pCh
 		    if (pCharTarg->IsStatFlag(STATF_SLEEPING | STATF_FREEZE) && iChance < 80)
 		        iChance = 80;
 
-			return iChance;
+			return g_Rand.GetVal(iChance);	// always need to have some chance. );
 		}
 		// Pre-AOS formula.
 		case 1:
