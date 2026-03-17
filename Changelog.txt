@@ -4111,3 +4111,11 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 11-03-2026, Mulambo
 - Added: New experimental flag EF_WalkBypassMonsters. This will override hardcoded client behaviour that prevents stepping over NPCs without max stamina (like GM can). However, this could cause flickering or lags to clients and should be used with caution.
 
+16-03-2026, Mulambo
+- Fixed: Issue with loosing target when somebody dies in combat (#1559)
+
+17-03-2026, Mulambo
+- Modified CombatHitChanceEra:
+  - Fixed: IncreaseDefChance on AOS formula (2) is now properly calculated from defender, not the attacker.
+  - Fixed: Hit chance to paralyzed targets with sphere custom (0) formula is now 80-100% (was 0-10%).
+  - Added: Implemented Hit chance increase / decrease to sphere custom formula (0).
