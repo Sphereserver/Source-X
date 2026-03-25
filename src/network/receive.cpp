@@ -1943,6 +1943,20 @@ bool PacketServerSelect::onReceive(CNetState* net)
 
 	uint server = readInt16();
 
+    // Web Identity validation.
+    if (g_Cfg.m_sWebIdentity.IsValid() && g_Cfg.m_sWebIdentityForce)
+    {
+        CClient* client = net->getClient();
+        ASSERT(client);
+
+        // We did not receive validation packet (0xa4). The packet itself is validated elsewhere.
+        if (!client->m_webIdentity.m_fReceived)
+        {
+            client->addLoginErr(PacketLoginError::BadAuthID);
+            return false;
+        }
+    }
+
 	net->getClient()->Login_Relay(server);
 	return true;
 }
@@ -1962,12 +1976,85 @@ PacketSystemInfo::PacketSystemInfo() : Packet(149)
 bool PacketSystemInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSystemInfo::onReceive");
-	UnreferencedParameter(net);
 
-	skip(148);
-	return true;
+    // Not using web identity.
+    if (!g_Cfg.m_sWebIdentity.IsValid())
+    {
+        UnreferencedParameter(net);
+
+        skip(148);
+        return true;
+    }
+
+    // Web identity check.
+    char clientType[7] = {};
+    readStringASCII(clientType, 6, false);
+    const uint8 version = readByte();
+
+    // Type or version doesn't match, might not be Web Identity.
+    if (strcmp(clientType, "CUOWEB") != 0 || version != 1) {
+        skip(141);
+
+        return true;
+    }
+
+    // We are using web identity, and we passed the version check. Assign data we received from it.
+    CClient* client = net->getClient();
+    ASSERT(client);
+
+    // Skip timestamp.
+    skip(4);
+
+    // Buffer for reading data from packet.
+    char dataBuffer[30];
+
+    // Remaining length of Web Identity packet (so we don't eat bytes from another packet).
+    int length = 137;
+
+    // Read the received secret and compare it to our secret.
+    length -= readStringNullASCII(dataBuffer, length);
+
+    // Secret is not valid.
+    if (strcmp(dataBuffer, g_Cfg.m_sWebIdentity) != 0)
+    {
+        skip(length);
+        client->addLoginErr(PacketLoginError::BadAuthID);
+        return false;
+    }
+
+    // Client is validated, we can now populate Web Identity data.
+    CClient::CWebIdentity &Identity = client->m_webIdentity;
+    Identity.m_fReceived = true;
+
+    // User ID.
+    length -= readStringNullASCII(dataBuffer, length);
+    Identity.m_sUserId = dataBuffer;
+
+    // Connecting IP.
+    length -= readStringNullASCII(dataBuffer, length);
+    Identity.m_sConnectingIp = dataBuffer;
+
+    // External Auth Provider.
+    length -= readStringNullASCII(dataBuffer, length);
+    Identity.m_sExternalAuthProvider = dataBuffer;
+
+    // External Auth Username.
+    length -= readStringNullASCII(dataBuffer, length);
+    Identity.m_sExternalAuthUsername = dataBuffer;
+
+    // External Auth ID.
+    length -= readStringNullASCII(dataBuffer, length);
+    Identity.m_sExternalAuthId = dataBuffer;
+
+    // Role.
+    length -= readStringNullASCII(dataBuffer, length);
+    Identity.m_sRole = dataBuffer;
+
+    // Skip the rest of the packet.
+    skip(length);
+
+    return true;
 }
-
 
 /***************************************************************************
  *

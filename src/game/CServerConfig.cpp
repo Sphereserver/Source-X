@@ -736,6 +736,8 @@ enum RC_TYPE
 	RC_VERSION,
 	RC_WALKBUFFER,
 	RC_WALKREGEN,
+    RC_WEBIDENTITY,
+    RC_WEBIDENTITYFORCE,
 	RC_WOOLGROWTHTIME,			// m_iWoolGrowthTime
 	RC_WOPCOLOR,
 	RC_WOPFONT,
@@ -1031,7 +1033,9 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "VERSION",				{ ELEM_VOID,	0												}},
 	{ "WALKBUFFER",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWalkBuffer)			}},
 	{ "WALKREGEN",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWalkRegen)			}},
-	{ "WOOLGROWTHTIME",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWoolGrowthTime)		}},
+    { "WEBIDENTITY",			{ ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sWebIdentity)			}},
+    { "WEBIDENTITYFORCE",		{ ELEM_BOOL, static_cast<uint>OFFSETOF(CServerConfig,m_sWebIdentityForce)			}},
+    { "WOOLGROWTHTIME",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWoolGrowthTime)		}},
 	{ "WOPCOLOR",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWordsOfPowerColor)	}},
 	{ "WOPFONT",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWordsOfPowerFont)		}},
 	{ "WOPPLAYER",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fWordsOfPowerPlayer)	}},
@@ -1518,7 +1522,13 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_WALKBUFFER:
 			m_iWalkBuffer = s.GetArgVal() * MSECS_PER_TENTH;
 			break;
-        case RC_MEDITATIONMOVEMENTABORT:
+	    case RC_WEBIDENTITY:
+	        m_sWebIdentity = s.GetArgStr();
+	        break;
+	    case RC_WEBIDENTITYFORCE:
+	        m_sWebIdentityForce = s.GetArgVal() > 0;
+	        break;
+	    case RC_MEDITATIONMOVEMENTABORT:
             _fMeditationMovementAbort = s.GetArgVal() > 0 ? true : false;
             break;
 		default:

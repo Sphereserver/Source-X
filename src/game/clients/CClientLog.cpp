@@ -112,7 +112,7 @@ bool CClient::addLoginErr(byte code)
 		"Timeout / Wrong encryption / Unknown error",
 		"Invalid client version. See the CLIENTVERSION setting in " SPHERE_FILE ".ini",
 		"Invalid character selected (chosen character does not exist)",
-		"AuthID is not correct. This normally means that the client did not log in via the login server",
+		"AuthID is not correct. This means that the client did not log in via the login server or Web Identity secret doesn't match",
 		"The account details entered are invalid (username or password is too short, too long or contains invalid characters). This can sometimes be caused by incorrect/missing encryption keys",
 		"The account details entered are invalid (username or password is too short, too long or contains invalid characters). This can sometimes be caused by incorrect/missing encryption keys",
 		"Encryption error: packet length does not match what was expected",
@@ -847,6 +847,12 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 	ASSERT( !m_Crypt.IsInit());
 	ASSERT( pEvent != nullptr );
 	ASSERT( uiLen > 0 );
+
+    // Web identity packet. Validation is handled in packet itself.
+    if (pEvent->Default.m_Cmd == XCMD_Spy && uiLen == 149)
+    {
+        return true;
+    }
 
 	// Try all client versions on the msg.
 	if ( !m_Crypt.Init( m_net->m_seed, pEvent->m_Raw, uiLen, GetNetState()->isClientKR() ) )
