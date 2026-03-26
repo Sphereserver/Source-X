@@ -2658,18 +2658,33 @@ do_default:
 				return true;
 			}
 		case CHC_SKILLCHECK:	// odd way to get skills checking into the triggers.
-			ptcKey += 10;
-			SKIP_SEPARATORS(ptcKey);
-			{
-				tchar * ppArgs[2];
-				if ( !Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, ARRAY_COUNT(ppArgs)) )
-					return false;
-				SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
-				if ( iSkill == SKILL_NONE )
-					return false;
-				sVal.FormatVal( Skill_CheckSuccess( iSkill, Exp_GetVal( ppArgs[1] )));
-			}
-			return true;
+        {
+            ptcKey += 10;
+            SKIP_SEPARATORS(ptcKey);
+        
+            tchar* ppArgs[3] = { nullptr };
+        
+            if ( !Str_ParseCmds(const_cast<tchar*>(ptcKey), ppArgs, ARRAY_COUNT(ppArgs)) )
+                return false;
+        
+            // skill
+            SKILL_TYPE iSkill = g_Cfg.FindSkillKey(ppArgs[0]);
+            if ( iSkill == SKILL_NONE )
+                return false;
+        
+            // difficulty (safe)
+            int iDiff = 0;
+            if ( ppArgs[1] && *ppArgs[1] )
+                iDiff = Exp_GetVal(ppArgs[1]);
+        
+            // bell curve (default = true)
+            bool fUseBellCurve = true;
+            if ( ppArgs[2] && *ppArgs[2] )
+                fUseBellCurve = (Exp_GetVal(ppArgs[2]) != 0);
+        
+            sVal.FormatVal( Skill_CheckSuccess(iSkill, iDiff, fUseBellCurve) );
+            return true;
+        }
 		case CHC_SKILLADJUSTED:
 			ptcKey += 13;
 			SKIP_SEPARATORS(ptcKey);
