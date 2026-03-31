@@ -4120,3 +4120,12 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
   - Fixed: Hit chance to paralyzed targets with sphere custom (0) formula is now 80-100% (was 0-10%).
   - Added: Implemented Hit chance increase / decrease to sphere custom formula (0).
 - Fixed: Equiping armor and weapon with spelleffect could crash the SphereServer (#1538)
+
+31-03-2026, Drk84
+- Added: New locals for the @SpellEffect/@Effect triggers:
+         local.IsSpellReflected (Read Only): Indicates if the spell was reflected because of the magic reflect flag.
+         local.BypassMagicReflection (R/W): When set to a value above 0, bypass the magic reflection.
+
+- Fixed: Poison buff was using the expired timer duration instead of the poison delay timer.
+         Notice that the delay values of poison are hardcoded and you have to use addbuff function if you change the local.delay  in @SpellEffectTick/@EffectTick
+       

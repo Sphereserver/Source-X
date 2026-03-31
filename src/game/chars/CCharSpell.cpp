@@ -1942,7 +1942,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			if (IsSetOF(OF_Buffs) && IsClientActive())
 			{
 				GetClientActive()->removeBuff(BI_POISON);
-				GetClientActive()->addBuff(BI_POISON, 1017383, 1070722, (word)(pItem->GetTimerSAdjusted()));
+				GetClientActive()->addBuff(BI_POISON, 1017383, 1070722, (word)(iSecondsDelay));
 			}
 			break;
 		}
@@ -3695,6 +3695,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		iSound = sm_DrinkSounds[g_Rand.GetVal(ARRAY_COUNT(sm_DrinkSounds))];
 	}
 
+    //If true allows the spell to bypass the magic reflection checks.
+    bool fBypassMagicReflection = false;
 
 	// Check if the spell is being resisted
 	ushort uiResist = 0;
@@ -3760,6 +3762,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
     pScriptArgs->m_VarsLocal.SetNum("Effect", iEffect);
     pScriptArgs->m_VarsLocal.SetNum("Resist", uiResist);
     pScriptArgs->m_VarsLocal.SetNum("Duration", iDuration);
+    pScriptArgs->m_VarsLocal.SetNum("IsSpellReflected", fReflecting);
+    pScriptArgs->m_VarsLocal.SetNum("BypassMagicReflection", fBypassMagicReflection);
 
 	if ( IsTrigUsed(TRIGGER_SPELLEFFECT) )
 	{
@@ -3790,6 +3794,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
     iEffect = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("Effect"));
     uiResist = (ushort)(pScriptArgs->m_VarsLocal.GetKeyNum("Resist"));
     iDuration = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("Duration"));
+    fBypassMagicReflection = pScriptArgs->m_VarsLocal.GetKeyNum("BypassMagicReflection") > 0 ? true : false;
 
     HUE_TYPE iColor = (HUE_TYPE)pScriptArgs->m_VarsLocal.GetKeyNum("EffectColor");
     dword dwRender = (dword)pScriptArgs->m_VarsLocal.GetKeyNum("EffectRender");
@@ -3830,7 +3835,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			return false;
 
 		// Check if the spell can be reflected
-		if (pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
+		if (pCharSrc && (pCharSrc != this) && !fBypassMagicReflection )		// only spells with direct target can be reflected
 		{
 			if ( IsStatFlag(STATF_REFLECTION) )
 			{
