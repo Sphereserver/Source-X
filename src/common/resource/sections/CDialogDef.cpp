@@ -190,7 +190,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
                 return true;
 
             int	iNewPage;
-            if ( m_wPage == 0 || page > m_wPage || page == 0 )
+            if ( m_wPage == 0 || page > m_wPage )
                 iNewPage	= page;
             else if ( page == m_wPage  )
                 iNewPage	= 1;

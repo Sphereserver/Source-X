@@ -834,6 +834,16 @@ public:
 		return ( (m_iConnectType == CONNECT_CRYPT) || (m_iConnectType == CONNECT_LOGIN) || (m_iConnectType == CONNECT_GAME) );
 	}
 
+    /**
+     * Checks, whether packet is pregame (connection or login part) or game (game, telnet, http, axis...).
+     *
+     * @return True if packet type is before login.
+     */
+    bool IsPreGameTypePacket() const noexcept
+	{
+	    return m_iConnectType == CONNECT_UNK || m_iConnectType == CONNECT_CRYPT || m_iConnectType == CONNECT_LOGIN;
+	}
+
 	CONNECT_TYPE GetConnectType() const noexcept
 	{
 		return m_iConnectType;
