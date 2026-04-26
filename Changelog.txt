@@ -4095,6 +4095,43 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Fixed: Malformed spell flags being returned via scripts.
 - Fixed: REGION ISEVENT didn't (always?) find REGIONTYPES.
 
-5-12-2025, Jhobean
+09-03-2026, Mulambo
+- Changed: Debug DEBUGF_WALK now works only for players (was for monster too), to increase readility in logs.
+- Changed: Improved OpenDoor Macro (Issue #1510) to use following formula with priorities (1 is best, 5 is worst, arrow is player facing):
+    5|4|4|4|5
+    5|3|↓|3|5
+    5|2|1|2|5
+    5|3|2|3|5
+    5|5|4|5|5
+- Added: Exposed skill effect (local.effect, I/O) in @start and @skillStart triggers (usable for changing the value with some formula, rather than range / flat value from skill effect property.
+- Added: Automated Debian package on master brach. Debian packge is currently not meant for production and needs testing (especially updating).
+- Fixed: Curing character with item as the caster crashes sphere (Issue #1549)
+- Fixed: Animate Dead spell crashing Sphere (Issue #1548)
+
+11-03-2026, Mulambo
+- Added: New experimental flag EF_WalkBypassMonsters. This will override hardcoded client behaviour that prevents stepping over NPCs without max stamina (like GM can). However, this could cause flickering or lags to clients and should be used with caution.
+
+16-03-2026, Mulambo
+- Fixed: Issue with loosing target when somebody dies in combat (#1559)
+
+17-03-2026, Mulambo
+- Modified CombatHitChanceEra:
+  - Fixed: IncreaseDefChance on AOS formula (2) is now properly calculated from defender, not the attacker.
+  - Fixed: Hit chance to paralyzed targets with sphere custom (0) formula is now 80-100% (was 0-10%).
+  - Added: Implemented Hit chance increase / decrease to sphere custom formula (0).
+- Fixed: Equiping armor and weapon with spelleffect could crash the SphereServer (#1538)
+
+31-03-2026, Drk84
+- Added: New locals for the @SpellEffect/@Effect triggers:
+         local.IsSpellReflected (Read Only): Indicates if the spell was reflected because of the magic reflect flag.
+         local.BypassMagicReflection (R/W): When set to a value above 0, bypass the magic reflection.
+
+- Fixed: Poison buff was using the expired timer duration instead of the poison delay timer.
+         Notice that the delay values of poison are hardcoded and you have to use addbuff function if you change the local.delay  in @SpellEffectTick/@EffectTick
+
+01-04-2026, Jhobean
 - Fixed: Full Tooltip now update each time you move an item manually (Issue #1500)
 - Fixed: On some situation when item was move or add on ground by script, decay flag and timer was not set. (Issue #1498)
+
+02-04-2026, Mulambo
+- Fixed: Timer on field spells with `SPELLFLAG_FIELD_RANDOMDECAY` was incrementally increasing for each field item created.

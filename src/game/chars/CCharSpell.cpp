@@ -351,6 +351,13 @@ CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg, int64 iDurat
 	}
 	pChar->StatFlag_Set(STATF_CONJURED);	// conjured creates have no loot
 	pChar->NPC_LoadScript(false);
+	pChar->MoveToChar(ptTarg);
+
+    // Check, if summon died after placing (like summoned on damaging area or trap).
+    if (pChar->Stat_GetVal(STAT_STR) <= 0)
+    {
+        return nullptr;
+    }
 
     if (IsSetOF(OF_PetSlots))
     {
@@ -359,9 +366,8 @@ CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg, int64 iDurat
         UnreferencedParameter(followers);
     }
 
-	pChar->NPC_PetSetOwner(this);
-	pChar->MoveToChar(ptTarg);
-	pChar->m_ptHome = ptTarg;
+    pChar->NPC_PetSetOwner(this);
+    pChar->m_ptHome = ptTarg;
 	pChar->m_pNPC->m_Home_Dist_Wander = 10;
 	pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement
 	//pChar->NPC_PetSetOwner(this);
@@ -1224,7 +1230,10 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pClient->removeBuff(BI_STRANGLE);
 					pClient->addBuff(BI_STRANGLE, 1075794, 1075795, wTimerEffect);
 				}
-                wStatEffectRef = (pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) / 100);
+		        if (pCaster != nullptr)
+		        {
+		            wStatEffectRef = (pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) / 100);
+		        }
 				if (wStatEffectRef < 4)
                     wStatEffectRef = 4;
 				pSpell->m_itSpell.m_spellcharges = wStatEffectRef;
@@ -1302,10 +1311,13 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 						pSpell->m_itSpell.m_spellcharges += 2;
 						//TO-DO If the spell targets someone already affected by the Pain Spike spell, only 3 to 7 points of DIRECT damage will be inflicted.
 				}
-				if (m_pNPC)
-                    wStatEffectRef = ((pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 10) + 30;
-				else
-                    wStatEffectRef = ((pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 100) + 18;
+		        if (pCaster != nullptr)
+		        {
+		            if (m_pNPC)
+		                wStatEffectRef = ((pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 10) + 30;
+		            else
+		                wStatEffectRef = ((pCaster->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 100) + 18;
+		        }
 				pSpell->m_itSpell.m_spellcharges = 10;
 			}
 			return;
@@ -1315,18 +1327,24 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				if (pClient)
 				{
-					Str_CopyLimitNull(NumBuff[0], pCaster->GetName(), uiBuffElemSize);
-					Str_CopyLimitNull(NumBuff[1], pCaster->GetName(), uiBuffElemSize);
+				    if (pCaster != nullptr)
+				    {
+				        Str_CopyLimitNull(NumBuff[0], pCaster->GetName(), uiBuffElemSize);
+				        Str_CopyLimitNull(NumBuff[1], pCaster->GetName(), uiBuffElemSize);
+				    }
 					pClient->removeBuff(BI_BLOODOATHCURSE);
 					pClient->addBuff(BI_BLOODOATHCURSE, 1075659, 1075660, wTimerEffect, pNumBuff, 2);
 				}
-				CClient *pCasterClient = pCaster->GetClientActive();
-				if (pCasterClient)
-				{
-					Str_CopyLimitNull(NumBuff[0], GetName(), uiBuffElemSize);
-					pCasterClient->removeBuff(BI_BLOODOATHCASTER);
-					pCasterClient->addBuff(BI_BLOODOATHCASTER, 1075661, 1075662, wTimerEffect, pNumBuff, 1);
-				}
+			    if (pCaster != nullptr)
+			    {
+			        CClient *pCasterClient = pCaster->GetClientActive();
+			        if (pCasterClient)
+			        {
+			            Str_CopyLimitNull(NumBuff[0], GetName(), uiBuffElemSize);
+			            pCasterClient->removeBuff(BI_BLOODOATHCASTER);
+			            pCasterClient->addBuff(BI_BLOODOATHCASTER, 1075661, 1075662, wTimerEffect, pNumBuff, 1);
+			        }
+			    }
 			}
 			return;
 		case LAYER_SPELL_Corpse_Skin:
@@ -1392,7 +1410,10 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case SPELL_Reactive_Armor:
 			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
-                wStatEffectRef = 15 + (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
+			    if (pCaster != nullptr)
+			    {
+			        wStatEffectRef = 15 + (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
+			    }
 
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -1408,7 +1429,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				int iSkill = -1;
 				const bool fValidSkill = pSpellDef->GetPrimarySkill(&iSkill, nullptr);
 				ASSERT_ALWAYS(fValidSkill);
-				pSpell->m_itSpell.m_PolyStr = (int16)pSpellDef->m_vcEffect.GetLinear(pCaster->Skill_GetBase((SKILL_TYPE)iSkill)) / 10;	// % of damage reflected.
+
+			    if (pCaster != nullptr)
+			    {
+			        pSpell->m_itSpell.m_PolyStr = (int16)pSpellDef->m_vcEffect.GetLinear(pCaster->Skill_GetBase((SKILL_TYPE)iSkill)) / 10;	// % of damage reflected.
+			    }
 			}
 			if (pClient && IsSetOF(OF_Buffs))
 			{
@@ -1618,10 +1643,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				{
 					if ( IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 						 wStatEffectRef = (400 + pCaster->Skill_GetBase(SKILL_EVALINT) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 10;
-
-					if ( wStatEffectRef > Stat_GetVal(STAT_INT) )
-                        wStatEffectRef = (word)(Stat_GetVal(STAT_INT));
 				}
+
+                if ( wStatEffectRef > Stat_GetVal(STAT_INT) )
+                    wStatEffectRef = (word)(Stat_GetVal(STAT_INT));
+
 				UpdateStatVal( STAT_INT, -wStatEffectRef );
 			}
 			return;
@@ -1629,7 +1655,10 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			StatFlag_Set( STATF_REFLECTION );
 			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
-                wStatEffectRef = 25 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
+			    if (pCaster != nullptr)
+			    {
+			        wStatEffectRef = 25 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
+			    }
 
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -1665,19 +1694,28 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				int iMagicResist = 0;
 				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
-					ushort uiCasterEvalInt = pCaster->Skill_GetBase(SKILL_EVALINT), uiCasterMeditation = pCaster->Skill_GetBase(SKILL_MEDITATION);
-					ushort uiCasterInscription = pCaster->Skill_GetBase(SKILL_INSCRIPTION);
-					ushort uiMyMagicResistance = Skill_GetBase(SKILL_MAGICRESISTANCE), uiMyInscription = Skill_GetBase(SKILL_INSCRIPTION);
-                    wStatEffectRef = (uiCasterEvalInt + uiCasterMeditation + uiCasterInscription) / 40;
-                    wStatEffectRef = minimum(75, wStatEffectRef);
+				    int iPhysicalResistMin = 0;
 
-					iPhysicalResist = 15 - (uiCasterInscription / 200);
-					int iPhysicalResistMin = minimum(INT16_MAX, iPhysicalResist);
-					pSpell->m_itSpell.m_PolyStr = (short)(maximum(-INT16_MAX, iPhysicalResistMin ));
+				    if (pCaster != nullptr)
+				    {
+				        ushort uiCasterEvalInt = pCaster->Skill_GetBase(SKILL_EVALINT);
+				        ushort uiCasterMeditation = pCaster->Skill_GetBase(SKILL_MEDITATION);
+				        ushort uiCasterInscription = pCaster->Skill_GetBase(SKILL_INSCRIPTION);
+				        wStatEffectRef = (uiCasterEvalInt + uiCasterMeditation + uiCasterInscription) / 40;
 
-					iMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
-					int iMagicResistMin = minimum(INT16_MAX, iMagicResist);
-					pSpell->m_itSpell.m_PolyDex = (short)(maximum(-INT16_MAX, iMagicResistMin));
+				        iPhysicalResist = 15 - (uiCasterInscription / 200);
+				        iPhysicalResistMin = minimum(INT16_MAX, iPhysicalResist);
+				    }
+
+				    wStatEffectRef = minimum(75, wStatEffectRef);
+				    pSpell->m_itSpell.m_PolyStr = (short)(maximum(-INT16_MAX, iPhysicalResistMin ));
+
+				    ushort uiMyMagicResistance = Skill_GetBase(SKILL_MAGICRESISTANCE);
+				    ushort uiMyInscription = Skill_GetBase(SKILL_INSCRIPTION);
+				    iMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
+				    int iMagicResistMin = minimum(INT16_MAX, iMagicResist);
+
+				    pSpell->m_itSpell.m_PolyDex = (short)(maximum(-INT16_MAX, iMagicResistMin));
 
 					/*
 					* The method _CheckLimitEffectSkill checks if the skill will go above the current skill cap value, but because
@@ -1904,7 +1942,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			if (IsSetOF(OF_Buffs) && IsClientActive())
 			{
 				GetClientActive()->removeBuff(BI_POISON);
-				GetClientActive()->addBuff(BI_POISON, 1017383, 1070722, (word)(pItem->GetTimerSAdjusted()));
+				GetClientActive()->addBuff(BI_POISON, 1017383, 1070722, (word)(iSecondsDelay));
 			}
 			break;
 		}
@@ -2303,6 +2341,9 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
             if (iDuration <= 0)
                 iDuration = GetSpellDuration( m_atMagery.m_iSpell, iSkillLevel, pCharSrc );
 
+		    // We use another variable, because we cannot increase iDuration, since it would increase for the next object as well.
+		    int64 iObjectDuration = iDuration;
+
 			CItem * pSpell = CItem::CreateBase( id );
 			ASSERT(pSpell);
 			pSpell->m_itSpell.m_spell = (word)(m_atMagery.m_iSpell);
@@ -2314,10 +2355,13 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			pSpell->SetHue(iColor);
 			pSpell->GenerateScript(this);
 
-            if (pSpellDef->IsSpellType(SPELLFLAG_FIELD_RANDOMDECAY)) // If the spell has ASYNC flag, the timers should be randomized.
-                iDuration += g_Rand.GetLLVal(iDuration / 2);
+		    // If the spell has ASYNC flag, the timers should be randomized.
+            if (pSpellDef->IsSpellType(SPELLFLAG_FIELD_RANDOMDECAY))
+            {
+                iObjectDuration += g_Rand.GetLLVal(iDuration / 2);
+            }
 
-			pSpell->MoveToDecay( ptg, iDuration * MSECS_PER_TENTH, true);
+			pSpell->MoveToDecay( ptg, iObjectDuration * MSECS_PER_TENTH, true);
 		}
 	}
 }
@@ -3220,10 +3264,24 @@ bool CChar::Spell_CastDone()
 				CItemCorpse* pCorpse = dynamic_cast <CItemCorpse*> (pObj); //This is probably redundant.
                 if (pCorpse == nullptr)
                 {
-                    SysMessage("That is not a corpse!");
+                    SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_NC);
                     return false;
                 }
-                Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
+
+			    m_atMagery.m_uiSummonID = pCorpse->GetCorpseType();
+			    // Necromancers do not raise humans, but zombies.
+			    if (CCharBase::IsPlayableID(m_atMagery.m_uiSummonID))
+			    {
+			        m_atMagery.m_uiSummonID = CREID_ZOMBIE;
+			    }
+			    pSummon = CreateBasic(m_atMagery.m_uiSummonID);
+			    if (!pSummon)
+			    {
+					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_FAIL);
+			        return false;
+			    }
+
+			    Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
                 if (!pSummon->RaiseCorpse(pCorpse))
 				{
 					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_FAIL);
@@ -3643,6 +3701,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		iSound = sm_DrinkSounds[g_Rand.GetVal(ARRAY_COUNT(sm_DrinkSounds))];
 	}
 
+    //If true allows the spell to bypass the magic reflection checks.
+    bool fBypassMagicReflection = false;
 
 	// Check if the spell is being resisted
 	ushort uiResist = 0;
@@ -3708,6 +3768,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
     pScriptArgs->m_VarsLocal.SetNum("Effect", iEffect);
     pScriptArgs->m_VarsLocal.SetNum("Resist", uiResist);
     pScriptArgs->m_VarsLocal.SetNum("Duration", iDuration);
+    pScriptArgs->m_VarsLocal.SetNum("IsSpellReflected", fReflecting);
+    pScriptArgs->m_VarsLocal.SetNum("BypassMagicReflection", fBypassMagicReflection);
 
 	if ( IsTrigUsed(TRIGGER_SPELLEFFECT) )
 	{
@@ -3738,6 +3800,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
     iEffect = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("Effect"));
     uiResist = (ushort)(pScriptArgs->m_VarsLocal.GetKeyNum("Resist"));
     iDuration = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("Duration"));
+    fBypassMagicReflection = pScriptArgs->m_VarsLocal.GetKeyNum("BypassMagicReflection") > 0 ? true : false;
 
     HUE_TYPE iColor = (HUE_TYPE)pScriptArgs->m_VarsLocal.GetKeyNum("EffectColor");
     dword dwRender = (dword)pScriptArgs->m_VarsLocal.GetKeyNum("EffectRender");
@@ -3778,7 +3841,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			return false;
 
 		// Check if the spell can be reflected
-		if (pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
+		if (pCharSrc && (pCharSrc != this) && !fBypassMagicReflection )		// only spells with direct target can be reflected
 		{
 			if ( IsStatFlag(STATF_REFLECTION) )
 			{
@@ -3916,23 +3979,25 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Arch_Cure:
 			if (IsStatFlag(STATF_POISONED))
 			{
-				if (g_Cfg.Calc_CurePoisonChance(LayerFind(LAYER_FLAG_Poison), iSkillLevel, pCharSrc->IsPriv(PRIV_GM)))
+				if (g_Cfg.Calc_CurePoisonChance(LayerFind(LAYER_FLAG_Poison), iSkillLevel, pCharSrc && pCharSrc->IsPriv(PRIV_GM)))
 				{
 					SetPoisonCure((spell == SPELL_Arch_Cure || iSkillLevel > 900) ? true : false);
-					pCharSrc->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_1), (pCharSrc == this) ? g_Cfg.GetDefaultMsg(DEFMSG_HEALING_YOURSELF) : (GetName()));
-					if (pCharSrc != this)
-						SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_2), pCharSrc->GetName());
+				    if (pCharSrc)
+				    {
+				        pCharSrc->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_1), (pCharSrc == this) ? g_Cfg.GetDefaultMsg(DEFMSG_HEALING_YOURSELF) : (GetName()));
+				        if (pCharSrc != this)
+				            SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_2), pCharSrc->GetName());
+				    }
 				}
 				else
 				{
-					if (pCharSrc != this)
+					if (pCharSrc && pCharSrc != this)
 						pCharSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_3));
 
 					SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_4));
 				}
 			}
 			break;
-
 
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:

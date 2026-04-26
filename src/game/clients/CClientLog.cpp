@@ -84,15 +84,6 @@ void CClient::SetConnectType( CONNECT_TYPE iType )
 		-- history.m_iPendingConnectionRequests;
 	}
 	m_iConnectType = iType;
-
-/*
-	m_iConnectType = iType;
-	if ( iType == CONNECT_GAME )
-	{
-		HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
-		-- history.m_connecting;
-	}
-*/
 }
 
 //---------------------------------------------------------------------
@@ -642,9 +633,7 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 
 			SysMessage( g_Serv.GetStatusString( 0x25 ) );
 
-			// exit 'remote admin mode'
-			SetConnectType( CONNECT_UNK );
-			return false;
+		    return false;
 		}
 
 		// UOGateway Status
@@ -671,8 +660,6 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 
 			SysMessage( g_Serv.GetStatusString( 0x22 ) );
 
-			// exit 'remote admin mode'
-			SetConnectType( CONNECT_UNK );
 			return false;
 		}
 	}

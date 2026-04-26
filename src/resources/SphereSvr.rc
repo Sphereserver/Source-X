@@ -1,7 +1,7 @@
 // Microsoft Visual C++ generated resource script (hand-edited).
 //
 #include "win_resource.h"
-#define COPYRIGHT_STR "Copyright (C) 1998-2024 SphereServer development team"
+#define COPYRIGHT_STR "Copyright (C) 1998-2026 SphereServer development team"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -126,16 +126,16 @@ BEGIN
     LTEXT           "Version",IDC_ABOUT_VERSION,40,8,400,8
     LTEXT           "Compiler",IDC_ABOUT_COMPILER,40,16,200,8
     LTEXT           COPYRIGHT_STR,3,40,24,120,8
-    CTEXT           "www.sphereserver.com",IDC_ABOUT_SPHERE_LINK,295,18,80,8
-    CTEXT           "www.menasoft.com",IDC_ABOUT_MENASOFT_LINK,295,26,80,8
+    CTEXT           "www.sphereserver.com",IDC_ABOUT_SPHERE_LINK,295,16,80,8
+    CTEXT           "www.menasoft.com",IDC_ABOUT_MENASOFT_LINK,295,24,80,8
     CTEXT           "__________________________________________________________________________________________________________________________",6,6,32,388,8
     LTEXT           "This software makes use of:",7,10,45,100,8
     LTEXT           "DEELX Regular Expression Engine (v1.2)\nCopyright (C) 2006 RegExLab.com",8,21,60,300,16
-    LTEXT           "libev library (v4.22)\nGeneral Public License v2 (GPLv2) 2007-2013 Marc Alexander Lehmann",9,21,80,300,16
-    LTEXT           "MariaDB C Connector (v3.3.4)\nLesser General Public License v2.1 (LGPLv2.1) 2009-2023 MariaDB Foundation",10,21,100,300,16
-    LTEXT           "SQLite (v3.33.0)\nGeneral Public License (GPL) 2000-2020",11,21,120,300,16
+    LTEXT           "libev library (v4.24)\nGeneral Public License v2 (GPLv2) 2007-2013 Marc Alexander Lehmann",9,21,80,300,16
+    LTEXT           "MariaDB C Connector (v3.3.4)\nLesser General Public License v2.1 (LGPLv2.1) 2009-2026 MariaDB Foundation",10,21,100,300,16
+    LTEXT           "SQLite (v3.49.1)\nGeneral Public License (GPL) 2000-2026",11,21,120,300,16
     LTEXT           "Twofish encryption library (v1.0)\nCopyright (C) 1998 Bruce Schneier, Doug Whiting, John Kelsey, Chris Hall, David Wagner",12,21,140,300,16
-    LTEXT           "Zlib data compression library (v1.2.11)\nCopyright (C) 1995-2017 Jean-loup Gailly, Mark Adler",13,21,160,300,16
+    LTEXT           "Zlib data compression library (v1.3.1)\nCopyright (C) 1995-2026 Jean-loup Gailly, Mark Adler",13,21,160,300,16
 END
 
 

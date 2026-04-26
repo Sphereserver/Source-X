@@ -25,12 +25,12 @@ lpctstr CServerTime::GetTimeMinDesc(int minutes) // static
         //		pMinDif = "";
         pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_FIRST);
     }
-    else if ((minute >= 15) && (minute < 30))
+    else if (minute < 30)
     {
         //		pMinDif = "a quarter past";
         pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_SECOND);
     }
-    else if ((minute >= 30) && (minute < 45))
+    else if (minute < 45)
     {
         //pMinDif = "half past";
         pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_THIRD);
@@ -85,10 +85,10 @@ lpctstr CServerTime::GetTimeMinDesc(int minutes) // static
     else if (hour > 12)
     {
         hour -= 12;
-        if ((hour >= 1) && (hour < 6))
+        if (hour < 6)
             pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_13_TO_18);
         //			pTail = " o'clock in the afternoon";
-        else if ((hour >= 6) && (hour < 9))
+        else if (hour < 9)
             pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_18_TO_21);
         //			pTail = " o'clock in the evening.";
         else

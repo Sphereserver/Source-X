@@ -92,7 +92,7 @@ CClient::~CClient() noexcept
 
 	// update ip history
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
-	if ( GetConnectType() != CONNECT_GAME )
+	if (IsPreGameTypePacket())
     {
         EXC_TRYSUB("m_iPendingConnectionRequests");
 
