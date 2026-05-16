@@ -140,8 +140,11 @@ bool CClient::addLoginErr(byte code)
 			code = PacketLoginError::Invalid;
 			break;
 		case PacketLoginError::InUse:
-		case PacketLoginError::CharIdle:
+		case PacketLoginError::BadCharacter:
 			code = PacketLoginError::InUse;
+			break;
+		case PacketLoginError::CharIdle:
+			code = static_cast<PacketLoginError::Reason>(PacketWarningMessage::CharacterInWorld);
 			break;
 		case PacketLoginError::Blocked:
 		case PacketLoginError::BlockedIP:
@@ -156,7 +159,6 @@ bool CClient::addLoginErr(byte code)
 			break;
 		case PacketLoginError::Other:
 		case PacketLoginError::BadVersion:
-		case PacketLoginError::BadCharacter:
 		case PacketLoginError::BadAuthID:
 		case PacketLoginError::BadEncLength:
 		case PacketLoginError::EncCrypt:
