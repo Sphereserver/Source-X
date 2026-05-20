@@ -20,7 +20,7 @@ on:
 
 jobs:
   windows-x86:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     permissions:
       contents: read
