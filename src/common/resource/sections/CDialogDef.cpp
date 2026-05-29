@@ -34,6 +34,8 @@ enum GUMPCTL_TYPE // controls we can put in a gump.
 
     GUMPCTL_ITEMPROPERTY,   // 1 = uid of the item in question.
 
+	GUMPCTL_MAPAREA,      // NEW: x,y,w,h,mapIndex,areaX,areaY,areaEndX,areaEndY
+
     // Not really controls but more attributes.
     GUMPCTL_NOCLOSE, // 0 = The gump cannot be closed by right clicking.
     GUMPCTL_NODISPOSE, // 0 = The gump cannot be closed by gump-closing macro.
@@ -82,6 +84,8 @@ lpctstr const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
     "HTMLGUMP",
 
     "ITEMPROPERTY",
+
+    "MAPAREA",
 
     "NOCLOSE",
     "NODISPOSE",
@@ -453,6 +457,22 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             else
                 m_iOriginY  = n64_narrow_n32_checked(gExprParser.GetSingle( ptcArgs ), false);
 
+            return true;
+        }
+
+        case GUMPCTL_MAPAREA:
+        {
+            GET_RELATIVE(x, m_iOriginX);
+            GET_RELATIVE(y, m_iOriginY);
+            GET_ABSOLUTE(width);
+            GET_ABSOLUTE(height);
+            GET_ABSOLUTE(mapIndex);
+            GET_ABSOLUTE(areaX);
+            GET_ABSOLUTE(areaY);
+            GET_ABSOLUTE(areaEndX);
+            GET_ABSOLUTE(areaEndY);
+
+            m_sControls.emplace_back(false).Format("maparea %d %d %d %d %d %d %d %d %d", x, y, width, height, mapIndex, areaX, areaY, areaEndX, areaEndY);
             return true;
         }
 
