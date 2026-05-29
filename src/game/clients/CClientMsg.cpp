@@ -1223,7 +1223,13 @@ void CClient::addItemName( CItem * pItem )
 	lpctstr pszNameFull = pItem->GetNameFull( fIdentified );
 
 	tchar szName[ MAX_ITEM_NAME_SIZE * 2 ];
-	size_t len = Str_CopyLimitNull( szName, pszNameFull, ARRAY_COUNT(szName) );
+
+    Str_CopyLimitNull(szName, pItem->GetKeyStr("NAME.PREFIX"), ARRAY_COUNT(szName));
+    Str_ConcatLimitNull(szName, pszNameFull, ARRAY_COUNT(szName));
+    Str_ConcatLimitNull(szName, pItem->GetKeyStr("NAME.SUFFIX"), ARRAY_COUNT(szName));
+
+	//size_t len = Str_CopyLimitNull( szName, pszNameFull, ARRAY_COUNT(szName) );
+    size_t len = strlen(szName);
 
 	const CContainer* pCont = dynamic_cast<const CContainer*>(pItem);
 	if ( pCont != nullptr )
