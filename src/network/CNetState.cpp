@@ -137,6 +137,10 @@ void CNetState::clear(void)
 
     m_iConnectionTimeMs = -1;
     m_sequence = 0;
+
+    m_pingWindowStart     = 0;
+    m_pingCount           = 0;
+
     m_seeded = false;
     m_newseed = false;
     m_seed = 0;

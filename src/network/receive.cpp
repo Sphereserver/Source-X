@@ -1340,6 +1340,30 @@ bool PacketPingReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPingReq::onReceive");
 
+    // Speedhack detection via sliding window (PINGFLOODMAX in sphere.ini, 0 = disabled).
+    // ClassicUO sends 0x73 every 1000ms. Normal rate: ~30 pings per 30s window.
+    if (g_Cfg.m_iPingFloodMax > 0)
+    {
+        const int64 WINDOW_MS = 30 * MSECS_PER_SEC; // 30 second window (GetTimeRaw is in milliseconds)
+
+        const int64 iNow = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+        if (net->m_pingWindowStart == 0 || (iNow - net->m_pingWindowStart) >= WINDOW_MS)
+        {
+            net->m_pingWindowStart = iNow;
+            net->m_pingCount       = 1;
+        }
+        else if (++net->m_pingCount > g_Cfg.m_iPingFloodMax)
+        {
+            CClient *client = net->getClient();
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_WARN, "%x:'%s' speedhack detected (%d pings in %" PRId64 " ms)\n", net->id(),
+                (client != nullptr && client->GetAccount() != nullptr) ? client->GetAccount()->GetName() : "?", net->m_pingCount, iNow - net->m_pingWindowStart);
+            if (client != nullptr)
+                client->SysMessage("An abnormal connection speed has been detected. You are being kicked from the game...");
+            net->markReadClosed();
+            return false;
+        }
+    }
+
 	byte value = readByte();
 	new PacketPingAck(net->getClient(), value);
 	return true;

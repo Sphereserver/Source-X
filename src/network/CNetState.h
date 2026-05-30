@@ -91,6 +91,9 @@ public:
     dword m_reportedVersionNumber;		// client version (reported)
     byte m_sequence;				// movement sequence
 
+    int64 m_pingWindowStart;         // start of current ping rate window (raw ticks)
+    int m_pingCount;                // pings received in current window
+
 public:
     explicit CNetState(int id);
     ~CNetState(void);

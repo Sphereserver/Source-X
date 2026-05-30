@@ -136,6 +136,7 @@ CServerConfig::CServerConfig()
 	m_iLightNight			= 25;	// dark before t2a.
 	m_iLightDay				= LIGHT_BRIGHT;
     m_iContainerMaxItems    = MAX_ITEMS_CONT;
+    m_iPingFloodMax         = 50;
 	m_iBackpackOverload		= 40 * WEIGHT_UNITS;
 	m_iBankIMax				= 1000;
 	m_iBankWMax				= 1000 * WEIGHT_UNITS;
@@ -673,6 +674,7 @@ enum RC_TYPE
 	RC_PACKETDEATHANIMATION,	// m_iPacketDeathAnimation
 	RC_PAYFROMPACKONLY,			// m_fPayFromPackOnly
 	RC_PETSINHERITNOTORIETY,	// m_iPetsInheritNotoriety
+    RC_PINGFLOODMAX,            // m_iPingFloodMax
 	RC_PLAYEREVIL,				// m_iPlayerKarmaEvil
 	RC_PLAYERNEUTRAL,			// m_iPlayerKarmaNeutral
 	RC_PROFILE,
@@ -968,6 +970,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "PACKETDEATHANIMATION",	{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_iPacketDeathAnimation)	}},
 	{ "PAYFROMPACKONLY",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fPayFromPackOnly)		}},
 	{ "PETSINHERITNOTORIETY",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iPetsInheritNotoriety)	}},
+    { "PINGFLOODMAX",           { ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iPingFloodMax)			}},
 	{ "PLAYEREVIL",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iPlayerKarmaEvil)		}},
 	{ "PLAYERNEUTRAL",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iPlayerKarmaNeutral)	}},
 	{ "PROFILE",				{ ELEM_VOID,	0												}},
@@ -1386,6 +1389,10 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				}
 			}
 			break;
+
+        case RC_PINGFLOODMAX:
+            m_iPingFloodMax = s.GetArgVal();
+            break;
 
 		case RC_PLAYEREVIL:	// How much bad karma makes a player evil?
 			m_iPlayerKarmaEvil = s.GetArgVal();
