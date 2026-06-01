@@ -1463,6 +1463,14 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			m_tmTile.m_Code = CV_NUKE;	// set nuke code.
 			addTarget( CLIMODE_TARG_TILE, g_Cfg.GetDefaultMsg( DEFMSG_SELECT_NUKE_AREA ), true );
 			break;
+
+		case CV_NUKEITEM:
+			m_Targ_Text = s.GetArgRaw();
+			m_tmTile.m_ptFirst.InitPoint(); // Clear this first
+			m_tmTile.m_Code = CV_NUKEITEM;	// set nuke code.
+			addTarget( CLIMODE_TARG_TILE, g_Cfg.GetDefaultMsg( DEFMSG_SELECT_NUKE_AREA ), true );
+			break;
+
 		case CV_NUKECHAR:
 			m_Targ_Text = s.GetArgRaw();
 			m_tmTile.m_ptFirst.InitPoint(); // Clear this first

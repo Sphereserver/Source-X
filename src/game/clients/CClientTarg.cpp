@@ -661,7 +661,65 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 		}
 		break;
 
-	case CV_NUKE:		// NUKE all items in the region.
+	case CV_NUKE: // NUKE all items and chars in the region.
+        {
+            // Items
+            auto AreaItem = CWorldSearchHolder::GetInstance(ptCtr, iRadius);
+            AreaItem->SetAllShow(IsPriv(PRIV_ALLSHOW));
+            AreaItem->SetSearchSquare(true);
+            for (;;)
+            {
+                CItem *pItem = AreaItem->GetItem();
+                if (pItem == nullptr)
+                    break;
+                if (!rect.IsInside2d(pItem->GetTopPoint()))
+                    continue;
+
+                if (m_Targ_Text.IsEmpty())
+                {
+                    pItem->Delete();
+                }
+                else
+                {
+                    CScript script(m_Targ_Text);
+                    if (!pItem->r_Verb(script, this))
+                        continue;
+                }
+                iCount++;
+            }
+
+            // Chars
+            auto AreaChar = CWorldSearchHolder::GetInstance(ptCtr, iRadius);
+            AreaChar->SetAllShow(IsPriv(PRIV_ALLSHOW));
+            AreaChar->SetSearchSquare(true);
+            for (;;)
+            {
+                CChar *pChar = AreaChar->GetChar();
+                if (pChar == nullptr)
+                    break;
+                if (!rect.IsInside2d(pChar->GetTopPoint()))
+                    continue;
+                if (pChar->m_pPlayer)
+                    continue;
+
+                if (m_Targ_Text.IsEmpty())
+                {
+                    pChar->Delete();
+                }
+                else
+                {
+                    CScript script(m_Targ_Text);
+                    if (!pChar->r_Verb(script, this))
+                        continue;
+                }
+                iCount++;
+            }
+
+            SysMessagef("%d %s", iCount, g_Cfg.GetDefaultMsg(DEFMSG_NUKED_ENTITIES));
+        }
+        break;
+
+	case CV_NUKEITEM:		// NUKE all items in the region.
 		{
 			auto AreaItem = CWorldSearchHolder::GetInstance( ptCtr, iRadius );
 			AreaItem->SetAllShow( IsPriv( PRIV_ALLSHOW ));
