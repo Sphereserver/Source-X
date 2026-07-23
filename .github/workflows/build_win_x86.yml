@@ -20,7 +20,7 @@ on:
 
 jobs:
   windows-x86:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     permissions:
       contents: read
@@ -28,11 +28,11 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
     - name: CMake
       run: cmake -G "Visual Studio 17 2022" -A Win32 .\
     - name: MSBuild
@@ -72,7 +72,7 @@ jobs:
           run-id: ${{ github.run_id }}
 
       - name: Create release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

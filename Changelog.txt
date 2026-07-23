@@ -4127,7 +4127,20 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
          local.BypassMagicReflection (R/W): When set to a value above 0, bypass the magic reflection.
 
 - Fixed: Poison buff was using the expired timer duration instead of the poison delay timer.
-         Notice that the delay values of poison are hardcoded and you have to use addbuff function if you change the local.delay  in @SpellEffectTick/@EffectTick
+         Notice that the delay values of poison are hardcoded and you have to use addbuff function if you change the local.delay in @SpellEffectTick/@EffectTick
 
 02-04-2026, Mulambo
 - Fixed: Timer on field spells with `SPELLFLAG_FIELD_RANDOMDECAY` was incrementally increasing for each field item created.
+
+19-05-2026, Mulambo
+- Fixed: logging telnet commands (#1580).
+- Fixed: when using invalid resource in corpses, error will be show in console (#1574).
+- Changed: PacketObjectStatus (0x11) show percentual hitpoints for items and chars, just like packet 0xA1 (Hitpoints update) (#1573).
+- Added: templates can now be used when carving corpses (#1574).
+
+19-05-2026, nightNR
+- Fixed: pre-AOS armor rating (AR) calculation (#1550).
+- Fixed NPCs can't cast spells from spellbook after respawn (#1551).
+
+23-07-2026, canerksk
+- Added: New local variable local.Sound to @SpellFail/@Fail triggers (R/W). If you set local.sound = 0, no sound will be played.

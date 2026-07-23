@@ -82,12 +82,20 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
 		const CResourceID& rid = pCorpseDef->m_BaseResources[i].GetResourceID();
-		if (rid.GetResType() != RES_ITEMDEF)
+		if (rid.GetResType() != RES_ITEMDEF && rid.GetResType() != RES_TEMPLATE)
+		{
+            g_Log.EventError("Corpse 0%" PRIx32 " (%s) has invalid ResourceType (%i) in resource list\n",
+                static_cast<dword>(pCorpse->GetUID()), pCorpseDef->GetName(), rid.GetResType());
 			continue;
+		}
 
-		ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
-		if (id == ITEMID_NOTHING)
-			break;
+	    ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
+	    if (id == ITEMID_NOTHING)
+	    {
+            g_Log.EventError("Corpse 0%" PRIx32 " (%s) has invalid resource in resource list\n",
+                static_cast<dword>(pCorpse->GetUID()), pCorpseDef->GetName());
+	        continue;
+	    }
 
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
@@ -122,7 +130,11 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
         ITEMID_TYPE id = (ITEMID_TYPE)ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum(pszTmp));
 		if (id == ITEMID_NOTHING)
-			break;
+		{
+		    g_Log.EventError("Corpse 0%" PRIx32 " (%s) has invalid resource in resource list\n",
+                static_cast<dword>(pCorpse->GetUID()), pCorpseDef->GetName());
+			continue;
+		}
 
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.amount", (int)i);
         iResourceQty =(word)pScriptArgs->m_VarsLocal.GetKeyNum(pszTmp);
