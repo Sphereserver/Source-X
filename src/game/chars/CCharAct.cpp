@@ -524,6 +524,12 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
         ModPropNum(pCCPChar, PROPCH_RESPOISON,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPOISON, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_RESENERGY,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESENERGY, pItemBaseCCPItemEquippable));
 
+		ModPropNum(pCCPChar, PROPCH_RESPHYSICALMAX, - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPHYSICALMAX, pItemBaseCCPItemEquippable));
+		ModPropNum(pCCPChar, PROPCH_RESFIREMAX,     - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESFIREMAX,     pItemBaseCCPItemEquippable));
+		ModPropNum(pCCPChar, PROPCH_RESCOLDMAX,     - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESCOLDMAX,     pItemBaseCCPItemEquippable));
+		ModPropNum(pCCPChar, PROPCH_RESPOISONMAX,   - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPOISONMAX,   pItemBaseCCPItemEquippable));
+		ModPropNum(pCCPChar, PROPCH_RESENERGYMAX,   - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESENERGYMAX,   pItemBaseCCPItemEquippable));
+
         ModPropNum(pCCPChar, PROPCH_INCREASEDAM,          - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDAM, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASEDEFCHANCE,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDEFCHANCE, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_FASTERCASTING,        - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_FASTERCASTING, pItemBaseCCPItemEquippable));
@@ -3391,6 +3397,12 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
         ModPropNum(pCCPChar, PROPCH_RESCOLD,      + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESCOLD, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_RESPOISON,    + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPOISON, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_RESENERGY,    + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESENERGY, pItemBaseCCPItemEquippable));
+
+		ModPropNum(pCCPChar, PROPCH_RESPHYSICALMAX, + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPHYSICALMAX, pItemBaseCCPItemEquippable));
+		ModPropNum(pCCPChar, PROPCH_RESFIREMAX,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESFIREMAX,     pItemBaseCCPItemEquippable));
+		ModPropNum(pCCPChar, PROPCH_RESCOLDMAX,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESCOLDMAX,     pItemBaseCCPItemEquippable));
+		ModPropNum(pCCPChar, PROPCH_RESPOISONMAX,   + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESPOISONMAX,   pItemBaseCCPItemEquippable));
+		ModPropNum(pCCPChar, PROPCH_RESENERGYMAX,   + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_RESENERGYMAX,   pItemBaseCCPItemEquippable));		
 
         ModPropNum(pCCPChar, PROPCH_INCREASEDAM,          + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDAM, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_INCREASEDEFCHANCE,    + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_INCREASEDEFCHANCE, pItemBaseCCPItemEquippable));
