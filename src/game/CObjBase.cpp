@@ -2506,7 +2506,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
             if (pt.IsValidPoint())
             {
                 RemoveFromView();
-                MoveTo(pt);
+                CItem* pItem = dynamic_cast<CItem*>(this);
+                if (pItem)
+                    pItem->MoveToDecay(pt, pItem->GetDecayTime());
+                else
+                    MoveTo(pt);
                 Update();
             }
             else

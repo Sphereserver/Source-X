@@ -4129,6 +4129,10 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Fixed: Poison buff was using the expired timer duration instead of the poison delay timer.
          Notice that the delay values of poison are hardcoded and you have to use addbuff function if you change the local.delay in @SpellEffectTick/@EffectTick
 
+01-04-2026, Jhobean
+- Fixed: Full Tooltip now update each time you move an item manually (Issue #1500)
+- Fixed: On some situation when item was move or add on ground by script, decay flag and timer was not set. (Issue #1498)
+
 02-04-2026, Mulambo
 - Fixed: Timer on field spells with `SPELLFLAG_FIELD_RANDOMDECAY` was incrementally increasing for each field item created.
 
