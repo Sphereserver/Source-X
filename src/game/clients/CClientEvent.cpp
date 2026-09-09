@@ -406,7 +406,24 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 
 		if ( pContItem != nullptr )
 		{
-			//	bug with shifting selling list by gold coins
+		    // If player is trying to put container inside its child, it will crash sphere due to circular weight calculation.
+		    auto *const pItemIsContainer = dynamic_cast<CItemContainer *>(pItem);
+		    if (pItemIsContainer && pItemIsContainer->IsItemInside(pContItem))
+		    {
+		        Event_Item_Drop_Fail(pItem);
+		        // Log the error.
+		        g_Log.EventError("Player '%s' (UID 0%x) trying to drop container '%s' (UID 0%x) inside its child container '%s' (UID 0%x).\n",
+                    m_pChar->GetName(), static_cast<dword>(m_pChar->GetUID()),
+                    pItem->GetName(), static_cast<dword>(pItem->GetUID()),
+                    pContItem->GetName(), static_cast<dword>(pContItem->GetUID())
+                );
+		        // Disconnect character. This behavior cannot be done manually and script might be called indefinitely.
+		        CharDisconnect();
+		        GetNetState()->markReadClosed();
+		        return;
+		    }
+
+		    //	Bug with shifting selling list by gold coins.
 			if ( pContItem->IsType(IT_EQ_VENDOR_BOX) &&
 				( pItem->IsType(IT_GOLD) || pItem->IsType(IT_COIN) ))
 			{
