@@ -209,7 +209,10 @@ void CChar::Stat_AddVal( STAT_TYPE i, int iVal )
 
     if ((i == STAT_STR) && (iVal <= 0))
     {   // Ensure this char will tick and die
-		CWorldTickingList::AddCharPeriodic(this, false);
+        if (!IsPeriodicTickPending())
+        {
+            CWorldTickingList::AddCharPeriodic(this, false);
+        }
     }
 }
 
