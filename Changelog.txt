@@ -4148,3 +4148,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 14-09-2026, Mulambo
   WARNING! POTENTIALLY BREAKING CHANGE!
 - Changed: Chance to hit in `CombatDamageEra=0` (Sphere custom) now returns calculated value, instead of random number from that value.
+
+08-10-2026, Mulambo
+  WARNING! POTENTIALLY BREAKING CHANGE!
+- Changed: `serv.map(location)` 3rd parameter is now always `z` position (was `map` when received 3 arguments or `z` when received 4 arguments).

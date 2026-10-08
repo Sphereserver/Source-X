@@ -1681,11 +1681,9 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 						FALLTHROUGH;
 
 					case 3:
-						if ( IsDigit(ppVal[2][0]) || (( iArgs == 4 ) && ( ppVal[2][0] == '-' )) )
+						if (IsDigit(ppVal[2][0]) || ppVal[2][0] == '-')
 						{
-							pt.m_z = (char)(( iArgs == 4 ) ? atoi(ppVal[2]) : 0);
-							if ( iArgs == 3 )
-								pt.m_map = (byte)(atoi(ppVal[2]));
+							pt.m_z = static_cast<char>(atoi(ppVal[2]));
 						}
 						FALLTHROUGH;
 
