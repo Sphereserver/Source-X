@@ -1677,6 +1677,11 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 						if (IsDigit(ppVal[3][0]))
 						{
 							pt.m_map = (byte)(atoi(ppVal[3]));
+
+						    if (!g_MapList.IsMapSupported(pt.m_map)) {
+			                    g_Log.EventError("Unsupported Map %d\n", pt.m_map);
+						        return false;
+						    }
 						}
 						FALLTHROUGH;
 
