@@ -6036,11 +6036,11 @@ bool CChar::_OnTick()
     {
         const ProfileTask aiTask(PROFILE_NPC_AI);
         EXC_SET_BLOCK("NPC action");
-        if (!IsStatFlag(STATF_FREEZE|STATF_STONE) && !Can(CAN_C_STATUE))
+        if (!IsStatFlag(STATF_STONE) && !Can(CAN_C_STATUE))
         {
             NPC_OnTickAction();
 
-            if (!IsStatFlag(STATF_DEAD))
+            if (!IsStatFlag(STATF_FREEZE|STATF_DEAD))
             {
                 const int iFlags = NPC_GetAiFlags();
                 if ((iFlags & NPC_AI_FOOD) && !(iFlags & NPC_AI_INTFOOD))
