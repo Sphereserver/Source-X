@@ -4151,3 +4151,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 03-10-2026, yeiffet
 - Fixed: "vector too long" exception in CWorldTicker, which made some characters stop ticking, so they couldn't die (#1593).
+
+08-10-2026, Mulambo
+- Changed: Equipped armor / weapon will also drop on ground when moving it while overweight, like other items (unless OF_OWNoDropCarriedItem is enabled).

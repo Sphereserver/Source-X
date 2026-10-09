@@ -3126,7 +3126,8 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 			}
 		}
 	}
-	else if ( pItem->GetEquipLayer() > LAYER_NONE && pItem->GetEquipLayer() <= LAYER_LEGS) //If we are overweight, we don't want our equipped items to fall on the ground. They will remain equipped.
+    // Item is equipped (armor / weapon), char is overweight and optional flag OWNoDropCarriedItem is enabled, so we keep it equipped.
+	else if (pItem->GetEquipLayer() > LAYER_NONE && pItem->GetEquipLayer() <= LAYER_LEGS && IsSetOF(OF_OWNoDropCarriedItem))
 	{
 		SysMessageDefault(DEFMSG_MSG_HEAVY);
 		return false;
