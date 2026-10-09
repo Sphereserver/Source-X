@@ -4154,3 +4154,5 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 08-10-2026, Mulambo
 - Changed: Equipped armor / weapon will also drop on ground when moving it while overweight, like other items (unless OF_OWNoDropCarriedItem is enabled).
+  WARNING! POTENTIALLY BREAKING CHANGE!
+- Changed: `serv.map(location)` 3rd parameter is now always `z` position (was `map` when received 3 arguments or `z` when received 4 arguments).
