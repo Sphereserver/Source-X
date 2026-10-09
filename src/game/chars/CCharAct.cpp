@@ -3126,7 +3126,8 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 			}
 		}
 	}
-	else if ( pItem->GetEquipLayer() > LAYER_NONE && pItem->GetEquipLayer() <= LAYER_LEGS) //If we are overweight, we don't want our equipped items to fall on the ground. They will remain equipped.
+    // Item is equipped (armor / weapon), char is overweight and optional flag OWNoDropCarriedItem is enabled, so we keep it equipped.
+	else if (pItem->GetEquipLayer() > LAYER_NONE && pItem->GetEquipLayer() <= LAYER_LEGS && IsSetOF(OF_OWNoDropCarriedItem))
 	{
 		SysMessageDefault(DEFMSG_MSG_HEAVY);
 		return false;
@@ -3142,6 +3143,7 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 	}
 	else if (fDropOnGround)
 	{
+	    // @todo This duplicates CItem::MoveToCheck() almost exactly.
 		if ( !GetTopPoint().IsValidPoint() )
 		{
 			// NPC is being created and has no valid point yet.
@@ -3157,6 +3159,14 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
         const CObjBase* pItemContPrev = pItem->GetContainer();
         int64 iDecayTime = pItem->GetDecayTime();
         CPointMap ptDrop(GetTopPoint());
+
+	    if ( iDecayTime > 0 )
+	    {
+	        const CRegion * pRegion = ptDrop.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
+	        if ( pRegion != nullptr && pRegion->IsFlag(REGION_FLAG_NODECAY) )
+	            iDecayTime = -1 * MSECS_PER_SEC;
+	    }
+
         TRIGRET_TYPE ttResult = TRIGRET_RET_DEFAULT;
         if (IsTrigUsed(TRIGGER_DROPON_GROUND) || IsTrigUsed(TRIGGER_ITEMDROPON_GROUND))
         {
