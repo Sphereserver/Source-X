@@ -1210,10 +1210,16 @@ int CChar::Fight_CalcDamage(const CItem * pWeapon, bool fNoRandom, bool fGetMax 
 	int iDmgMax = 0;
 	STAT_TYPE iStatBonus = (STAT_TYPE)GetPropNum(COMP_PROPS_CHAR, PROPCH_COMBATBONUSSTAT, true);
 	int iStatBonusPercent = (int)GetPropNum(COMP_PROPS_CHAR, PROPCH_COMBATBONUSPERCENT, true);
-	if ( pWeapon != nullptr )
+
+    if ( pWeapon != nullptr )
 	{
 		iDmgMin = pWeapon->Weapon_GetAttack(false);
 		iDmgMax = pWeapon->Weapon_GetAttack(true);
+
+	    // Use bonus stats from weapon.
+        iStatBonus = static_cast<STAT_TYPE>(pWeapon->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_COMBATBONUSSTAT, true));
+        iStatBonusPercent = pWeapon->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_COMBATBONUSPERCENT, true);
+
 	}
 	else
 	{
