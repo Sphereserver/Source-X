@@ -1046,6 +1046,16 @@ bool CSector::MoveCharToSector( CChar * pChar )
 		}
 	}
 
+    // Send new weather and light for this sector
+    CClient *pClient = pChar->GetClientActive();
+    if (pClient != nullptr)
+    {
+        pClient->addLight();
+        // Provide the weather as an arg as we are not in the new location yet.
+        pClient->addWeather(GetWeather());
+        pClient->addSeason(GetSeason());
+    }
+    
 	// Remove from previous spot.
 	m_Chars_Active.AddCharActive(pChar);
 
