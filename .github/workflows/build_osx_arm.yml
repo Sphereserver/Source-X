@@ -35,6 +35,9 @@ jobs:
       uses: actions/checkout@v6
       with:
         fetch-depth: 0
+    - name: Remove untrusted Homebrew tap (pre-installed on runner)
+      run: brew untap aws/tap || true
+
     - name: Install prerequisites
       run:  |
             sw_vers

@@ -3398,9 +3398,11 @@ void CChar::Spell_CastFail(bool fAbort)
 			iTithingLoss = g_Cfg.Calc_SpellTithingCost(this, pSpell, m_Act_Prv_UID.ObjFind());
 	}
 
+    SOUND_TYPE iSound = SOUND_SPELL_FIZZLE;
     CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
     pScriptArgs->Init(m_atMagery.m_iSpell, iManaLoss, 0, m_Act_Prv_UID.ObjFind());
     pScriptArgs->m_VarsLocal.SetNum("CreateObject1",iT1);
+    pScriptArgs->m_VarsLocal.SetNum("Sound", iSound);
     pScriptArgs->m_VarsLocal.SetNum("TithingLoss", iTithingLoss);
 
 	if ( IsTrigUsed(TRIGGER_SPELLFAIL) )
@@ -3424,7 +3426,12 @@ void CChar::Spell_CastFail(bool fAbort)
     iT1 = (ITEMID_TYPE)(ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum("CreateObject1")));
 	if (iT1)
 		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, dwRender);
-	Sound( SOUND_SPELL_FIZZLE );
+
+    iSound = static_cast<SOUND_TYPE>(pScriptArgs->m_VarsLocal.GetKeyNum("Sound"));
+    if (iSound)
+    {
+	  Sound(iSound);
+    }
 
 	if ( IsClientActive() )
 		GetClientActive()->addObjMessage( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_GEN_FIZZLES ), this );

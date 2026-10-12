@@ -694,16 +694,15 @@ void CServerMapDiffCollection::LoadMapDiffs()
 		if ( !g_MapList.IsMapSupported( m ) )
 			continue;
 
-		const int map = g_MapList.GetMapID(m);
-
 		// Load Mapdif Files
 		{
-			CSFile * pFileMapdif	= &(g_Install.m_Mapdif[map]);
-			CSFile * pFileMapdifl	= &(g_Install.m_Mapdifl[map]);
+			CSFile *pFileMapdif = &g_Install.m_Mapdif[m];
+			CSFile *pFileMapdifl = &g_Install.m_Mapdifl[m];
 
 			// Check that the relevant dif files are available
 			if ( pFileMapdif->IsFileOpen() && pFileMapdifl->IsFileOpen() )
 			{
+			    const int map = g_MapList.GetMapID(m);
 				// Make sure that we're at the beginning of the files
 				pFileMapdif->SeekToBegin();
 				pFileMapdifl->SeekToBegin();
@@ -744,14 +743,15 @@ void CServerMapDiffCollection::LoadMapDiffs()
 
 		// Load Stadif Files
 		{
-			CSFile * pFileStadif	= &(g_Install.m_Stadif[map]);
-			CSFile * pFileStadifl	= &(g_Install.m_Stadifl[map]);
-			CSFile * pFileStadifi	= &(g_Install.m_Stadifi[map]);
+			CSFile *pFileStadif = &g_Install.m_Stadif[m];
+			CSFile *pFileStadifl = &g_Install.m_Stadifl[m];
+			CSFile *pFileStadifi = &g_Install.m_Stadifi[m];
 
 			// Check that the relevant dif files are available
 			if ( !pFileStadif->IsFileOpen() || !pFileStadifl->IsFileOpen() || !pFileStadifi->IsFileOpen() )
 				continue;
 
+            const int map = g_MapList.GetMapID(m);
 			// Make sure that we're at the beginning of the files
 			pFileStadif->SeekToBegin();
 			pFileStadifl->SeekToBegin();
