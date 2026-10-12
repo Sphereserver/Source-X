@@ -4163,3 +4163,12 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 10-10-2026, Mulambo
 - Changed: During damage calculation, when character has weapon, values `COMBATBONUSSTAT` and `COMBATBONUSPERCENT` are taken from that weapon rather than from character.
+
+12-10-2026, canerksk
+- Added: Maparea, one of the dialog features of TazUO added.
+	  maparea x y w h mapIndex mapX mapY mapbitX mapbitY
+	  example:
+	    [dialog d_mapareatest]
+	    0,0
+	    resizepic 0 0 3000 500 500
+	    maparea 20 20 400 300 <src.p.m> <eval <src.p.x>-200> <eval <src.p.y>-150> <eval <src.p.x>+200> <eval <src.p.y>+150>
