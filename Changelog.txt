@@ -4165,6 +4165,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Changed: During damage calculation, when character has weapon, values `COMBATBONUSSTAT` and `COMBATBONUSPERCENT` are taken from that weapon rather than from character.
 
 12-10-2026, canerksk
+- Added: console clear option added to context menu on Windows (#1516)
 - Added: Maparea, one of the dialog features of TazUO added.
 	  maparea x y w h mapIndex mapX mapY mapbitX mapbitY
 	  example:
