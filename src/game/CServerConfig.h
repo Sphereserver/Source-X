@@ -342,6 +342,7 @@ public:
 	bool m_fMonsterFight;			// Will creatures fight amoung themselves.
 	bool m_fMonsterFear;			// will they run away if hurt ?
     uint m_iContainerMaxItems;      // Maximum number of items allowed in a container item.
+    uint m_iNPCSpellCastRange;      // Maximum range the NPCs can target with spells.
     int m_iDragWeightMax;            // Capacity of maxweight in % character can move with drag and drop
     int m_iBackpackOverload;        // Maximum weight in stones extra allowed in main backpack.
 	int	 m_iBankIMax;				// Maximum number of items allowed in bank.
