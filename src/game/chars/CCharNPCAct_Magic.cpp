@@ -171,14 +171,12 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 
     int iDist = GetTopDist3D(pChar);
     int iMaxRange = static_cast<int>(g_Cfg.m_iNPCSpellCastRange);
-	g_Log.EventDebug("Ini max distance %i\n", iMaxRange);
 
     // Check if NPC has spellcast range overridden.
     const CVarDefCont *pOverriddenMaxRange = GetKey("OVERRIDE.SPELLCAST_RANGE", true);
     if (pOverriddenMaxRange) {
         iMaxRange = static_cast<int>(pOverriddenMaxRange->GetValNum());
     }
-	g_Log.EventDebug("Overridden max distance %i\n", iMaxRange);
 
     // Too far away, NPC needs to move closer.
     if (iDist > iMaxRange) {
