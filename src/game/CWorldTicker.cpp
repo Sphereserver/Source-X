@@ -32,7 +32,7 @@ static void UnsortedVecDifference(
     ASSERT(vecElemBuffer.empty());
 
     // Reserve space in vecElemBuffer to avoid reallocations
-    vecElemBuffer.reserve(vecMain.size() - vecToRemoveUnsorted.size());
+    vecElemBuffer.reserve(vecMain.size());
 
     /*
     // IMPLEMENTATION 1: linear, no bulk insertions
@@ -116,14 +116,10 @@ static void SortedVecRemoveAddQueued(
     ASSERT(!sl::SortedContainerHasDuplicates(vecToAdd));
 #endif
 
-    if (!vecToRemoveUnsorted.empty())
+    if (!vecToRemoveUnsorted.empty() && !vecMain.empty())
     {
-        if (vecMain.empty()) {
-            ASSERT(false);  // Shouldn't ever happen.
-        }
-
         vecElemBuffer.clear();
-        vecElemBuffer.reserve(vecMain.size() - vecToRemoveUnsorted.size());
+        vecElemBuffer.reserve(vecMain.size());
 
         // Unsorted custom algorithm.
         // We can't use a classical sorted algorithm because vecMain is sorted by pair.first (int64 timeout)
@@ -355,6 +351,7 @@ bool CWorldTicker::_EraseTimedObject(CTimedObject* pTimedObject)
     {
         // It isn't in the ticking list, or we already have received a remove request.
         ASSERT(false);  // Not legit.
+        return false;
     }
 
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
@@ -624,6 +621,12 @@ bool CWorldTicker::_EraseCharTicking(CChar* pChar)
         return false; // Not legit.
     }
 #endif
+
+    if (_vPeriodicCharsEraseRequests.cend() !=
+        std::find(_vPeriodicCharsEraseRequests.cbegin(), _vPeriodicCharsEraseRequests.cend(), pChar))
+    {
+        return true;
+    }
 
     _vPeriodicCharsEraseRequests.emplace_back(pChar);
 
@@ -1316,6 +1319,8 @@ void CWorldTicker::ProcessCharPeriodicTicks()
                 if (pChar->_IsSleeping() || pChar->_IsBeingDeleted())
                     continue;
 
+                pChar->_iTimePeriodicTick = 0;
+
                 _vPeriodicCharsTicksBuffer.emplace_back(pChar);
                 _vIndexMiscBuffer.emplace_back(uiProgressive);
             }
@@ -1350,7 +1355,11 @@ void CWorldTicker::ProcessCharPeriodicTicks()
         EXC_TRYSUB("Char Periodic Ticks Loop");
         for (CChar* pChar : _vPeriodicCharsTicksBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
         {
-            pChar->_iTimePeriodicTick = 0;
+            if (pChar->_IsBeingDeleted() || pChar->_IsSleeping())
+            {
+                continue;
+            }
+
             if (pChar->OnTickPeriodic())
             {
                 if (!pChar->IsPeriodicTickPending())

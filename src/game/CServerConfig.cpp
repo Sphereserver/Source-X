@@ -132,6 +132,7 @@ CServerConfig::CServerConfig()
     m_fCanPetsDrinkPotion   = true;
 	m_fMonsterFight			= false;
 	m_fMonsterFear			= false;
+	m_iNPCSpellCastRange	= 10;
 	m_iLightDungeon			= 27;
 	m_iLightNight			= 25;	// dark before t2a.
 	m_iLightDay				= LIGHT_BRIGHT;
@@ -663,6 +664,7 @@ enum RC_TYPE
 	RC_NPCNOFAMETITLE,			// m_NPCNoFameTitle
 	RC_NPCSHOVENPC,				// m_NPCShoveNPC
 	RC_NPCSKILLSAVE,			// m_iSaveNPCSkills
+	RC_NPCSPELLCASTRANGE,       // m_iNPCSpellCastRange
 	RC_NPCTRAINCOST,			// m_iTrainSkillCost
 	RC_NPCTRAINMAX,				// m_iTrainSkillMax
 	RC_NPCTRAINPERCENT,			// m_iTrainSkillPercent
@@ -958,6 +960,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_NPCNoFameTitle)		}},
 	{ "NPCSHOVENPC",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_NPCShoveNPC)			}},
 	{ "NPCSKILLSAVE",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iSaveNPCSkills)		}},
+    { "NPCSPELLCASTRANGE",      { ELEM_INT,     static_cast<uint>OFFSETOF(CServerConfig,m_iNPCSpellCastRange)		}},
 	{ "NPCTRAINCOST",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillCost)		}},
 	{ "NPCTRAINMAX",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillMax)		}},
 	{ "NPCTRAINPERCENT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillPercent)	}},
@@ -1677,15 +1680,18 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 						if (IsDigit(ppVal[3][0]))
 						{
 							pt.m_map = (byte)(atoi(ppVal[3]));
+
+						    if (!g_MapList.IsMapSupported(pt.m_map)) {
+			                    g_Log.EventError("Unsupported Map %d\n", pt.m_map);
+						        return false;
+						    }
 						}
 						FALLTHROUGH;
 
 					case 3:
-						if ( IsDigit(ppVal[2][0]) || (( iArgs == 4 ) && ( ppVal[2][0] == '-' )) )
+						if (IsDigit(ppVal[2][0]) || ppVal[2][0] == '-')
 						{
-							pt.m_z = (char)(( iArgs == 4 ) ? atoi(ppVal[2]) : 0);
-							if ( iArgs == 3 )
-								pt.m_map = (byte)(atoi(ppVal[2]));
+							pt.m_z = static_cast<char>(atoi(ppVal[2]));
 						}
 						FALLTHROUGH;
 

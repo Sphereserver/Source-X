@@ -4144,3 +4144,36 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 23-07-2026, canerksk
 - Added: New local variable local.Sound to @SpellFail/@Fail triggers (R/W). If you set local.sound = 0, no sound will be played.
+
+14-09-2026, Mulambo
+  WARNING! POTENTIALLY BREAKING CHANGE!
+- Changed: Chance to hit in `CombatDamageEra=0` (Sphere custom) now returns calculated value, instead of random number from that value.
+
+03-10-2026, yeiffet
+- Fixed: "vector too long" exception in CWorldTicker, which made some characters stop ticking, so they couldn't die (#1593).
+
+08-10-2026, Mulambo
+- Changed: Equipped armor / weapon will also drop on ground when moving it while overweight, like other items (unless OF_OWNoDropCarriedItem is enabled).
+  WARNING! POTENTIALLY BREAKING CHANGE!
+- Changed: `serv.map(location)` 3rd parameter is now always `z` position (was `map` when received 3 arguments or `z` when received 4 arguments).
+
+09-10-2026, Mulambo
+- Fixed: NPCs can now attack or cast while paralyzed when Magic / Combat flags (MAGICF_CASTPARALYZED / COMBAT_PARALYZE_CANSWING) are enabled.
+- Added: Attacking character (dclick in war mode) will turn player to target direction (if he can attack the target and `OF_NoDClickTurn` is not set).
+
+10-10-2026, Mulambo
+- Changed: During damage calculation, when character has weapon, values `COMBATBONUSSTAT` and `COMBATBONUSPERCENT` are taken from that weapon rather than from character.
+
+12-10-2026, canerksk
+- Added: console clear option added to context menu on Windows (#1516)
+- Added: Maparea, one of the dialog features of TazUO added.
+	  maparea x y w h mapIndex mapX mapY mapbitX mapbitY
+	  example:
+	    [dialog d_mapareatest]
+	    0,0
+	    resizepic 0 0 3000 500 500
+	    maparea 20 20 400 300 <src.p.m> <eval <src.p.x>-200> <eval <src.p.y>-150> <eval <src.p.x>+200> <eval <src.p.y>+150>
+
+12-10-2026, canerksk, Mulambo
+- Added: NPCSpellCastRange ini settings and TAG.OVERRIDE.SPELLCAST_RANGE (#1524).
+    Defines the maximum range NPCs can target with spells (default value is 10). Override tag to change the range for a single NPC.

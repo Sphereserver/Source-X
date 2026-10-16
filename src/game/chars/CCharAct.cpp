@@ -3126,7 +3126,8 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 			}
 		}
 	}
-	else if ( pItem->GetEquipLayer() > LAYER_NONE && pItem->GetEquipLayer() <= LAYER_LEGS) //If we are overweight, we don't want our equipped items to fall on the ground. They will remain equipped.
+    // Item is equipped (armor / weapon), char is overweight and optional flag OWNoDropCarriedItem is enabled, so we keep it equipped.
+	else if (pItem->GetEquipLayer() > LAYER_NONE && pItem->GetEquipLayer() <= LAYER_LEGS && IsSetOF(OF_OWNoDropCarriedItem))
 	{
 		SysMessageDefault(DEFMSG_MSG_HEAVY);
 		return false;
@@ -3142,6 +3143,7 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 	}
 	else if (fDropOnGround)
 	{
+	    // @todo This duplicates CItem::MoveToCheck() almost exactly.
 		if ( !GetTopPoint().IsValidPoint() )
 		{
 			// NPC is being created and has no valid point yet.
@@ -3157,6 +3159,14 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
         const CObjBase* pItemContPrev = pItem->GetContainer();
         int64 iDecayTime = pItem->GetDecayTime();
         CPointMap ptDrop(GetTopPoint());
+
+	    if ( iDecayTime > 0 )
+	    {
+	        const CRegion * pRegion = ptDrop.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
+	        if ( pRegion != nullptr && pRegion->IsFlag(REGION_FLAG_NODECAY) )
+	            iDecayTime = -1 * MSECS_PER_SEC;
+	    }
+
         TRIGRET_TYPE ttResult = TRIGRET_RET_DEFAULT;
         if (IsTrigUsed(TRIGGER_DROPON_GROUND) || IsTrigUsed(TRIGGER_ITEMDROPON_GROUND))
         {
@@ -5974,7 +5984,7 @@ bool CChar::_OnTick()
     const bool fTickableState  = _CanTick(false);
     const bool fSleeping       = _IsSleeping();
 
-//#ifdef _DEBUG
+#ifdef _DEBUG
     if (!fTickableState || fSleeping)
     {
         g_Log.EventDebug("[Temporary msg] Char '%s' (UID=0x%" PRIx32 ") at P=%s is in the ticking list with unusual CanTick=%d, SleepingState=%d.\n",
@@ -5983,10 +5993,11 @@ bool CChar::_OnTick()
                          (int)fTickableState, (int)fSleeping
                          );
     }
-//#endif
+#endif
 
     if (!fTickableState)
 	{
+#ifdef _DEBUG
         // It can happen that i'm in the ticking list, but for various reasons right now i'm in a non-tickable state.
         // Among the reasons why i can't tick, though, there cannot be being in a sleeping state: when a char goes into sleeping state
         //  it should also be removed from the list (it happens in _GoSleep()).
@@ -5995,15 +6006,16 @@ bool CChar::_OnTick()
                              (int)GetTopSector()->IsSleeping());
         }
         //ASSERT(!fSleeping);
+#endif
 
-		if (GetTopSector()->IsSleeping() && !g_Rand.Get16ValFast(15))
+        if (GetTopSector()->IsSleeping() && !g_Rand.Get16ValFast(15))
 		{
             // Do not make the char sleep right when it enters a sleeping sector. Doing this
             //  will lead to an accumulation of npcs at the edge of the new sector.
 
-//#ifdef _DEBUG
+#ifdef _DEBUG
             g_Log.EventDebug("[Temporary msg] Sent CChar to sleep (random), to be awaken alongside its sector.\n");
-//#endif
+#endif
 
 			_SetTimeout(1);      //Make it tick after sector's awakening.
 			_GoSleep();
@@ -6034,11 +6046,11 @@ bool CChar::_OnTick()
     {
         const ProfileTask aiTask(PROFILE_NPC_AI);
         EXC_SET_BLOCK("NPC action");
-        if (!IsStatFlag(STATF_FREEZE|STATF_STONE) && !Can(CAN_C_STATUE))
+        if (!IsStatFlag(STATF_STONE) && !Can(CAN_C_STATUE))
         {
             NPC_OnTickAction();
 
-            if (!IsStatFlag(STATF_DEAD))
+            if (!IsStatFlag(STATF_FREEZE|STATF_DEAD))
             {
                 const int iFlags = NPC_GetAiFlags();
                 if ((iFlags & NPC_AI_FOOD) && !(iFlags & NPC_AI_INTFOOD))
