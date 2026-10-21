@@ -8,6 +8,7 @@
 #include "CWorldClock.h"
 #include "CWorldGameTime.h"
 #include "CWorldTicker.h"
+#include "CWorldTickingList.h"
 #include <unordered_set>
 
 /*
@@ -1126,12 +1127,26 @@ void CWorldTicker::ProcessTimedObjects()
     // Done working with _vTimedObjsTimeouts, we don't need the lock from now on.
 
     lpctstr ptcSubDesc;
-    for (CTimedObject* pTimedObj : _vTimedObjsTimeoutsBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
+    CWorldTickingList::sm_fTickLoopRunning = true;
+    // Do not cache the pointers nor the size: an element is set to nullptr if its object is destroyed by the tick of a previous one.
+    for (size_t uiBufIdx = 0; uiBufIdx < _vTimedObjsTimeoutsBuffer.size(); ++uiBufIdx)    // Loop through all msecs stored, unless we passed the timestamp.
     {
+        CTimedObject* pTimedObj = _vTimedObjsTimeoutsBuffer[uiBufIdx];
+        if (!pTimedObj)
+            continue;   // Destroyed during this loop.
+
         ptcSubDesc = "Generic";
 
         EXC_TRYSUB("Tick");
         EXC_SETSUB_BLOCK("Elapsed");
+
+        // Delete-d (waiting for the deferred destruction) by the tick of a previous object of this list, after the selection:
+        //  it must not tick (no @Timer on a deleted item, no new timeout on a deleted NPC).
+        if (const CObjBase* pObjDeleted = dynamic_cast<const CObjBase*>(pTimedObj))
+        {
+            if (pObjDeleted->_IsBeingDeleted())
+                continue;
+        }
 
         pTimedObj->_ClearTimeoutRaw();
 
@@ -1215,6 +1230,10 @@ void CWorldTicker::ProcessTimedObjects()
             {
                 ptcSubDesc = "TimedFunction";
                 fDelete = false;
+                // Stopped during this loop (by the tick of a previous object of the list), after it was selected to tick: don't run it.
+                //  It will be destroyed at the end of this server tick.
+                if (pTimedObj->IsDeleted())
+                    break;
                 pTimedObj->_OnTick();
             }
             break;
@@ -1240,6 +1259,7 @@ void CWorldTicker::ProcessTimedObjects()
 
     EXC_CATCH;
 
+    CWorldTickingList::sm_fTickLoopRunning = false;
     _vTimedObjsTimeoutsBuffer.clear();
 }
 
@@ -1353,8 +1373,13 @@ void CWorldTicker::ProcessCharPeriodicTicks()
 
     {
         EXC_TRYSUB("Char Periodic Ticks Loop");
-        for (CChar* pChar : _vPeriodicCharsTicksBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
+        CWorldTickingList::sm_fTickLoopRunning = true;
+        // Do not cache the pointers nor the size: an element is set to nullptr if its char is destroyed by the tick of a previous one.
+        for (size_t uiBufIdx = 0; uiBufIdx < _vPeriodicCharsTicksBuffer.size(); ++uiBufIdx)    // Loop through all msecs stored, unless we passed the timestamp.
         {
+            CChar* pChar = _vPeriodicCharsTicksBuffer[uiBufIdx];
+            if (!pChar)
+                continue;   // Destroyed during this loop.
             if (pChar->_IsBeingDeleted() || pChar->_IsSleeping())
             {
                 continue;
@@ -1379,6 +1404,7 @@ void CWorldTicker::ProcessCharPeriodicTicks()
 
     EXC_CATCH;
 
+    CWorldTickingList::sm_fTickLoopRunning = false;
     _vPeriodicCharsTicksBuffer.clear();
 }
 

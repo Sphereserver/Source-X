@@ -17,6 +17,9 @@ CTimedObject::~CTimedObject()
     ADDTOCALLSTACK("CTimedObject::~CTimedObject");
     EXC_TRY("Cleanup in destructor");
 
+    // If i'm among the objects selected to tick in the current server tick, forget me.
+    CWorldTickingList::OnTimedObjectDestroyed(this);
+
     if (_IsTimeoutTickingActive())
     {
         CWorldTickingList::DelObjSingle(this);

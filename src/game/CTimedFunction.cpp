@@ -5,6 +5,7 @@
 #include "CServer.h"
 #include "CTimedFunctionHandler.h"
 #include "CTimedFunction.h"
+#include "CWorld.h"
 
 
 CTimedFunction::CTimedFunction(const CUID& uidAttached, const char* pcCommand) :
@@ -17,12 +18,14 @@ CTimedFunction::CTimedFunction(const CUID& uidAttached, const char* pcCommand) :
 
 bool CTimedFunction::_IsDeleted() const // virtual
 {
-	return false;
+	// A timed function is "deleted" when it has been stopped (TIMERF STOP/CLEAR, or its object has been deleted):
+	//  it's moved to the list of the objects to destroy at the end of the server tick.
+	return g_World.IsScheduledObjDeletion(this);
 }
 
 bool CTimedFunction::IsDeleted() const // virtual
 {
-	return false;
+	return g_World.IsScheduledObjDeletion(this);
 }
 
 static bool _ExecTimedFunction(CUID&& uid, CScript&& s)

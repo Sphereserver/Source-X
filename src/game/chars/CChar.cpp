@@ -343,6 +343,9 @@ CChar::~CChar()
 	ADDTOCALLSTACK("CChar::~CChar");
     EXC_TRY("Cleanup in destructor");
 
+    // If i'm among the chars selected for the periodic tick in the current server tick, forget me.
+    CWorldTickingList::OnCharDestroyed(this);
+
 	CChar::DeletePrepare();
 	CChar::DeleteCleanup(true);
 

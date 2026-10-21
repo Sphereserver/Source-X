@@ -51,6 +51,30 @@ bool CWorldTickingList::IsStatusUpdateTickRegistered(const CObjBase* pObj)
     return g_World._Ticker.IsStatusUpdateTickRegistered(pObj);
 }
 
+bool CWorldTickingList::sm_fTickLoopRunning = false;
+
+void CWorldTickingList::OnTimedObjectDestroyed(const CTimedObject* pObj) noexcept // static
+{
+    // The static flag is checked first: it's always valid, even while g_World is being destroyed.
+    if (!sm_fTickLoopRunning)
+        return;
+    for (CTimedObject*& pElem : g_World._Ticker._vTimedObjsTimeoutsBuffer)
+    {
+        if (pElem == pObj)
+            pElem = nullptr;
+    }
+}
+
+void CWorldTickingList::OnCharDestroyed(const CChar* pChar) noexcept // static
+{
+    if (!sm_fTickLoopRunning)
+        return;
+    for (CChar*& pElem : g_World._Ticker._vPeriodicCharsTicksBuffer)
+    {
+        if (pElem == pChar)
+            pElem = nullptr;
+    }
+}
 
 void CWorldTickingList::ClearTickingLists() // static
 {
