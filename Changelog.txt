@@ -4177,3 +4177,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 12-10-2026, canerksk, Mulambo
 - Added: NPCSpellCastRange ini settings and TAG.OVERRIDE.SPELLCAST_RANGE (#1524).
     Defines the maximum range NPCs can target with spells (default value is 10). Override tag to change the range for a single NPC.
+
+21-10-2026, DavideRei
+- Fixed: CItemBase::ResetMakeValue (called when the resources or the skills to make an itemdef change) used INT32_MIN instead of the "not calculated yet" marker INT64_MIN: the value wasn't recalculated but became abs(INT32_MIN), so an itemdef without a value suddenly had one and its new items were created as CItemVendable.
