@@ -1958,7 +1958,9 @@ bool CChar::CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovem
     if (!fPathfinding && (g_Cfg.m_iDebugFlags & DEBUGF_WALK) && IsPlayer())
         g_Log.EventWarn("GetHeightMount() %hhu, block.m_Top.m_z %hhd, ptDest.m_z %hhd.\n", uiMyHeight, blockingState->m_Top.m_z, ptDest->m_z);
 
-    if (IsStatFlag(STATF_ONHORSE) && (uiMyHeight + ptDest->m_z >= blockingState->m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE))
+    // MountHeight=2: the rule is for players only, mounted NPCs can enter the buildings.
+    const bool fMountHeight = g_Cfg.m_iMountHeight && !(m_pNPC && (g_Cfg.m_iMountHeight == 2));
+    if (IsStatFlag(STATF_ONHORSE) && (uiMyHeight + ptDest->m_z >= blockingState->m_Top.m_z) && fMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE))
     {
         if (!fPathfinding)
             SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);
