@@ -2399,8 +2399,9 @@ do_default:
 
             CChar* pCharArg = CUID::CharFindFromUID(m_followers[uiIndex].uid);
             if (!pCharArg)
-                return false;
+                return true;    // The follower doesn't exist anymore: return 0 (sVal already set) instead of an error, so scripts can check it.
 
+            SKIP_SEPARATORS(ptcKey);
             if (*ptcKey == '\0')
             {
                 sVal.SetValTrue();
