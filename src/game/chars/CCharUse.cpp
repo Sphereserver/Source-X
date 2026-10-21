@@ -737,7 +737,9 @@ int CChar::Use_PlayMusic( CItem * pInstrument, int iDifficultyToPlay )
 		}
 	}
 
-	bool fSuccess = Skill_UseQuick(SKILL_MUSICIANSHIP, iDifficultyToPlay, (Skill_GetActive() != SKILL_MUSICIANSHIP));
+	// No Musicianship gain when playing for Peacemaking, Provocation or Enticement: a bad play makes them fail immediately,
+	//  with no skill delay, so it could be macroed to raise Musicianship with no wait.
+	bool fSuccess = Skill_UseQuick(SKILL_MUSICIANSHIP, iDifficultyToPlay, false);
 	Sound(pInstrument->Use_Music(fSuccess));
 	if ( fSuccess )
 		return iDifficultyToPlay;	// success
