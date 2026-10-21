@@ -1643,7 +1643,7 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 	if ( IsSetOF(OF_PetSlots) )
 	{
         short iFollowerSlots = pCharPet->GetFollowerSlots();
-		m_pChar->FollowersUpdate(pCharPet,(-maximum(0, iFollowerSlots)));
+		m_pChar->FollowersUpdate(pCharPet,maximum(0, iFollowerSlots), false, true);
 	}
 
 	m_pChar->GetBank(LAYER_STABLE)->ContentAdd(pPetItem);

@@ -4177,3 +4177,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 12-10-2026, canerksk, Mulambo
 - Added: NPCSpellCastRange ini settings and TAG.OVERRIDE.SPELLCAST_RANGE (#1524).
     Defines the maximum range NPCs can target with spells (default value is 10). Override tag to change the range for a single NPC.
+
+21-10-2026, DavideRei
+- Fixed: removing a follower with FOLLOWERSLOTS=0 (with OF_PetSlots) was handled as an addition, because the removal was requested passing the negative slots (-0 == 0). CChar::FollowersUpdate has now a fRemove argument. @FollowersUpdate arguments are unchanged (ARGN1 = 1 when removing, ARGN2 = slots).
+- Changed: with EF_FollowerList, the followers that don't exist anymore or that have another owner are removed from the list when it's updated.

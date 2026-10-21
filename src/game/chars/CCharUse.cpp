@@ -1241,7 +1241,7 @@ short CChar::GetCurFollowers() const
         });
 }
 
-bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fCheckOnly )
+bool CChar::FollowersUpdate(CChar *pCharPet, short iPetFollowerSlots, bool fCheckOnly, bool fRemove )
 {
 	ADDTOCALLSTACK("CChar::FollowersUpdate");
 	// Attemp to update followers on this character based on pChar
@@ -1255,8 +1255,8 @@ bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fChe
         //  everyone scripts have to be changed to recognize this scenario.
 
         CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-        pScriptArgs->m_iN1 = (iPetFollowerSlots >= 0) ? 0 : 1;
-        pScriptArgs->m_iN2 = abs(iPetFollowerSlots);
+        pScriptArgs->m_iN1 = fRemove ? 1 : 0;
+        pScriptArgs->m_iN2 = iPetFollowerSlots;
         //pScriptArgs->m_iN3 = fCheckOnly;
         if (OnTrigger(CTRIG_FollowersUpdate, pScriptArgs, pCharPet) == TRIGRET_RET_TRUE)
             return false;
@@ -1268,7 +1268,17 @@ bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fChe
     ASSERT(iMaxFollower >= 0);
 	if (IsSetEF(EF_FollowerList))
 	{
-        if (iPetFollowerSlots >= 0)
+        // Check the current list consistency: remove the followers that don't exist anymore or that aren't mine.
+        for (auto it = m_followers.begin(); it != m_followers.end(); )
+        {
+            const CChar *pChar = it->uid.CharFind();
+            if (!pChar || ((pChar != pCharPet) && (pChar->GetOwner() != this)))
+                it = m_followers.erase(it);
+            else
+                ++it;
+        }
+
+        if (!fRemove)
         {
             bool fCharAlreadyFollower = false;
             for (auto const& follower_data : m_followers)
@@ -1297,24 +1307,24 @@ bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fChe
         }
 		else if (!fCheckOnly)
         {
-            // If iPetFollowerSlots is negative, remove this follower.
+            // Remove this follower.
             std::erase_if(
                 m_followers,
                 [pCharPet, iPetFollowerSlots](auto const& inp_struct) -> bool {
                     const bool fIsSame = inp_struct.uid == pCharPet->GetUID();
                     if (!fIsSame)
                         return false;
-                    if (inp_struct.followerslots != abs(iPetFollowerSlots))
+                    if (inp_struct.followerslots != iPetFollowerSlots)
                         g_Log.EventWarn("Removed Follower with UID 0%" PRIx32 " with actual FollowerSlots %d, but expected %d.\n",
-                                        inp_struct.uid.GetObjUID(), inp_struct.followerslots, abs(iPetFollowerSlots));
+                                        inp_struct.uid.GetObjUID(), inp_struct.followerslots, iPetFollowerSlots);
                     return true;
                 });
 		}
 	}
 	else
 	{
-        short iNewCurFollower = GetCurFollowers() + iPetFollowerSlots;
-        if (!fIgnoreMax && (iNewCurFollower > iMaxFollower))
+        const short iNewCurFollower = GetCurFollowers() + (fRemove ? -iPetFollowerSlots : iPetFollowerSlots);
+        if (!fRemove && !fIgnoreMax && (iNewCurFollower > iMaxFollower))
             return false;
         if (!fCheckOnly)
             SetDefNum("CURFOLLOWER", iNewCurFollower);
