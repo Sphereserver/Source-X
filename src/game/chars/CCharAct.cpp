@@ -4304,12 +4304,50 @@ void CChar::Wake()
     UpdateMode(false, nullptr);
 }
 
+// Has the animation of my body the "die forward" action (DIE2)?
+// It's the same choice made by GenerateAnimate for ANIM_DIE_FORWARD: custom anims without it are marked in the CHARDEF
+//  with AFLAG_CUST_ANI_NO_DIE2 / AFLAG_CUST_MON_NO_DIE2 (ANIM=), depending on the action set (animal or monster) of the body.
+bool CChar::Anim_HasDieForward() const
+{
+	ADDTOCALLSTACK("CChar::Anim_HasDieForward");
+	if ( IsPlayableCharacter() )
+		return true;
+
+	const CREID_TYPE dispID = GetDispID();
+	CUOMobTypesEntry mobTypesRow {MOBTE_QTY, 0};
+	if ( g_Cfg.m_fUseMobTypes && g_Install.m_mobtypes.IsLoaded() )
+	{
+		const CUOMobTypesEntry *pMobtEntry = g_Install.m_mobtypes.GetEntry(dispID);
+		if ( pMobtEntry->m_uiType != MOBTE_QTY )
+		{
+			mobTypesRow.m_uiType = pMobtEntry->m_uiType;
+			mobTypesRow.m_uiFlags = pMobtEntry->m_uiFlags;
+		}
+	}
+	if ( mobTypesRow.m_uiType == MOBTE_QTY )
+		mobTypesRow.m_uiType = (dispID >= CREID_HORSE_TAN) ? MOBTE_ANIMAL : MOBTE_MONSTER;
+
+	if ( (mobTypesRow.m_uiFlags & ATFLAG_UseUopAnimation) || (mobTypesRow.m_uiType == MOBTE_SEA_MONSTER) )
+		return true;
+
+	const CCharBase *pCharDef = Char_GetDef();
+	if ( (mobTypesRow.m_uiType == MOBTE_ANIMAL && !(mobTypesRow.m_uiFlags & ATFLAG_CalculateOffsetLowGroupExtended))
+		|| (mobTypesRow.m_uiType == MOBTE_MONSTER && (mobTypesRow.m_uiFlags & ATFLAG_CalculateOffsetByLowGroup)) )
+		return !(pCharDef->m_Anims & AFLAG_CUST_ANI_NO_DIE2);
+
+	return !(pCharDef->m_Anims & AFLAG_CUST_MON_NO_DIE2) && (dispID != CREID_SHADOW_LORD);
+}
+
 // Sleep
 void CChar::SleepStart( bool fFrontFall )
 {
 	ADDTOCALLSTACK("CChar::SleepStart");
 	if (IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_POLYMORPH))
 		return;
+
+	// No front fall if my anim doesn't have the DIE2 action (same as Death)
+	if ( fFrontFall && !Anim_HasDieForward() )
+		fFrontFall = false;
 
 	CItemCorpse *pCorpse = MakeCorpse(fFrontFall);
 	if (pCorpse == nullptr)
@@ -4433,7 +4471,8 @@ CChar::DeathRequestResult CChar::Death()
     }
 
 	// Create the corpse item
-    bool fFrontFall = g_Rand.GetValFast(2);
+    // No front fall if my anim doesn't have the DIE2 action: the client can't draw the corpse (it disappears)
+    const bool fFrontFall = Anim_HasDieForward() ? (g_Rand.GetValFast(2) != 0) : false;
 	CItemCorpse * pCorpse = MakeCorpse(fFrontFall);
 	if ( pCorpse )
 	{

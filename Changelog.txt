@@ -4177,3 +4177,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 12-10-2026, canerksk, Mulambo
 - Added: NPCSpellCastRange ini settings and TAG.OVERRIDE.SPELLCAST_RANGE (#1524).
     Defines the maximum range NPCs can target with spells (default value is 10). Override tag to change the range for a single NPC.
+
+21-10-2026, DavideRei
+- Fixed: chars whose animation has no "die forward" action (DIE2: custom anims marked with AFLAG_CUST_ANI_NO_DIE2 / AFLAG_CUST_MON_NO_DIE2, Shadow Lord) could die or fall asleep forward, and the client couldn't draw their corpse (it disappeared).

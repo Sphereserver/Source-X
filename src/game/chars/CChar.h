@@ -1215,6 +1215,7 @@ public:
 	bool CheckCorpseCrime( CItemCorpse *pCorpse, bool fLooting, bool fTest );
 	CItemCorpse * FindMyCorpse( bool fIgnoreLOS = false, int iRadius = 2) const;
 	CItemCorpse * MakeCorpse( bool fFrontFall );
+    bool Anim_HasDieForward() const;
     bool RaiseCorpse( CItemCorpse * pCorpse );
 
     enum class DeathRequestResult
