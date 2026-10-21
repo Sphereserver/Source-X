@@ -35,6 +35,12 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 		return false;	// blocked
 	}
 
+	// The walk follows the height a char would stand at, so it can climb the stairs and reach another floor: a straight line
+	//  between the two (at half the player height) can't pass through a floor or a stair, so check it on every tile of the walk.
+	const int iStepsTotal = iDist;
+	const int zLineFrom = ptSrc.m_z + (PLAYER_HEIGHT / 2);
+	const int zLineTo = ptDst.m_z + (PLAYER_HEIGHT / 2);
+
 	// Walk towards the object. If any spot is too far above our heads then we can not see what's behind it.
 	int iDistTry = 0;
 	while ( --iDist >= 0 )
@@ -87,6 +93,20 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 
 			ptSrc.m_z = z;
 			++iDistTry;
+
+			if ( (iStepsTotal > 0) && ((ptSrc.m_x != ptDst.m_x) || (ptSrc.m_y != ptDst.m_y)) )
+			{
+				const int zLine = zLineFrom + ((zLineTo - zLineFrom) * (iStepsTotal - iDist) / iStepsTotal);
+				CServerMapBlockingState block(CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY, ptSrc.m_z, PLAYER_HEIGHT);
+				CWorldMap::GetHeightPoint2(ptSrc, block, true);
+				const uint64 uiFloorFlags = (CAN_I_PLATFORM|CAN_I_CLIMB);
+				// Standing on a floor or a stair (static, item or multi, not terrain) higher than the line: the line passes under it
+				if ( (block.m_Bottom.m_dwTile > TERRAIN_QTY) && (block.m_Bottom.m_uiBlockFlags & uiFloorFlags) && (block.m_Bottom.m_z > zLine) )
+					goto blocked;
+				// A floor over my head lower than the line: the line passes over it
+				if ( (block.m_Top.m_dwTile > TERRAIN_QTY) && (block.m_Top.m_uiBlockFlags & uiFloorFlags) && (block.m_Top.m_z <= zLine) )
+					goto blocked;
+			}
 		}
 	}
 
