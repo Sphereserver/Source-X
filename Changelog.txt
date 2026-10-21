@@ -4177,3 +4177,8 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 12-10-2026, canerksk, Mulambo
 - Added: NPCSpellCastRange ini settings and TAG.OVERRIDE.SPELLCAST_RANGE (#1524).
     Defines the maximum range NPCs can target with spells (default value is 10). Override tag to change the range for a single NPC.
+
+21-10-2026, DavideRei
+- Fixed: the action of a ridden mount or of a shrunken pet (NPCACT_RIDDEN, which keeps the link with the rider/figurine in ACTARG1) could be changed by scripts (ACTION, HEAR), pet commands or a fight ending, breaking the link: the garbage collection then found an invalid mount. Skill_Start now refuses to change it while STATF_RIDDEN is set (with a warning in the console).
+- Fixed: when mounting a horse not owned yet, the owner is set before turning it into a ridden NPC (setting the owner changed its action).
+- Fixed: shrunken pets (figurines) got hungry, and ridden/shrunken NPCs could be attacked.

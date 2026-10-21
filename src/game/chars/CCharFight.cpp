@@ -334,7 +334,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 		return true;	// field spell ?
 	if (pCharSrc == this)
 		return true;	// self induced
-	if (IsStatFlag(STATF_DEAD|STATF_STONE))
+	if (IsStatFlag(STATF_DEAD|STATF_STONE|STATF_RIDDEN))	// a ridden or shrunken NPC isn't in the world
 		return false;
 
 	if (fShouldReveal)

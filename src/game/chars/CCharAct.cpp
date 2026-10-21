@@ -4009,14 +4009,16 @@ bool CChar::Horse_Mount(CChar *pHorse)
             memoryId = ITEMID_TYPE(pScriptArgs->m_iN1);//(ITEMID_TYPE) Args.m_iN1;
 	}
 
+	// Set a new owner if it is not us (check first to prevent friends taking ownership).
+	// Do it before turning the horse into a ridden npc: setting the owner makes the pet follow him, which is an action
+	//  change, and from Make_Figurine on the action of the mount must not be touched (see Skill_Start).
+	if ( !pHorse->NPC_IsOwnedBy(this, false) )
+		pHorse->NPC_PetSetOwner(this);
+
 	// Create the figurine for the horse (Memory item equiped on layer 25 of the player)
 	CItem * pMountItem = pHorse->Make_Figurine(GetUID(), memoryId);
 	if ( !pMountItem)
 		return false;
-
-	// Set a new owner if it is not us (check first to prevent friends taking ownership)
-	if ( !pHorse->NPC_IsOwnedBy(this, false) )
-		pHorse->NPC_PetSetOwner(this);
 
 	Horse_UnMount();					// unmount if already mounted
 
@@ -5789,6 +5791,13 @@ void CChar::OnTickFood(ushort uiVal, int HitsHungerLoss)
 		return;
 	if ( IsPriv(PRIV_GM) )
 		return;
+	if ( IsStatFlag(STATF_RIDDEN) )
+	{
+		// A shrunken pet (in a figurine) doesn't get hungry.
+		const CItem *pFigurine = m_atRidden.m_uidFigurine.ItemFind();
+		if ( pFigurine && pFigurine->IsType(IT_FIGURINE) )
+			return;
+	}
 
 	// Decrease food level
 	int iFood = Stat_GetVal(STAT_FOOD) - uiVal;

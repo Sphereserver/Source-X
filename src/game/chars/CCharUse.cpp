@@ -1206,8 +1206,10 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
         pPet->SetDefNum("FOLLOWERSLOTS", iFollowerSlots.value(), true);
     }
 
-	if ( pPet->IsDisconnected() )
-		pPet->StatFlag_Clear(STATF_RIDDEN);		// pull the creature out of IDLE space
+	// Pull the creature out of IDLE space. Clear the flag also if it isn't disconnected: while it's set the action of the
+	//  pet can't be changed from NPCACT_RIDDEN (see Skill_Start).
+	if ( pPet->IsStatFlag(STATF_RIDDEN) )
+		pPet->StatFlag_Clear(STATF_RIDDEN);
 
 	pItem->m_itFigurine.m_UID.InitUID();
 	pPet->m_dirFace = m_dirFace;
