@@ -4177,3 +4177,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 12-10-2026, canerksk, Mulambo
 - Added: NPCSpellCastRange ini settings and TAG.OVERRIDE.SPELLCAST_RANGE (#1524).
     Defines the maximum range NPCs can target with spells (default value is 10). Override tag to change the range for a single NPC.
+
+21-10-2026, DavideRei
+- Fixed: BREAK (or CONTINUE on the last iteration) inside an IF in a script loop (FOR, WHILE, FORCHARS, FORITEMS, FORCONT*, FORCHARLAYER, FORCHARMEMORYTYPE...): the rest of the loop block was skipped from the middle, so the first ENDIF met was taken as the end of the block and the following lines were executed in the wrong place.
+- Fixed: BREAK in FOROBJS stopped only the items pass, the chars pass was executed anyway.

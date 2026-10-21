@@ -293,6 +293,9 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(
 
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
+		// The script can be positioned in the middle of the block (BREAK, or CONTINUE on the last iteration, maybe from inside
+		//  an IF): go back to the start of the block before skipping it, otherwise the first ENDIF met is taken as its end.
+		s.SeekContext(StartContext);
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
         TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult);
 		if ( iRet != TRIGRET_ENDIF )
@@ -344,6 +347,9 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
 
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
+		// The script can be positioned in the middle of the block (BREAK, or CONTINUE on the last iteration, maybe from inside
+		//  an IF): go back to the start of the block before skipping it, otherwise the first ENDIF met is taken as its end.
+		s.SeekContext(StartContext);
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
         TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult);
 		if ( iRet != TRIGRET_ENDIF )
