@@ -352,7 +352,7 @@ void CChar::NPC_Act_Fight()
     }
 
     // Move in for melee type combat.
-    int iRange = Fight_CalcRange(m_uidWeapon.ItemFind());
+    int iRange = Fight_CalcRange(m_uidWeapon.ItemFind(), pChar);
     if (!NPC_Act_Follow(false, iRange, false))
     {
         // Enemy gone?
