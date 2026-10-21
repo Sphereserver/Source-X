@@ -54,6 +54,7 @@ CServerConfig::CServerConfig()
 
 	m_fUseNTService		= false;
 	m_fUseHTTP			= 2;
+	m_fUseTelnet		= true;
 	m_fUseAuthID		= true;
 	_iMapCacheTime		= 2ll  * 60 * MSECS_PER_SEC;
 	_iSectorSleepDelay  = 10ll * 60 * MSECS_PER_SEC;
@@ -733,6 +734,7 @@ enum RC_TYPE
     RC_USEMOBTYPES,             // m_fUseMobTypes
 	RC_USENOCRYPT,				// m_Usenocrypt
 	RC_USEPACKETPRIORITY,		// m_fUsePacketPriorities
+	RC_USETELNET,				// m_fUseTelnet
 	RC_VENDORMARKUP,			// m_iVendorMarkup
 	RC_VENDORMAXSELL,			// m_iVendorMaxSell
 	RC_VENDORTRADETITLE,		// m_fVendorTradeTitle
@@ -1030,6 +1032,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "USEMOBTYPES",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseMobTypes)			} },
 	{ "USENOCRYPT",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUsenocrypt)			}},	// we don't want no-crypt clients
 	{ "USEPACKETPRIORITY",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUsePacketPriorities)	}},
+	{ "USETELNET",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseTelnet)			}},
 	{ "VENDORMARKUP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMarkup)			}},
 	{ "VENDORMAXSELL",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMaxSell)		}},
 	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fVendorTradeTitle)		}},

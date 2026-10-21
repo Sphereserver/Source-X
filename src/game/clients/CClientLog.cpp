@@ -553,6 +553,12 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 				 (iLen != 3 || pData[1] != '\n' || pData[2] != '\0') )
 				break;
 
+			if ( g_Cfg.m_fUseTelnet == false )
+			{
+				g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Telnet console request from %s has been rejected.\n", GetSocketID(), GetPeerStr());
+				return false;
+			}
+
 			// enter into remote admin mode. (look for password).
 			SetConnectType( CONNECT_TELNET );
 			m_zLogin[0] = 0;
