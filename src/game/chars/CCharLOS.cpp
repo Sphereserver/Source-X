@@ -35,6 +35,16 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 		return false;	// blocked
 	}
 
+	// Ships: the hull is made of impassable pieces, so who's on board and who's in the water couldn't see each other
+	//  (sea monsters never attacked the sailors, and the sailors couldn't target them). The pieces of the ship one
+	//  of the two is on don't block the line of sight.
+	const CRegion* pRegionShip = ptSrc.GetRegion(REGION_TYPE_SHIP);
+	if ( !pRegionShip )
+		pRegionShip = ptDst.GetRegion(REGION_TYPE_SHIP);
+	const auto fnIsShipPiece = [pRegionShip](const CPointMap& pt) -> bool {
+		return pRegionShip && pRegionShip->IsInside2d(pt);
+	};
+
 	// Walk towards the object. If any spot is too far above our heads then we can not see what's behind it.
 	int iDistTry = 0;
 	while ( --iDist >= 0 )
@@ -54,10 +64,11 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 			char z = CWorldMap::GetHeightPoint2(ptTest, uiBlockFlags, true);
 			short zDiff = (short)(abs(z - ptTest.m_z));
 
-			if ( (zDiff > PLAYER_HEIGHT) || (uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) )		// blocked
+			if ( !fnIsShipPiece(ptTest) && ((zDiff > PLAYER_HEIGHT) || (uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR))) )		// blocked
 			{
 				ptTest = ptSrc;
 				ptTest.Move(dirTest2);
+				if ( !fnIsShipPiece(ptTest) )
 				{
 					uiBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
 					z = CWorldMap::GetHeightPoint2(ptTest, uiBlockFlags, true);
@@ -82,10 +93,12 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 			char z = CWorldMap::GetHeightPoint2(ptSrc, uiBlockFlags, true);
             short zDiff = (short)(abs(z - ptSrc.m_z));
 
-			if ( (zDiff > PLAYER_HEIGHT) || (uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) || (iDistTry > iMaxDist) )
+			const bool fShipPiece = fnIsShipPiece(ptSrc);
+			if ( (!fShipPiece && ((zDiff > PLAYER_HEIGHT) || (uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)))) || (iDistTry > iMaxDist) )
 				goto blocked;
 
-			ptSrc.m_z = z;
+			if ( !fShipPiece || (zDiff <= PLAYER_HEIGHT) )	// on a ship keep my height when the piece is tall (mast, sails)
+				ptSrc.m_z = z;
 			++iDistTry;
 		}
 	}

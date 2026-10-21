@@ -1649,12 +1649,29 @@ void CChar::Fight_HitTry()
 }
 
 // Distance from which I can hit
-int CChar::Fight_CalcRange( CItem * pWeapon ) const
+int CChar::Fight_CalcRange( CItem * pWeapon, CChar * pCharTarg ) const
 {
 	ADDTOCALLSTACK("CChar::Fight_CalcRange");
 
-	const int iCharRange = GetRangeH();
+	int iCharRange = GetRangeH();
 	const int iWeaponRange = pWeapon ? pWeapon->GetRangeH() : 0;
+
+	// Fights between a ship and the sea: a swimming creature can't get next to who stands on the deck, and the other
+	//  way round. When one of the two is on a ship and the other is an NPC able to swim outside of it, the reach is at
+	//  least 3 tiles for both, whatever the RANGE of the chardef. (The shore is not handled: to be done later.)
+	static constexpr int kiShipFightRange = 3;
+	if ( (iCharRange < kiShipFightRange) && (pCharTarg != nullptr) )
+	{
+		const bool fMeOnShip = m_pArea && m_pArea->IsFlag(REGION_FLAG_SHIP);
+		const bool fTargOnShip = pCharTarg->m_pArea && pCharTarg->m_pArea->IsFlag(REGION_FLAG_SHIP);
+		if ( fMeOnShip != fTargOnShip )
+		{
+			const CChar* pCharSea = fMeOnShip ? pCharTarg : this;
+			if ( pCharSea->m_pNPC && pCharSea->Can(CAN_C_SWIM) )
+				iCharRange = kiShipFightRange;
+		}
+	}
+
 	return ( maximum(iCharRange , iWeaponRange) );
 }
 
@@ -1915,7 +1932,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             const WAR_SWING_TYPE swingTypeHold = fSwingNoRange ? m_atFight.m_iWarSwingState : WAR_SWING_READY;
 
 		    int	iMinDist = pWeapon ? pWeapon->GetRangeL() : 0;
-		    int	iMaxDist = Fight_CalcRange(pWeapon);
+            int iMaxDist = Fight_CalcRange(pWeapon, pCharTarg);
 		    if ( (dist < iMinDist) || (dist > iMaxDist) )
 		    {
 			    if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_iWarSwingState != WAR_SWING_SWINGING) )
@@ -1965,7 +1982,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if (fSwingNoRange) // We don't want the animation to display if we are outside of range.
 		{
 			int	iMinDist = pWeapon ? pWeapon->GetRangeL() : 0;
-			int	iMaxDist = Fight_CalcRange(pWeapon);
+            int iMaxDist = Fight_CalcRange(pWeapon, pCharTarg);
 			if (dist <  iMinDist || dist > iMaxDist)
 				return WAR_SWING_READY;
 		}

@@ -1099,7 +1099,7 @@ private:
     */
     byte GetRangeH() const;
 
-	int	Fight_CalcRange( CItem * pWeapon = nullptr ) const;
+	int	Fight_CalcRange( CItem * pWeapon = nullptr, CChar * pCharTarg = nullptr ) const;
     void Fight_SetDefaultSwingDelays();
 
 	bool Fight_IsActive() const;
