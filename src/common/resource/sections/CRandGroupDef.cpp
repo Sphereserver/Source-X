@@ -218,7 +218,6 @@ bool CRandGroupDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * p
 size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) const
 {
     ADDTOCALLSTACK("CRandGroupDef::GetRandMemberIndex");
-    int rid;
     size_t iCount = m_Members.size();
     if ( iCount <= 0 )
         return sl::scont_bad_index();
@@ -250,17 +249,18 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) cons
         // If no regionresource, return just some random entry!
         if (pOreDef != nullptr)
         {
-            rid = pOreDef->m_ReapItem;
-            if (rid != 0)
-            {
-                if (!pCharSrc->Skill_MakeItem((ITEMID_TYPE)(rid), CUID(UID_PLAIN_CLEAR), SKTRIG_SELECT))
-                    continue;
+            // Has the char the skill level required by the resource (the lowest value of its SKILL)?
+            // It's the gathering skill in use (mining, lumberjacking...): Skill_MakeItem on the REAP item checked instead
+            //  the SKILLMAKE of the item, which is meant to craft it.
+            const SKILL_TYPE skill = pCharSrc->Skill_GetActive();
+            if (pCharSrc->IsSkillBase(skill) && !pOreDef->m_vcSkill.m_aiValues.empty() &&
+                (pCharSrc->Skill_GetBase(skill) < pOreDef->m_vcSkill.m_aiValues[0]))
+                continue;
 
-                if (IsTrigUsed(TRIGGER_RESOURCETEST))
-                {
-                    if (fTrigger && pOreDef->OnTrigger("@ResourceTest", CScriptParserBufs::GetCScriptTriggerArgsPtr(), pCharSrc) == TRIGRET_RET_TRUE)
-                        continue;
-                }
+            if (IsTrigUsed(TRIGGER_RESOURCETEST))
+            {
+                if (fTrigger && pOreDef->OnTrigger("@ResourceTest", CScriptParserBufs::GetCScriptTriggerArgsPtr(), pCharSrc) == TRIGRET_RET_TRUE)
+                    continue;
             }
         }
         members.emplace_back(i);
