@@ -222,7 +222,7 @@ bool CRegion::MakeRegionDefname()
     return true;
 }
 
-enum RC_TYPE : int // Even if it would implicitly be set to int, specify it to silence UBSanitizer.
+enum REGC_TYPE : int // Even if it would implicitly be set to int, specify it to silence UBSanitizer.
 {
 	RC_ANNOUNCE,
 	RC_ARENA,
@@ -304,7 +304,7 @@ bool CRegion::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 	ADDTOCALLSTACK("CRegion::r_WriteVal");
 	EXC_TRY("WriteVal");
 	bool fZero = false;
-	RC_TYPE index = (RC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
+	REGC_TYPE index = (REGC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
 		return (fNoCallParent ? false : CScriptObj::r_WriteVal( ptcKey, sVal, pSrc ));
@@ -521,7 +521,7 @@ bool CRegion::r_LoadVal( CScript & s )
         }
     }
 
-	RC_TYPE index = (RC_TYPE) FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
+	REGC_TYPE index = (REGC_TYPE) FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 		return false;
 

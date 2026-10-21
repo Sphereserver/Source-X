@@ -46,7 +46,7 @@ void CSector::Init(int index, uchar map, short x, short y)
 	SetDefaultWeatherChance();
 }
 
-enum SC_TYPE
+enum SECC_TYPE
 {
     SC_CANSLEEP,
 	SC_CLIENTS,
@@ -103,7 +103,7 @@ bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 		{ nullptr, INT32_MAX }
 	};
 
-    SC_TYPE key = (SC_TYPE)FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
+    SECC_TYPE key = (SECC_TYPE)FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
 	switch ( key )
 	{
         case SC_CANSLEEP:

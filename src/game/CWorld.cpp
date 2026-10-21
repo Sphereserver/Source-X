@@ -1539,7 +1539,7 @@ bool CWorld::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 	return false;
 }
 
-enum WC_TYPE
+enum WLDC_TYPE
 {
     WC_CURTICK,
 	WC_PREVBUILD,
