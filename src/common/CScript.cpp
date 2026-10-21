@@ -933,7 +933,9 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 	}
 
 	// Write: "KEY=VAL\n"
-	static thread_local tchar ptcBuf[SCRIPT_MAX_LINE_LEN];
+	// Two more bytes than the limit used below: with a key + value filling the whole line, the '=', the newline and the
+	//  terminator appended by hand would otherwise be written one byte past the end of the buffer.
+	static thread_local tchar ptcBuf[SCRIPT_MAX_LINE_LEN + 2];
 	size_t uiStrLen = Str_CopyLimitNull(ptcBuf, ptcKey, SCRIPT_MAX_LINE_LEN);
 	ptcBuf[uiStrLen++] = '=';
 	ptcBuf[uiStrLen]   = '\0'; // Needed by Str_ConcatLimitNull

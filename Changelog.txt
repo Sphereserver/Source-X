@@ -4177,3 +4177,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 12-10-2026, canerksk, Mulambo
 - Added: NPCSpellCastRange ini settings and TAG.OVERRIDE.SPELLCAST_RANGE (#1524).
     Defines the maximum range NPCs can target with spells (default value is 10). Override tag to change the range for a single NPC.
+
+21-10-2026, DavideRei
+- Fixed: buffer over-reads and off-by-one writes reported by GCC (CLanguageID::Set, CScript::WriteKeyStr, text of unicode speech and language packets, Str_CopyLimitNull).

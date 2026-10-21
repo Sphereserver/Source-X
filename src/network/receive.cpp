@@ -2129,7 +2129,8 @@ bool PacketSpeakReqUNICODE::onReceive(CNetState* net)
 
 		skip((int)(toskip));
 		tchar text[MAX_TALK_BUFFER];
-		readStringNullASCII(text, ARRAY_COUNT(text));
+		// maxlength doesn't count the terminator: if the client sends no terminator, it's written at text[maxlength]
+		readStringNullASCII(text, ARRAY_COUNT(text) - 1);
 		client->Event_Talk(text, hue, mode, true);
 	}
 	else
@@ -2838,7 +2839,8 @@ bool PacketLanguage::onReceive(CNetState* net)
 	ASSERT(client);
 
 	tchar language[4];
-	readStringNullASCII(language, ARRAY_COUNT(language));
+	// maxlength doesn't count the terminator (see Packet::readStringNullASCII)
+	readStringNullASCII(language, ARRAY_COUNT(language) - 1);
 
 	client->GetAccount()->m_lang.Set(language);
 	return true;
