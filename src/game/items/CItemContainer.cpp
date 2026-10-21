@@ -886,7 +886,7 @@ void CItemContainer::SetKeyRing()
 	}
 }
 
-bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg )
+bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg, bool fStacking )
 {
 	ADDTOCALLSTACK("CItemContainer::CanContainerHold");
 	if ( !pCharMsg || !pItem )
@@ -896,7 +896,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 
 	size_t pTagTmp = (size_t)(GetKeyNum("OVERRIDE.MAXITEMS"));
 	size_t iMaxItemsCont = pTagTmp ? pTagTmp : g_Cfg.m_iContainerMaxItems;
-	if ( GetContentCount() >= iMaxItemsCont )
+	if ( !fStacking && (GetContentCount() >= iMaxItemsCont) )
 	{
 		pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_ITEMS);
 		return false;
@@ -941,7 +941,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 			if ( pTagTemp )
 				iBankIMax = (int)(pTagTemp->GetValNum());
 
-			if ( iBankIMax >= 0 )
+			if ( !fStacking && (iBankIMax >= 0) )
 			{
 				// Check if the item dropped in the bank is a container. If it is
 				// we need to calculate the number of items in that too.

@@ -521,6 +521,19 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 				pObjOn = pItemOn->GetContainer();
 				pt = pItemOn->GetUnkPoint();
 
+				// Stacking on an item inside a container adds weight to that container and to the ones holding it: check them all.
+				if ( pItem->Stack(pItemOn, true) )
+				{
+					for ( CItemContainer* pCont = dynamic_cast<CItemContainer*>(pObjOn); pCont != nullptr; pCont = dynamic_cast<CItemContainer*>(pCont->GetContainer()) )
+					{
+						if ( !pCont->CanContainerHold(pItem, m_pChar, true) )
+						{
+							Event_Item_Drop_Fail(pItem);
+							return;
+						}
+					}
+				}
+
 				if ( ! pItem->Stack( pItemOn ))
 				{
 					if ( pItemOn->IsTypeSpellbook() )

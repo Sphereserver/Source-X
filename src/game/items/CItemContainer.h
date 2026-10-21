@@ -38,7 +38,8 @@ public:
 	bool IsSearchable() const;
 
 	bool IsItemInside(const CItem * pItem) const;
-	bool CanContainerHold(const CItem * pItem, const CChar * pCharMsg );
+	// fStacking: pItem is going to be stacked on an item already in the container, so it doesn't add a new item: check only the weight.
+	bool CanContainerHold(const CItem * pItem, const CChar * pCharMsg, bool fStacking = false );
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 	virtual void r_Write( CScript & s ) override;
