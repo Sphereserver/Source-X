@@ -1343,13 +1343,22 @@ bool CSector::_OnTick()
 
 			if ( iRegionPeriodic && pChar->m_pArea )
 			{
+				// On a ship the char's area is the ship's own region, which has no events: fire the periodic
+				//  triggers (ambient sounds) on the sea/land region under it.
+				CRegionWorld* pAreaPeriodic = pChar->m_pArea;
+				if ( pAreaPeriodic->IsFlag(REGION_FLAG_SHIP) )
+				{
+					CRegionWorld* pAreaUnder = dynamic_cast<CRegionWorld*>(pChar->GetTopPoint().GetRegion(REGION_TYPE_AREA));
+					if ( pAreaUnder )
+						pAreaPeriodic = pAreaUnder;
+				}
 				if ( ( iRegionPeriodic == 2 ) && IsTrigUsed(TRIGGER_REGPERIODIC))
 				{
-					pChar->m_pArea->OnRegionTrigger( pChar, RTRIG_REGPERIODIC );
+					pAreaPeriodic->OnRegionTrigger( pChar, RTRIG_REGPERIODIC );
 					--iRegionPeriodic;
 				}
 				if ( IsTrigUsed(TRIGGER_CLIPERIODIC) )
-					pChar->m_pArea->OnRegionTrigger( pChar, RTRIG_CLIPERIODIC );
+					pAreaPeriodic->OnRegionTrigger( pChar, RTRIG_CLIPERIODIC );
 			}
 		}
 
