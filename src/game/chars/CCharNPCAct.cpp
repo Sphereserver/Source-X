@@ -2736,7 +2736,11 @@ void CChar::NPC_ExtraAI()
 	{
 		CItem *pLightSource = LayerFind(LAYER_HAND2);
 		if ( pLightSource && (pLightSource->IsType(IT_LIGHT_OUT) || pLightSource->IsType(IT_LIGHT_LIT)) )
+		{
+			// Clear the timer used to burn the light: in the pack it would expire without the DECAY flag.
+			pLightSource->SetTimeout(-1);
 			ItemBounce(pLightSource, g_Cfg.m_iBounceMessage);
+		}
 	}
 
 	EXC_CATCH;
