@@ -1354,7 +1354,7 @@ bool CItem::IsStackable( const CItem * pItem ) const
 	return true;
 }
 
-bool CItem::Stack( CItem * pItem )
+bool CItem::Stack( CItem * pItem, bool fCheckOnly )
 {
 	ADDTOCALLSTACK("CItem::Stack");
 	// RETURN:
@@ -1384,6 +1384,9 @@ bool CItem::Stack( CItem * pItem )
 		return false;
 	if ( IsAttr(ATTR_LOCKEDDOWN) != pItem->IsAttr(ATTR_LOCKEDDOWN) )
 		return false;
+
+    if (fCheckOnly)
+        return true;
 
 	const uint destMaxAmount = pItem->GetMaxAmount();
     const word destAmount = pItem->GetAmount();

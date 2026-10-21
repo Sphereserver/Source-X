@@ -739,7 +739,7 @@ public:
 	}
 
 	virtual bool IsSameType( const CObjBase * pObj ) const;
-	bool Stack( CItem * pItem );
+	bool Stack( CItem * pItem , bool fCheckOnly = false);
 	word ConsumeAmount( word iQty = 1 );
 
 	void SetAmount( word amount );
