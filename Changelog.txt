@@ -4179,5 +4179,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
     Defines the maximum range NPCs can target with spells (default value is 10). Override tag to change the range for a single NPC.
 
 21-10-2026, DavideRei
+- Fixed: characters with CAN_C_STATUE (like petrified ones) showed emotes from timed effects, like poison.
 - Changed: no get hit sound and animation when a char with CAN_C_STATUE takes damage.
 - Added: bees animation (0x091b or 0x0923) when a char is stung using a beehive.
