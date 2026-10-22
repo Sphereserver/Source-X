@@ -320,6 +320,10 @@ void CChar::Skill_Decay()
 	ADDTOCALLSTACK("CChar::Skill_Decay");
 	// Decay the character's skill levels.
 
+	// Can be turned off with SkillDecay=0 in sphere.ini
+	if (!g_Cfg.m_fSkillDecay)
+		return;
+
 	SKILL_TYPE skillDeduct = SKILL_NONE;
 	ushort uiSkillLevel = 0;
 
@@ -4029,6 +4033,14 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 		return false;
 	}
 
+	// Tracking stays active for as long as the target is in range: without this, after choosing who to track no other
+	//  skill (Tracking itself included) could be used until the target was lost.
+	if ( skill == SKILL_TRACKING )
+	{
+		Skill_Fail(true);
+		return false;
+	}
+
 	if ( IsStatFlag(STATF_WAR) )
 	{
 		SysMessageDefault(DEFMSG_SKILLWAIT_2);
@@ -4403,6 +4415,16 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 
 	if ( !Skill_CanUse(skill) )
 		return false;
+
+	// A ridden mount (or a shrunken pet) is kept "alive" only by its action: NPCACT_RIDDEN, with ACTARG1 holding the UID of the
+	//  mount item. Both are shared with any other action, so starting or stopping an action here (ACTION=-1 or HEAR from scripts,
+	//  a pet command, a fight ending...) breaks the link with the rider: the garbage collection then finds an invalid mount.
+	//  The legit ways out of this state (dismount, unshrink) clear STATF_RIDDEN before changing the action.
+	if ( m_pNPC && (skill != NPCACT_RIDDEN) && IsStatFlag(STATF_RIDDEN) && (Skill_GetActive() == NPCACT_RIDDEN) )
+	{
+		g_Log.EventWarn("Blocked action change (to %d) on the ridden/shrunken NPC '%s' (UID=0%" PRIx32 ").\n", (int)skill, GetName(), GetUID().GetObjUID());
+		return false;
+	}
 
 	SKILL_TYPE skActive = Skill_GetActive();
 	if (skActive != SKILL_NONE )
