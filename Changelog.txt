@@ -4183,4 +4183,5 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Added: ARGN1 in @StepStealth trigger (R/W): how many stealth steps the move consumes. Default 2 if running or hovering, 1 otherwise.
 - Added: bees animation (0x091b or 0x0923) when a char is stung using a beehive.
 - Fixed: characters with CAN_C_STATUE (like petrified ones) showed emotes from timed effects, like poison.
+- Fixed: OWNER <uid> on a char made the char with that UID a pet of this one, instead of setting it as the owner of this char (OWNER without arguments, which sets SRC as owner, was right).
 - Changed: no get hit sound and animation when a char with CAN_C_STATUE takes damage.
