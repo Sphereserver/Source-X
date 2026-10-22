@@ -51,6 +51,8 @@ enum ITEMID_TYPE : uint32_t	// InsideUO or UoFiddler are great for this stuff.
 	ITEMID_ROCK_1_HI = 0x8ea,
 
 	ITEMID_BEEHIVE = 0x091a,
+    ITEMID_BEEHIVE_FX_1 = 0x091b,
+    ITEMID_BEEHIVE_FX_2 = 0x0923,
 
 	ITEMID_FOOD_BACON = 0x0976,
 	ITEMID_FOOD_FISH_RAW = 0x97a,
