@@ -4408,6 +4408,16 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 	if ( !Skill_CanUse(skill) )
 		return false;
 
+	// A ridden mount (or a shrunken pet) is kept "alive" only by its action: NPCACT_RIDDEN, with ACTARG1 holding the UID of the
+	//  mount item. Both are shared with any other action, so starting or stopping an action here (ACTION=-1 or HEAR from scripts,
+	//  a pet command, a fight ending...) breaks the link with the rider: the garbage collection then finds an invalid mount.
+	//  The legit ways out of this state (dismount, unshrink) clear STATF_RIDDEN before changing the action.
+	if ( m_pNPC && (skill != NPCACT_RIDDEN) && IsStatFlag(STATF_RIDDEN) && (Skill_GetActive() == NPCACT_RIDDEN) )
+	{
+		g_Log.EventWarn("Blocked action change (to %d) on the ridden/shrunken NPC '%s' (UID=0%" PRIx32 ").\n", (int)skill, GetName(), GetUID().GetObjUID());
+		return false;
+	}
+
 	SKILL_TYPE skActive = Skill_GetActive();
 	if (skActive != SKILL_NONE )
 		Skill_Fail(true);		// fail previous skill unfinished. (with NO skill gain!)
