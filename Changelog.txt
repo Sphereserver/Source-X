@@ -4179,6 +4179,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
     Defines the maximum range NPCs can target with spells (default value is 10). Override tag to change the range for a single NPC.
 
 21-10-2026, DavideRei
+- Added: LDB.ESCAPEDATA <text> (like MDB.ESCAPEDATA for MySQL): returns the text with every single quote doubled, to safely put it between single quotes in a SQLite statement.
 - Added: SkillDecay setting in sphere.ini (default 1). With SkillDecay=0 the skills locked down (arrow down) don't decay anymore while the other skills are raised.
 - Added: ARGN1 in @StepStealth trigger (R/W): how many stealth steps the move consumes. Default 2 if running or hovering, 1 otherwise.
 - Added: bees animation (0x091b or 0x0923) when a char is stung using a beehive.
