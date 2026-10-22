@@ -4198,5 +4198,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 23-10-2026, DavideRei
 - Added: UseTelnet setting in sphere.ini (default 1). With UseTelnet=0 the remote admin console (telnet) requests on the game port are refused and logged; the server's own console is not affected.
+- Added: UseAxis setting in sphere.ini (default 1). With UseAxis=0 the Axis connection requests on the game port (staff login with a clear-text password, then Axis.db is sent) are refused and logged.
 - Fixed: Animate Dead raised the corpse even when the summoned creature died while being placed (on a damaging field or a trap), using a dead or deleted char. Spell_Summon_Place also checks if the summon was deleted on placement.
 - Fixed: in @SpellEffect and @Effect the explode flag of the spell effect was set as LOCAL.Explode but read back as LOCAL.EffectExplode, so the explosion was always lost. It's now LOCAL.EffectExplode in both places.
