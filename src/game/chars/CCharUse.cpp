@@ -1206,8 +1206,10 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
         pPet->SetDefNum("FOLLOWERSLOTS", iFollowerSlots.value(), true);
     }
 
-	if ( pPet->IsDisconnected() )
-		pPet->StatFlag_Clear(STATF_RIDDEN);		// pull the creature out of IDLE space
+	// Pull the creature out of IDLE space. Clear the flag also if it isn't disconnected: while it's set the action of the
+	//  pet can't be changed from NPCACT_RIDDEN (see Skill_Start).
+	if ( pPet->IsStatFlag(STATF_RIDDEN) )
+		pPet->StatFlag_Clear(STATF_RIDDEN);
 
 	pItem->m_itFigurine.m_UID.InitUID();
 	pPet->m_dirFace = m_dirFace;
@@ -1730,6 +1732,15 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			else
             {
 				SysMessageDefault(DEFMSG_ITEMUSE_BEEHIVE_STING);
+                switch (g_Rand.GetVal(2))
+                {
+                    case 0:
+                        pItem->Effect(EFFECT_OBJ, ITEMID_BEEHIVE_FX_1, pItem, 6, 30, false);
+                        break;
+                    case 1:
+                        pItem->Effect(EFFECT_OBJ, ITEMID_BEEHIVE_FX_2, pItem, 10, 40, false);
+                        break;
+                }
 				OnTakeDamage(g_Rand.GetVal(5), this, DAMAGE_POISON | DAMAGE_GENERAL);
 			}
 			pItem->SetTimeoutS(15 * 60);
