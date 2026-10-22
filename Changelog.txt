@@ -4182,6 +4182,8 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Added: SkillDecay setting in sphere.ini (default 1). With SkillDecay=0 the skills locked down (arrow down) don't decay anymore while the other skills are raised.
 - Added: ARGN1 in @StepStealth trigger (R/W): how many stealth steps the move consumes. Default 2 if running or hovering, 1 otherwise.
 - Added: bees animation (0x091b or 0x0923) when a char is stung using a beehive.
+- Added: FINDEVENT.<events> and FINDTEVENT.<events> references on containers and chars (like FINDID / FINDTYPE): the first item (in the sub containers too) having the given section in its EVENTS, or in the TEVENTS of its itemdef.
+  Example: REF1=<FINDEVENT.e_quest_item>
 - Fixed: characters with CAN_C_STATUE (like petrified ones) showed emotes from timed effects, like poison.
 - Fixed: OWNER <uid> on a char made the char with that UID a pet of this one, instead of setting it as the owner of this char (OWNER without arguments, which sets SRC as owner, was right).
 - Fixed: CItemBase::ResetMakeValue (called when the resources or the skills to make an itemdef change) used INT32_MIN instead of the "not calculated yet" marker INT64_MIN: the value wasn't recalculated but became abs(INT32_MIN), so an itemdef without a value suddenly had one and its new items were created as CItemVendable.

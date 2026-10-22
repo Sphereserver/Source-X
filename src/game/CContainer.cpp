@@ -244,6 +244,39 @@ CItem *CContainer::ContentFind(CResourceID const& rid, dword dwArg, int iDescend
 	return nullptr;
 }
 
+CItem *CContainer::ContentFindEvent(CResourceID const& rid, bool fBaseEvents, int iDescendLevels ) const
+{
+	ADDTOCALLSTACK("CContainer::ContentFindEvent");
+	// FINDEVENT / FINDTEVENT: like ContentFind, but the item is chosen by one of its EVENTS / TEVENTS.
+
+	if ( rid.GetResIndex() == 0 )
+		return nullptr;
+
+	for (CSObjContRec* pObjRec : *this)
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		const bool fMatch = fBaseEvents
+			? pItem->Base_GetDef()->m_TEvents.ContainsResourceID(rid)
+			: pItem->m_OEvents.ContainsResourceID(rid);
+		if ( fMatch )
+			return pItem;
+
+		if ( iDescendLevels <= 0 )
+			continue;
+
+		CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
+		if ( pCont )
+		{
+			if ( !pCont->IsSearchable() )
+				continue;
+			CItem *pItemInCont = pCont->ContentFindEvent(rid, fBaseEvents, iDescendLevels - 1);
+			if ( pItemInCont )
+				return pItemInCont;
+		}
+	}
+	return nullptr;
+}
+
 TRIGRET_TYPE CContainer::OnContTriggerForLoop(
     CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole *pSrc,
     CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext,
@@ -672,6 +705,22 @@ bool CContainer::r_GetRefContainer( lpctstr &ptcKey, CScriptObj *&pRef )
 			if (idx >= GetContentCount())
 				return false;
 			pRef = dynamic_cast<CItem*>(GetContentIndex(idx));
+			SKIP_SEPARATORS(ptcKey);
+			return true;
+		}
+		else if ( !strnicmp(ptcKey, "TEVENT", 6) )	// findtevent.<events section>: by the TEVENTS of the itemdef
+		{
+			ptcKey += 6;
+			SKIP_SEPARATORS(ptcKey);
+			pRef = ContentFindEvent(g_Cfg.ResourceGetID_EatStr(RES_EVENTS, ptcKey), true);
+			SKIP_SEPARATORS(ptcKey);
+			return true;
+		}
+		else if ( !strnicmp(ptcKey, "EVENT", 5) )	// findevent.<events section>: by the EVENTS of the item
+		{
+			ptcKey += 5;
+			SKIP_SEPARATORS(ptcKey);
+			pRef = ContentFindEvent(g_Cfg.ResourceGetID_EatStr(RES_EVENTS, ptcKey), false);
 			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}
