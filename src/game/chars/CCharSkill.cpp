@@ -4033,6 +4033,14 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 		return false;
 	}
 
+	// Tracking stays active for as long as the target is in range: without this, after choosing who to track no other
+	//  skill (Tracking itself included) could be used until the target was lost.
+	if ( skill == SKILL_TRACKING )
+	{
+		Skill_Fail(true);
+		return false;
+	}
+
 	if ( IsStatFlag(STATF_WAR) )
 	{
 		SysMessageDefault(DEFMSG_SKILLWAIT_2);
