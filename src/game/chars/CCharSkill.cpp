@@ -1832,7 +1832,7 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 
 			// Basic skill check.
 			int iDifficulty = Use_PlayMusic(pInstrument, g_Rand.GetVal(40));
-			if (iDifficulty < -1)	// no instrument: immediate fail
+			if (iDifficulty < 0)	// no instrument or played badly: immediate fail
 				return -SKTRIG_ABORT;
 
 			if ( !iDifficulty )
@@ -1958,7 +1958,7 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
             // Slayer instruments will decrease your success chance by 20% when used on the creatures from its opposing group
 
 			int iDifficulty = Use_PlayMusic(pInstrument, g_Rand.GetVal(iBaseDiff));	// How difficult? 1-100 (use RandBell). If no instrument, it immediately fails
-			if (iDifficulty < -1)	// no instrument: immediate fail
+			if (iDifficulty < 0)	// no instrument or played badly: immediate fail
 				return -SKTRIG_ABORT;
 
 			if ( !iDifficulty )
@@ -2073,7 +2073,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
             // Slayer instruments will decrease your success chance by 20% when used on the creatures from its opposing group
 
 			int iDifficulty = Use_PlayMusic(pInstrument, g_Rand.GetVal(iBaseDiff));	// How difficult? 1-100 (use RandBell). If no instrument, it immediately fails
-			if (iDifficulty < -1)	// no instrument: immediate fail
+			if (iDifficulty < 0)	// no instrument or played badly: immediate fail
 				return -SKTRIG_ABORT;
 
 			if ( !iDifficulty )
