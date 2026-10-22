@@ -320,6 +320,10 @@ void CChar::Skill_Decay()
 	ADDTOCALLSTACK("CChar::Skill_Decay");
 	// Decay the character's skill levels.
 
+	// Can be turned off with SkillDecay=0 in sphere.ini
+	if (!g_Cfg.m_fSkillDecay)
+		return;
+
 	SKILL_TYPE skillDeduct = SKILL_NONE;
 	ushort uiSkillLevel = 0;
 
