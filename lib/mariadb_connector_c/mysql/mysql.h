@@ -5,12 +5,12 @@
    modify it under the terms of the GNU Library General Public
    License as published by the Free Software Foundation; either
    version 2 of the License, or (at your option) any later version.
-   
+
    This library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Library General Public License for more details.
-   
+
    You should have received a copy of the GNU Library General Public
    License along with this library; if not, write to the Free
    Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -67,6 +67,12 @@ typedef struct st_ma_const_string
   const char *str;
   size_t length;
 } MARIADB_CONST_STRING;
+
+typedef struct st_ma_const_data
+{
+  const unsigned char *data;
+  size_t length;
+} MARIADB_CONST_DATA;
 
 
 #ifndef ST_MA_USED_MEM_DEFINED
@@ -172,9 +178,9 @@ extern const char *SQLSTATE_UNKNOWN;
     void *extension;
   } MYSQL_DATA;
 
-  enum mysql_option 
+  enum mysql_option
   {
-    MYSQL_OPT_CONNECT_TIMEOUT, 
+    MYSQL_OPT_CONNECT_TIMEOUT,
     MYSQL_OPT_COMPRESS,
     MYSQL_OPT_NAMED_PIPE,
     MYSQL_INIT_COMMAND,
@@ -217,8 +223,9 @@ extern const char *SQLSTATE_UNKNOWN;
     MYSQL_OPT_MAX_ALLOWED_PACKET,
     MYSQL_OPT_NET_BUFFER_LENGTH,
     MYSQL_OPT_TLS_VERSION,
+    MYSQL_OPT_ZSTD_COMPRESSION_LEVEL,
 
-    /* MariaDB specific */
+    /* MariaDB-specific */
     MYSQL_PROGRESS_CALLBACK=5999,
     MYSQL_OPT_NONBLOCK,
     /* MariaDB Connector/C specific */
@@ -250,7 +257,8 @@ extern const char *SQLSTATE_UNKNOWN;
     MARIADB_OPT_SKIP_READ_RESPONSE,
     MARIADB_OPT_RESTRICTED_AUTH,
     MARIADB_OPT_RPL_REGISTER_REPLICA,
-    MARIADB_OPT_STATUS_CALLBACK
+    MARIADB_OPT_STATUS_CALLBACK,
+    MARIADB_OPT_SERVER_PLUGINS
   };
 
   enum mariadb_value {
@@ -329,7 +337,7 @@ struct st_mysql_options {
     enum mysql_option methods_to_use;
     char *bind_address;
     my_bool secure_auth;
-    my_bool report_data_truncation; 
+    my_bool report_data_truncation;
     /* function pointers for local infile support */
     int (*local_infile_init)(void **, const char *, void *);
     int (*local_infile_read)(void *, char *, unsigned int);
@@ -496,7 +504,7 @@ void STDCALL mysql_set_local_infile_handler(MYSQL *mysql,
 
 void mysql_set_local_infile_default(MYSQL *mysql);
 
-void my_set_error(MYSQL *mysql, unsigned int error_nr, 
+void my_set_error(MYSQL *mysql, unsigned int error_nr,
                   const char *sqlstate, const char *format, ...);
 /* Functions to get information from the MYSQL and MYSQL_RES structures */
 /* Should definitely be used if one uses shared libraries */
@@ -533,7 +541,7 @@ int		STDCALL mysql_ssl_set(MYSQL *mysql, const char *key,
 				      const char *cert, const char *ca,
 				      const char *capath, const char *cipher);
 const char *	STDCALL mysql_get_ssl_cipher(MYSQL *mysql);
-my_bool		STDCALL mysql_change_user(MYSQL *mysql, const char *user, 
+my_bool		STDCALL mysql_change_user(MYSQL *mysql, const char *user,
 					  const char *passwd, const char *db);
 MYSQL *		STDCALL mysql_real_connect(MYSQL *mysql, const char *host,
 					   const char *user,
@@ -593,7 +601,7 @@ int STDCALL mysql_server_init(int argc, char **argv, char **groups);
 void STDCALL mysql_server_end(void);
 void STDCALL mysql_thread_end(void);
 my_bool STDCALL mysql_thread_init(void);
-int STDCALL mysql_set_server_option(MYSQL *mysql, 
+int STDCALL mysql_set_server_option(MYSQL *mysql,
                                     enum enum_mysql_set_option option);
 const char * STDCALL mysql_get_client_info(void);
 unsigned long STDCALL mysql_get_client_version(void);
@@ -853,7 +861,7 @@ struct st_mariadb_api {
   int (STDCALL *mariadb_stmt_execute_direct)(MYSQL_STMT *stmt, const char *stmtstr, size_t length);
   int (STDCALL *mysql_reset_connection)(MYSQL *mysql);
 };
-  
+
 /* these methods can be overwritten by db plugins */
 struct st_mariadb_methods {
   MYSQL *(*db_connect)(MYSQL *mysql, const char *host, const char *user, const char *passwd,
@@ -872,8 +880,8 @@ struct st_mariadb_methods {
   my_bool (*db_stmt_get_result_metadata)(MYSQL_STMT *stmt);
   my_bool (*db_stmt_get_param_metadata)(MYSQL_STMT *stmt);
   int (*db_stmt_read_all_rows)(MYSQL_STMT *stmt);
-  int (*db_stmt_fetch)(MYSQL_STMT *stmt, unsigned char **row);
-  int (*db_stmt_fetch_to_bind)(MYSQL_STMT *stmt, unsigned char *row);
+  int (*db_stmt_fetch)(MYSQL_STMT *stmt, unsigned char **row, unsigned long *length);
+  int (*db_stmt_fetch_to_bind)(MYSQL_STMT *stmt, unsigned char *row, unsigned long length);
   void (*db_stmt_flush_unbuffered)(MYSQL_STMT *stmt);
   void (*set_error)(MYSQL *mysql, unsigned int error_nr, const char *sqlstate, const char *format, ...);
   void (*invalidate_stmts)(MYSQL *mysql, const char *function_name);
