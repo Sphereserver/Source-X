@@ -3775,7 +3775,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
     pScriptArgs->Init((int)spell, iSkillLevel, 0, pSourceItem);
     pScriptArgs->m_VarsLocal.SetNum("DamageType", 0);
     pScriptArgs->m_VarsLocal.SetNum("CreateObject1", pSpellDef->m_idEffect);
-    pScriptArgs->m_VarsLocal.SetNum("Explode", fExplode);
+    pScriptArgs->m_VarsLocal.SetNum("EffectExplode", fExplode);
     pScriptArgs->m_VarsLocal.SetNum("Sound", iSound);
     pScriptArgs->m_VarsLocal.SetNum("Effect", iEffect);
     pScriptArgs->m_VarsLocal.SetNum("Resist", uiResist);
