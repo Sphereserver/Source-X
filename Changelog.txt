@@ -4195,3 +4195,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Changed: an active Tracking (following the arrow to the chosen target) doesn't block the use of the other skills anymore: it's stopped when another skill (or Tracking again) is used. Before no other skill could be used until the target was lost.
 - Changed: Peacemaking, Provocation and Enticement fail when the instrument is played badly (failed Musicianship check), like on OSI: before they failed only without an instrument, and a bad play was just a message.
 - Changed: Peacemaking, Provocation and Enticement don't give Musicianship gains anymore: a failed attempt has no skill delay, so it could be macroed.
+
+23-10-2026, DavideRei
+- Fixed: in @SpellEffect and @Effect the explode flag of the spell effect was set as LOCAL.Explode but read back as LOCAL.EffectExplode, so the explosion was always lost. It's now LOCAL.EffectExplode in both places.
