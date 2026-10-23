@@ -52,7 +52,7 @@ size_t CResourceQty::WriteNameSingle( tchar * pszArgs, size_t uiBufLen, int iQty
         return Str_CopyLimitNull(pszArgs, g_Cfg.ResourceGetName(m_rid), uiBufLen);
 }
 
-bool CResourceQty::Load(lpctstr &pszCmds)
+bool CResourceQty::Load(lpctstr &pszCmds, RES_TYPE resTypeDefault)
 {
     ADDTOCALLSTACK("CResourceQty::Load");
     // Can be either order.:
@@ -74,8 +74,8 @@ bool CResourceQty::Load(lpctstr &pszCmds)
         return false;
     }
 
-    m_rid = g_Cfg.ResourceGetID_EatStr(RES_UNKNOWN, pszCmds);
-    if ( m_rid.GetResType() == RES_UNKNOWN )
+    m_rid = g_Cfg.ResourceGetID_EatStr(resTypeDefault, pszCmds);
+    if ( (m_rid.GetResType() == RES_UNKNOWN) || ((resTypeDefault != RES_UNKNOWN) && (m_rid.GetResIndex() == 0)) )
     {
         m_rid.Init();
         g_Log.EventError("Bad resource list id '%s'\n", orig);
@@ -178,7 +178,7 @@ bool CResourceQtyArray::IsResourceMatchAll( const CChar * pChar ) const
     return true;
 }
 
-size_t CResourceQtyArray::Load(lpctstr pszCmds)
+size_t CResourceQtyArray::Load(lpctstr pszCmds, RES_TYPE resTypeDefault)
 {
     ADDTOCALLSTACK("CResourceQtyArray::Load");
     //	clear-before-load in order not to mess with the previous data
@@ -202,7 +202,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
         else
         {
             CResourceQty res;
-            if ( !res.Load(pszCmds) )
+            if ( !res.Load(pszCmds, resTypeDefault) )
                 break;
 
             if ( res.GetResourceID().IsValidUID())
