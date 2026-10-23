@@ -42,11 +42,12 @@ public:
     {
         m_iQty = iQuantity;
     }
-    inline bool Load( lptstr & arg )
+    inline bool Load( lptstr & arg, RES_TYPE resTypeDefault = RES_UNKNOWN )
     {
-        return Load( const_cast<lpctstr&>(arg) );
+        return Load( const_cast<lpctstr&>(arg), resTypeDefault );
     }
-    bool Load( lpctstr & pszCmds );
+    // resTypeDefault: type of a bare ID (a number instead of a defname), which can't tell its type by itself.
+    bool Load( lpctstr & pszCmds, RES_TYPE resTypeDefault = RES_UNKNOWN );
     size_t WriteKey( tchar * pszArgs, size_t uiBufSize, bool fQtyOnly = false, bool fKeyOnly = false ) const;
     size_t WriteNameSingle( tchar * pszArgs, size_t uiBufLen, int iQty = 0 ) const;
 
@@ -71,7 +72,7 @@ public:
     CResourceQtyArray(const CResourceQtyArray& copy) = default;
 
 public:
-    size_t Load( lpctstr pszCmds );
+    size_t Load( lpctstr pszCmds, RES_TYPE resTypeDefault = RES_UNKNOWN );
     void WriteKeys( tchar * pszArgs, size_t uiBufSize, size_t index = 0, bool fQtyOnly = false, bool fKeyOnly = false ) const;
     void WriteNames( tchar * pszArgs, size_t uiBufSize, size_t index = 0 ) const;
 

@@ -774,8 +774,9 @@ bool CContainer::r_WriteValContainer( lpctstr ptcKey, CSString &sVal, CTextConso
 
 		case 3:			//	restest
 		{
+			// A bare ID is an item, like in RESCOUNT
 			CResourceQtyArray Resources;
-			sVal.FormatSTVal(Resources.Load(pKey) ? ResourceConsume(&Resources, 1, true) : 0);
+			sVal.FormatSTVal(Resources.Load(pKey, RES_ITEMDEF) ? ResourceConsume(&Resources, 1, true) : 0);
 			break;
 		}
 
