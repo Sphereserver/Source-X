@@ -354,7 +354,7 @@ CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg, int64 iDurat
 	pChar->MoveToChar(ptTarg);
 
     // Check, if summon died after placing (like summoned on damaging area or trap).
-    if (pChar->Stat_GetVal(STAT_STR) <= 0)
+    if (pChar->IsDeleted() || (pChar->Stat_GetVal(STAT_STR) <= 0))
     {
         return nullptr;
     }
@@ -3281,7 +3281,12 @@ bool CChar::Spell_CastDone()
 			        return false;
 			    }
 
-			    Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
+			    if (!Spell_Summon_Place(pSummon, pCorpse->GetTopPoint()))
+			    {
+			        // It died on placement (damaging field, trap...): don't raise the corpse with it.
+					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_FAIL);
+			        return false;
+			    }
                 if (!pSummon->RaiseCorpse(pCorpse))
 				{
 					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_FAIL);
