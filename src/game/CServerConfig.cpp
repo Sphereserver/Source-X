@@ -54,6 +54,8 @@ CServerConfig::CServerConfig()
 
 	m_fUseNTService		= false;
 	m_fUseHTTP			= 2;
+	m_fUseTelnet		= true;
+	m_fUseAxis			= true;
 	m_fUseAuthID		= true;
 	_iMapCacheTime		= 2ll  * 60 * MSECS_PER_SEC;
 	_iSectorSleepDelay  = 10ll * 60 * MSECS_PER_SEC;
@@ -132,6 +134,7 @@ CServerConfig::CServerConfig()
     m_fCanPetsDrinkPotion   = true;
 	m_fMonsterFight			= false;
 	m_fMonsterFear			= false;
+	m_iNPCSpellCastRange	= 10;
 	m_iLightDungeon			= 27;
 	m_iLightNight			= 25;	// dark before t2a.
 	m_iLightDay				= LIGHT_BRIGHT;
@@ -151,6 +154,7 @@ CServerConfig::CServerConfig()
 	m_fDeadCannotSeeLiving	= 0;
 	m_iMediumCanHearGhosts	= 1000;
 	m_iSkillPracticeMax		= 300;
+	m_fSkillDecay			= true;
 	m_iPacketDeathAnimation = true;
 	m_fCharTags				= false;
 	m_fVendorTradeTitle		= true;
@@ -663,6 +667,7 @@ enum RC_TYPE
 	RC_NPCNOFAMETITLE,			// m_NPCNoFameTitle
 	RC_NPCSHOVENPC,				// m_NPCShoveNPC
 	RC_NPCSKILLSAVE,			// m_iSaveNPCSkills
+	RC_NPCSPELLCASTRANGE,       // m_iNPCSpellCastRange
 	RC_NPCTRAINCOST,			// m_iTrainSkillCost
 	RC_NPCTRAINMAX,				// m_iTrainSkillMax
 	RC_NPCTRAINPERCENT,			// m_iTrainSkillPercent
@@ -692,6 +697,7 @@ enum RC_TYPE
 	RC_SCPFILES,
 	RC_SECTORSLEEP,				// _iSectorSleepDelay
 	RC_SECURE,
+	RC_SKILLDECAY,				// m_fSkillDecay
 	RC_SKILLPRACTICEMAX,		// m_iSkillPracticeMax
 	RC_SNOOPCRIMINAL,
 	RC_SPEECHOTHER,
@@ -722,6 +728,7 @@ enum RC_TYPE
 	RC_UOGSTATUS,				// m_fUOGStatus
 	RC_USEASYNCNETWORK,			// m_fUseAsyncNetwork
 	RC_USEAUTHID,				// m_fUseAuthID
+	RC_USEAXIS,					// m_fUseAxis
 	RC_USECRYPT,				// m_Usecrypt
 	RC_USEEXTRABUFFER,			// m_fUseExtraBuffer
 	RC_USEHTTP,					// m_fUseHTTP
@@ -729,6 +736,7 @@ enum RC_TYPE
     RC_USEMOBTYPES,             // m_fUseMobTypes
 	RC_USENOCRYPT,				// m_Usenocrypt
 	RC_USEPACKETPRIORITY,		// m_fUsePacketPriorities
+	RC_USETELNET,				// m_fUseTelnet
 	RC_VENDORMARKUP,			// m_iVendorMarkup
 	RC_VENDORMAXSELL,			// m_iVendorMaxSell
 	RC_VENDORTRADETITLE,		// m_fVendorTradeTitle
@@ -960,6 +968,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_NPCNoFameTitle)		}},
 	{ "NPCSHOVENPC",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_NPCShoveNPC)			}},
 	{ "NPCSKILLSAVE",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iSaveNPCSkills)		}},
+    { "NPCSPELLCASTRANGE",      { ELEM_INT,     static_cast<uint>OFFSETOF(CServerConfig,m_iNPCSpellCastRange)		}},
 	{ "NPCTRAINCOST",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillCost)		}},
 	{ "NPCTRAINMAX",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillMax)		}},
 	{ "NPCTRAINPERCENT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillPercent)	}},
@@ -989,6 +998,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "SCPFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sSCPBaseDir)			}},
 	{ "SECTORSLEEP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iSectorSleepDelay)		}},
 	{ "SECURE",					{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fSecure)				}},
+	{ "SKILLDECAY",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fSkillDecay)			}},
 	{ "SKILLPRACTICEMAX",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iSkillPracticeMax)		}},
 	{ "SNOOPCRIMINAL",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iSnoopCriminal)		}},
 	{ "SPEECHOTHER",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sSpeechOther)			}},
@@ -1019,6 +1029,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "UOGSTATUS",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUOGStatus)			}},
 	{ "USEASYNCNETWORK",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_fUseAsyncNetwork)		}},
 	{ "USEAUTHID",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseAuthID)			}},	// we use authid like osi
+	{ "USEAXIS",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseAxis)			}},
 	{ "USECRYPT",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUsecrypt)				}},	// we don't want crypt clients
 	{ "USEEXTRABUFFER",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseExtraBuffer)		}},
 	{ "USEHTTP",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_fUseHTTP)				}},
@@ -1026,6 +1037,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "USEMOBTYPES",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseMobTypes)			} },
 	{ "USENOCRYPT",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUsenocrypt)			}},	// we don't want no-crypt clients
 	{ "USEPACKETPRIORITY",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUsePacketPriorities)	}},
+	{ "USETELNET",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseTelnet)			}},
 	{ "VENDORMARKUP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMarkup)			}},
 	{ "VENDORMAXSELL",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMaxSell)		}},
 	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fVendorTradeTitle)		}},
@@ -1687,15 +1699,18 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 						if (IsDigit(ppVal[3][0]))
 						{
 							pt.m_map = (byte)(atoi(ppVal[3]));
+
+						    if (!g_MapList.IsMapSupported(pt.m_map)) {
+			                    g_Log.EventError("Unsupported Map %d\n", pt.m_map);
+						        return false;
+						    }
 						}
 						FALLTHROUGH;
 
 					case 3:
-						if ( IsDigit(ppVal[2][0]) || (( iArgs == 4 ) && ( ppVal[2][0] == '-' )) )
+						if (IsDigit(ppVal[2][0]) || ppVal[2][0] == '-')
 						{
-							pt.m_z = (char)(( iArgs == 4 ) ? atoi(ppVal[2]) : 0);
-							if ( iArgs == 3 )
-								pt.m_map = (byte)(atoi(ppVal[2]));
+							pt.m_z = static_cast<char>(atoi(ppVal[2]));
 						}
 						FALLTHROUGH;
 

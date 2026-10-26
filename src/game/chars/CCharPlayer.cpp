@@ -703,7 +703,7 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 				if ( pAccount->SetPassword(s.GetArgStr()) )
 				{
 					SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_ACCEPTPASS));
-					g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "Account '%s', password set to '%s'\n", pAccount->GetName(), s.GetArgStr());
+					g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "Account '%s', password set\n", pAccount->GetName());
 					return true;
 				}
 

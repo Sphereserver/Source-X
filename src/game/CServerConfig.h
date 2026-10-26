@@ -242,6 +242,8 @@ public:
 	// Begin INI file options.
 	bool m_fUseNTService;       // Start this as a system service on Win2000, XP, NT
 	int	 m_fUseHTTP;            // Use the built in http server
+	bool m_fUseTelnet;         // Allow the remote admin console (telnet) on the game port
+	bool m_fUseAxis;           // Allow Axis connections on the game port
 	bool m_fUseAuthID;          // Use the OSI AuthID to avoid possible hijack to game server.
 	int64  _iMapCacheTime;     // Time in sec to keep unused map data..
 	int64  _iSectorSleepDelay;    // The mask for how long sectors will sleep.
@@ -342,6 +344,7 @@ public:
 	bool m_fMonsterFight;			// Will creatures fight amoung themselves.
 	bool m_fMonsterFear;			// will they run away if hurt ?
     uint m_iContainerMaxItems;      // Maximum number of items allowed in a container item.
+    uint m_iNPCSpellCastRange;      // Maximum range the NPCs can target with spells.
     int m_iDragWeightMax;            // Capacity of maxweight in % character can move with drag and drop
     int m_iBackpackOverload;        // Maximum weight in stones extra allowed in main backpack.
 	int	 m_iBankIMax;				// Maximum number of items allowed in bank.
@@ -379,6 +382,7 @@ public:
 	int  m_iSpeedScaleFactor;		// fight skill delay = m_iSpeedScaleFactor / ( (dex + 100) * Weapon Speed ).
     uint m_iCombatParryingEra;      // Parrying behaviour flags
 	int  m_iSkillPracticeMax;		// max skill level a player can practice on dummies/targets upto.
+	bool m_fSkillDecay;				// Skills locked down decay while the other skills are used (default behaviour).
 	bool m_iPacketDeathAnimation;	// packet 02c
     bool m_fDisplayPercentAr;       // Display the ARMOR value in the tooltip as the %
     bool m_fDisplayElementalResistance; //Display the Elemental and MAxElemental Resistances on the paperdoll and tooltips (RESFIRE/RESCOLD/RESENERGY/RESPOISON) even if combat flag Elemental Engine is disabled.

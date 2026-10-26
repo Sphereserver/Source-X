@@ -589,7 +589,7 @@ void CChar::ClearPlayer()
 	{
 		if (g_Serv.GetServerMode() != ServMode::Exiting)
 		{
-			g_Log.EventWarn("Character '%s'(UID 0%x) on account '%s' as been deleted.\n", GetName(), (dword)GetUID(), pAccount->GetName());
+			g_Log.EventWarn("Character '%s'(UID 0%x) on account '%s' has been deleted.\n", GetName(), (dword)GetUID(), pAccount->GetName());
 		}
 
 		pAccount->DetachChar(this);	// unlink me from my account.
@@ -4802,7 +4802,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 			CChar * pChar = CUID::CharFindFromUID(s.GetArgDWVal()); // otherwise we try to run it from the CChar with the given UID.
             if (pChar)
-                return pChar->NPC_PetSetOwner(this);
+                return NPC_PetSetOwner(pChar);
             return false;   // Something went wrong, giving a warning of it.
         }
 

@@ -334,7 +334,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 		return true;	// field spell ?
 	if (pCharSrc == this)
 		return true;	// self induced
-	if (IsStatFlag(STATF_DEAD|STATF_STONE))
+	if (IsStatFlag(STATF_DEAD|STATF_STONE|STATF_RIDDEN))	// a ridden or shrunken NPC isn't in the world
 		return false;
 
 	if (fShouldReveal)
@@ -737,7 +737,7 @@ effect_bounce:
 			int iArMax = iArmorRating * g_Rand.Get16Val2Fast(7,35) / 100;
 			int iArMin = iArMax / 2;
 
-			int iDef = g_Rand.GetVal2Fast( iArMin, (iArMax - iArMin) + 1 );
+			int iDef = g_Rand.GetVal2Fast(iArMin, iArMax + 1);
 			if ( uiType & DAMAGE_MAGIC )		// magical damage halves effectiveness of defense
 				iDef /= 2;
 
@@ -1028,7 +1028,8 @@ effect_bounce:
 		return 0;
 
 	// Apply damage
-	SoundChar(CRESND_GETHIT);
+	if ( !Can(CAN_C_STATUE) )
+		SoundChar(CRESND_GETHIT);
 	UpdateStatVal( STAT_STR, -iDmg);
 	if ( pSrc->IsClientActive() )
 		pSrc->GetClientActive()->addHitsUpdate( this );	// always send updates to src
@@ -1057,7 +1058,7 @@ effect_bounce:
 		return iDmg;
 	}
 
-	if (m_atFight.m_iWarSwingState != WAR_SWING_SWINGING)	// don't interrupt my swing animation
+	if ((m_atFight.m_iWarSwingState != WAR_SWING_SWINGING) && !Can(CAN_C_STATUE))	// don't interrupt my swing animation (statues don't move)
 		UpdateAnimate(ANIM_GET_HIT);
 
 	return iDmg;
@@ -1210,10 +1211,16 @@ int CChar::Fight_CalcDamage(const CItem * pWeapon, bool fNoRandom, bool fGetMax 
 	int iDmgMax = 0;
 	STAT_TYPE iStatBonus = (STAT_TYPE)GetPropNum(COMP_PROPS_CHAR, PROPCH_COMBATBONUSSTAT, true);
 	int iStatBonusPercent = (int)GetPropNum(COMP_PROPS_CHAR, PROPCH_COMBATBONUSPERCENT, true);
-	if ( pWeapon != nullptr )
+
+    if ( pWeapon != nullptr )
 	{
 		iDmgMin = pWeapon->Weapon_GetAttack(false);
 		iDmgMax = pWeapon->Weapon_GetAttack(true);
+
+	    // Use bonus stats from weapon.
+        iStatBonus = static_cast<STAT_TYPE>(pWeapon->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_COMBATBONUSSTAT, true));
+        iStatBonusPercent = pWeapon->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_COMBATBONUSPERCENT, true);
+
 	}
 	else
 	{

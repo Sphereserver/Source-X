@@ -354,7 +354,7 @@ CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg, int64 iDurat
 	pChar->MoveToChar(ptTarg);
 
     // Check, if summon died after placing (like summoned on damaging area or trap).
-    if (pChar->Stat_GetVal(STAT_STR) <= 0)
+    if (pChar->IsDeleted() || (pChar->Stat_GetVal(STAT_STR) <= 0))
     {
         return nullptr;
     }
@@ -1942,7 +1942,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			if (IsSetOF(OF_Buffs) && IsClientActive())
 			{
 				GetClientActive()->removeBuff(BI_POISON);
-				GetClientActive()->addBuff(BI_POISON, 1017383, 1070722, (word)(pItem->GetTimerSAdjusted()));
+				GetClientActive()->addBuff(BI_POISON, 1017383, 1070722, (word)(iSecondsDelay));
 			}
 			break;
 		}
@@ -2341,6 +2341,9 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
             if (iDuration <= 0)
                 iDuration = GetSpellDuration( m_atMagery.m_iSpell, iSkillLevel, pCharSrc );
 
+		    // We use another variable, because we cannot increase iDuration, since it would increase for the next object as well.
+		    int64 iObjectDuration = iDuration;
+
 			CItem * pSpell = CItem::CreateBase( id );
 			ASSERT(pSpell);
 			pSpell->m_itSpell.m_spell = (word)(m_atMagery.m_iSpell);
@@ -2352,10 +2355,13 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			pSpell->SetHue(iColor);
 			pSpell->GenerateScript(this);
 
-            if (pSpellDef->IsSpellType(SPELLFLAG_FIELD_RANDOMDECAY)) // If the spell has ASYNC flag, the timers should be randomized.
-                iDuration += g_Rand.GetLLVal(iDuration / 2);
+		    // If the spell has ASYNC flag, the timers should be randomized.
+            if (pSpellDef->IsSpellType(SPELLFLAG_FIELD_RANDOMDECAY))
+            {
+                iObjectDuration += g_Rand.GetLLVal(iDuration / 2);
+            }
 
-			pSpell->MoveToDecay( ptg, iDuration * MSECS_PER_TENTH, true);
+			pSpell->MoveToDecay( ptg, iObjectDuration * MSECS_PER_TENTH, true);
 		}
 	}
 }
@@ -3275,7 +3281,12 @@ bool CChar::Spell_CastDone()
 			        return false;
 			    }
 
-			    Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
+			    if (!Spell_Summon_Place(pSummon, pCorpse->GetTopPoint()))
+			    {
+			        // It died on placement (damaging field, trap...): don't raise the corpse with it.
+					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_FAIL);
+			        return false;
+			    }
                 if (!pSummon->RaiseCorpse(pCorpse))
 				{
 					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_FAIL);
@@ -3392,9 +3403,11 @@ void CChar::Spell_CastFail(bool fAbort)
 			iTithingLoss = g_Cfg.Calc_SpellTithingCost(this, pSpell, m_Act_Prv_UID.ObjFind());
 	}
 
+    SOUND_TYPE iSound = SOUND_SPELL_FIZZLE;
     CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
     pScriptArgs->Init(m_atMagery.m_iSpell, iManaLoss, 0, m_Act_Prv_UID.ObjFind());
     pScriptArgs->m_VarsLocal.SetNum("CreateObject1",iT1);
+    pScriptArgs->m_VarsLocal.SetNum("Sound", iSound);
     pScriptArgs->m_VarsLocal.SetNum("TithingLoss", iTithingLoss);
 
 	if ( IsTrigUsed(TRIGGER_SPELLFAIL) )
@@ -3418,7 +3431,12 @@ void CChar::Spell_CastFail(bool fAbort)
     iT1 = (ITEMID_TYPE)(ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum("CreateObject1")));
 	if (iT1)
 		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, dwRender);
-	Sound( SOUND_SPELL_FIZZLE );
+
+    iSound = static_cast<SOUND_TYPE>(pScriptArgs->m_VarsLocal.GetKeyNum("Sound"));
+    if (iSound)
+    {
+	  Sound(iSound);
+    }
 
 	if ( IsClientActive() )
 		GetClientActive()->addObjMessage( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_GEN_FIZZLES ), this );
@@ -3695,6 +3713,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		iSound = sm_DrinkSounds[g_Rand.GetVal(ARRAY_COUNT(sm_DrinkSounds))];
 	}
 
+    //If true allows the spell to bypass the magic reflection checks.
+    bool fBypassMagicReflection = false;
 
 	// Check if the spell is being resisted
 	ushort uiResist = 0;
@@ -3755,11 +3775,13 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
     pScriptArgs->Init((int)spell, iSkillLevel, 0, pSourceItem);
     pScriptArgs->m_VarsLocal.SetNum("DamageType", 0);
     pScriptArgs->m_VarsLocal.SetNum("CreateObject1", pSpellDef->m_idEffect);
-    pScriptArgs->m_VarsLocal.SetNum("Explode", fExplode);
+    pScriptArgs->m_VarsLocal.SetNum("EffectExplode", fExplode);
     pScriptArgs->m_VarsLocal.SetNum("Sound", iSound);
     pScriptArgs->m_VarsLocal.SetNum("Effect", iEffect);
     pScriptArgs->m_VarsLocal.SetNum("Resist", uiResist);
     pScriptArgs->m_VarsLocal.SetNum("Duration", iDuration);
+    pScriptArgs->m_VarsLocal.SetNum("IsSpellReflected", fReflecting);
+    pScriptArgs->m_VarsLocal.SetNum("BypassMagicReflection", fBypassMagicReflection);
 
 	if ( IsTrigUsed(TRIGGER_SPELLEFFECT) )
 	{
@@ -3790,6 +3812,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
     iEffect = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("Effect"));
     uiResist = (ushort)(pScriptArgs->m_VarsLocal.GetKeyNum("Resist"));
     iDuration = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("Duration"));
+    fBypassMagicReflection = pScriptArgs->m_VarsLocal.GetKeyNum("BypassMagicReflection") > 0 ? true : false;
 
     HUE_TYPE iColor = (HUE_TYPE)pScriptArgs->m_VarsLocal.GetKeyNum("EffectColor");
     dword dwRender = (dword)pScriptArgs->m_VarsLocal.GetKeyNum("EffectRender");
@@ -3830,7 +3853,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			return false;
 
 		// Check if the spell can be reflected
-		if (pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
+		if (pCharSrc && (pCharSrc != this) && !fBypassMagicReflection )		// only spells with direct target can be reflected
 		{
 			if ( IsStatFlag(STATF_REFLECTION) )
 			{

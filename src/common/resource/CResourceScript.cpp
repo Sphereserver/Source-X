@@ -116,9 +116,10 @@ void CResourceScript::Close()
         return;
 
     -- m_iOpenCount;
-    if ( ! m_iOpenCount )
-    {
-        // Just leave it open for caching purposes
+    /*
+    if (!m_iOpenCount) {
+        // Just leave it open for caching purposes.
         //CloseForce();
     }
+    */
 }

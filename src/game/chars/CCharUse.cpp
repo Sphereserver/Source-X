@@ -82,12 +82,20 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
 		const CResourceID& rid = pCorpseDef->m_BaseResources[i].GetResourceID();
-		if (rid.GetResType() != RES_ITEMDEF)
+		if (rid.GetResType() != RES_ITEMDEF && rid.GetResType() != RES_TEMPLATE)
+		{
+            g_Log.EventError("Corpse 0%" PRIx32 " (%s) has invalid ResourceType (%i) in resource list\n",
+                static_cast<dword>(pCorpse->GetUID()), pCorpseDef->GetName(), rid.GetResType());
 			continue;
+		}
 
-		ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
-		if (id == ITEMID_NOTHING)
-			break;
+	    ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
+	    if (id == ITEMID_NOTHING)
+	    {
+            g_Log.EventError("Corpse 0%" PRIx32 " (%s) has invalid resource in resource list\n",
+                static_cast<dword>(pCorpse->GetUID()), pCorpseDef->GetName());
+	        continue;
+	    }
 
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
@@ -122,7 +130,11 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
         ITEMID_TYPE id = (ITEMID_TYPE)ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum(pszTmp));
 		if (id == ITEMID_NOTHING)
-			break;
+		{
+		    g_Log.EventError("Corpse 0%" PRIx32 " (%s) has invalid resource in resource list\n",
+                static_cast<dword>(pCorpse->GetUID()), pCorpseDef->GetName());
+			continue;
+		}
 
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.amount", (int)i);
         iResourceQty =(word)pScriptArgs->m_VarsLocal.GetKeyNum(pszTmp);
@@ -725,7 +737,9 @@ int CChar::Use_PlayMusic( CItem * pInstrument, int iDifficultyToPlay )
 		}
 	}
 
-	bool fSuccess = Skill_UseQuick(SKILL_MUSICIANSHIP, iDifficultyToPlay, (Skill_GetActive() != SKILL_MUSICIANSHIP));
+	// No Musicianship gain when playing for Peacemaking, Provocation or Enticement: a bad play makes them fail immediately,
+	//  with no skill delay, so it could be macroed to raise Musicianship with no wait.
+	bool fSuccess = Skill_UseQuick(SKILL_MUSICIANSHIP, iDifficultyToPlay, false);
 	Sound(pInstrument->Use_Music(fSuccess));
 	if ( fSuccess )
 		return iDifficultyToPlay;	// success
@@ -1194,8 +1208,10 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
         pPet->SetDefNum("FOLLOWERSLOTS", iFollowerSlots.value(), true);
     }
 
-	if ( pPet->IsDisconnected() )
-		pPet->StatFlag_Clear(STATF_RIDDEN);		// pull the creature out of IDLE space
+	// Pull the creature out of IDLE space. Clear the flag also if it isn't disconnected: while it's set the action of the
+	//  pet can't be changed from NPCACT_RIDDEN (see Skill_Start).
+	if ( pPet->IsStatFlag(STATF_RIDDEN) )
+		pPet->StatFlag_Clear(STATF_RIDDEN);
 
 	pItem->m_itFigurine.m_UID.InitUID();
 	pPet->m_dirFace = m_dirFace;
@@ -1718,6 +1734,15 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			else
             {
 				SysMessageDefault(DEFMSG_ITEMUSE_BEEHIVE_STING);
+                switch (g_Rand.GetVal(2))
+                {
+                    case 0:
+                        pItem->Effect(EFFECT_OBJ, ITEMID_BEEHIVE_FX_1, pItem, 6, 30, false);
+                        break;
+                    case 1:
+                        pItem->Effect(EFFECT_OBJ, ITEMID_BEEHIVE_FX_2, pItem, 10, 40, false);
+                        break;
+                }
 				OnTakeDamage(g_Rand.GetVal(5), this, DAMAGE_POISON | DAMAGE_GENERAL);
 			}
 			pItem->SetTimeoutS(15 * 60);
