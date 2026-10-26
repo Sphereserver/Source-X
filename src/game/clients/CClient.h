@@ -150,6 +150,18 @@ public:
 	int64 m_timeLastEventWalk;	    // Last time we got a walk event from client
 	int64 m_timeNextEventWalk;		// Fastwalk prevention: only allow more walk requests after this timer
 
+    // Web Identity.
+    struct CWebIdentity
+    {
+        bool m_fReceived{false};
+        CSString m_sUserId;
+        CSString m_sConnectingIp;
+        CSString m_sExternalAuthProvider;
+        CSString m_sExternalAuthUsername;
+        CSString m_sExternalAuthId;
+        CSString m_sRole;
+    } m_webIdentity;
+
 	// Context of the targetting setup. depends on CLIMODE_TYPE m_Targ_Mode
 	union
 	{
