@@ -4180,3 +4180,4 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 21-10-2026, DavideRei
 - Added: MountHeight=2 in sphere.ini: like MountHeight=1 (can't enter under a roof while mounted) but for players only, mounted NPCs can walk into the buildings.
+    The same rule applies to the other MountHeight checks (teleport, summon, mount, FIX).

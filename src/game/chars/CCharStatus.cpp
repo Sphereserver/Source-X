@@ -1785,6 +1785,12 @@ bool CChar::IsMountCapable() const
 	return false;
 }
 
+bool CChar::IsMountHeightRestricted() const
+{
+	// MountHeight: 0 = no restriction, 1 = everyone, 2 = players only (mounted NPCs can enter the buildings).
+	return g_Cfg.m_iMountHeight && !((g_Cfg.m_iMountHeight == 2) && m_pNPC);
+}
+
 bool CChar::IsVerticalSpace( const CPointMap& ptDest, bool fForceMount ) const
 {
 	ADDTOCALLSTACK("CChar::IsVerticalSpace");
@@ -1958,9 +1964,7 @@ bool CChar::CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovem
     if (!fPathfinding && (g_Cfg.m_iDebugFlags & DEBUGF_WALK) && IsPlayer())
         g_Log.EventWarn("GetHeightMount() %hhu, block.m_Top.m_z %hhd, ptDest.m_z %hhd.\n", uiMyHeight, blockingState->m_Top.m_z, ptDest->m_z);
 
-    // MountHeight=2: the rule is for players only, mounted NPCs can enter the buildings.
-    const bool fMountHeight = g_Cfg.m_iMountHeight && !(m_pNPC && (g_Cfg.m_iMountHeight == 2));
-    if (IsStatFlag(STATF_ONHORSE) && (uiMyHeight + ptDest->m_z >= blockingState->m_Top.m_z) && fMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE))
+    if (IsStatFlag(STATF_ONHORSE) && (uiMyHeight + ptDest->m_z >= blockingState->m_Top.m_z) && IsMountHeightRestricted() && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE))
     {
         if (!fPathfinding)
             SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);

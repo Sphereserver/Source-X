@@ -784,7 +784,7 @@ char CChar::GetFixZ( const CPointMap& pt, uint64 uiBlockFlags)
 			return pt.m_z;
 	}
 
-	if ( (uiHeightMount + pt.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_ALLMOVE) )
+	if ( (uiHeightMount + pt.m_z >= block.m_Top.m_z) && IsMountHeightRestricted() && !IsPriv(PRIV_ALLMOVE) )
 		return pt.m_z;
 
 	return block.m_Bottom.m_z;
