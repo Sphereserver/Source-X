@@ -68,6 +68,14 @@
           MYSQL_CLIENT_ ## X ## _PLUGIN_INTERFACE_VERSION,
 #define mysql_end_client_plugin             }
 
+#if defined _WIN32
+#  define MARIADB_CLIENT_PLUGIN_EXPORT __declspec(dllexport)
+#elif defined(__GNUC__) || defined(__clang__)
+#  define MARIADB_CLIENT_PLUGIN_EXPORT __attribute__((visibility("default")))
+#else
+#  define MARIADB_CLIENT_PLUGIN_EXPORT
+#endif
+
 /* generic plugin header structure */
 #ifndef MYSQL_CLIENT_PLUGIN_HEADER
 #define MYSQL_CLIENT_PLUGIN_HEADER                      \
@@ -122,7 +130,7 @@ typedef struct st_mariadb_client_plugin_PVIO
 } MARIADB_PVIO_PLUGIN;
 
 /******** authentication plugin specific declarations *********/
-#include <mysql/plugin_auth_common.h>
+#include <mysql/plugin_auth.h>
 
 struct st_mysql_client_plugin_AUTHENTICATION
 {

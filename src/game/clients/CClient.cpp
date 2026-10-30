@@ -1411,7 +1411,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				}
 				break;
 			}
-			return false;
+			return true;	// no target cursor open: nothing to do, but it's not an error
 		case CV_LINK:	// link doors
 			m_Targ_UID.InitUID();
 			addTarget( CLIMODE_TARG_LINK, g_Cfg.GetDefaultMsg( DEFMSG_SELECT_LINK_ITEM ) );
@@ -1531,7 +1531,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				addTargetCancel();
 				break;
 			}
-			return false;
+			return true;	// no target cursor open: nothing to do, but it's not an error
 		case CV_SHOWSKILLS:
 			addSkillWindow((SKILL_TYPE)(g_Cfg.m_iMaxSkill)); // Reload the real skills
 			break;
