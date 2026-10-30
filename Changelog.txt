@@ -4179,5 +4179,32 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
     Defines the maximum range NPCs can target with spells (default value is 10). Override tag to change the range for a single NPC.
 
 21-10-2026, DavideRei
+- Added: LDB.ESCAPEDATA <text> (like MDB.ESCAPEDATA for MySQL): returns the text with every single quote doubled, to safely put it between single quotes in a SQLite statement.
+- Added: SkillDecay setting in sphere.ini (default 1). With SkillDecay=0 the skills locked down (arrow down) don't decay anymore while the other skills are raised.
+- Added: ARGN1 in @StepStealth trigger (R/W): how many stealth steps the move consumes. Default 2 if running or hovering, 1 otherwise.
+- Added: bees animation (0x091b or 0x0923) when a char is stung using a beehive.
+- Added: FINDEVENT.<events> and FINDTEVENT.<events> references on containers and chars (like FINDID / FINDTYPE): the first item (in the sub containers too) having the given section in its EVENTS, or in the TEVENTS of its itemdef.
+  Example: REF1=<FINDEVENT.e_quest_item>
+- Fixed: characters with CAN_C_STATUE (like petrified ones) showed emotes from timed effects, like poison.
+- Fixed: OWNER <uid> on a char made the char with that UID a pet of this one, instead of setting it as the owner of this char (OWNER without arguments, which sets SRC as owner, was right).
+- Fixed: CItemBase::ResetMakeValue (called when the resources or the skills to make an itemdef change) used INT32_MIN instead of the "not calculated yet" marker INT64_MIN: the value wasn't recalculated but became abs(INT32_MIN), so an itemdef without a value suddenly had one and its new items were created as CItemVendable.
+- Fixed: the action of a ridden mount or of a shrunken pet (NPCACT_RIDDEN, which keeps the link with the rider/figurine in ACTARG1) could be changed by scripts (ACTION, HEAR), pet commands or a fight ending, breaking the link: the garbage collection then found an invalid mount. Skill_Start now refuses to change it while STATF_RIDDEN is set (with a warning in the console).
+- Fixed: when mounting a horse not owned yet, the owner is set before turning it into a ridden NPC (setting the owner changed its action).
+- Fixed: shrunken pets (figurines) got hungry, and ridden/shrunken NPCs could be attacked.
+- Changed: no get hit sound and animation when a char with CAN_C_STATUE takes damage.
+- Changed: an active Tracking (following the arrow to the chosen target) doesn't block the use of the other skills anymore: it's stopped when another skill (or Tracking again) is used. Before no other skill could be used until the target was lost.
+- Changed: Peacemaking, Provocation and Enticement fail when the instrument is played badly (failed Musicianship check), like on OSI: before they failed only without an instrument, and a bad play was just a message.
+- Changed: Peacemaking, Provocation and Enticement don't give Musicianship gains anymore: a failed attempt has no skill delay, so it could be macroed.
+
+23-10-2026, DavideRei
+- Added: UseTelnet setting in sphere.ini (default 1). With UseTelnet=0 the remote admin console (telnet) requests on the game port are refused and logged; the server's own console is not affected.
+- Added: UseAxis setting in sphere.ini (default 1). With UseAxis=0 the Axis connection requests on the game port (staff login with a clear-text password, then Axis.db is sent) are refused and logged.
+- Fixed: Animate Dead raised the corpse even when the summoned creature died while being placed (on a damaging field or a trap), using a dead or deleted char. Spell_Summon_Place also checks if the summon was deleted on placement.
+- Fixed: in @SpellEffect and @Effect the explode flag of the spell effect was set as LOCAL.Explode but read back as LOCAL.EffectExplode, so the explosion was always lost. It's now LOCAL.EffectExplode in both places.
+- Fixed: the weather made the light darker with clear weather and not with rain: WEATHER_DRY (0xFF) and WEATHER_DEFAULT (0xFE) aren't 0, WEATHER_RAIN is. Now rain, storm and snow are 2 light levels darker at night and 4 during the day, clouds 1 and 2: a fixed amount, the random one changed on every tick. The light is also updated when the weather changes, in the sector tick (it was calculated before the change) and with SetWeather (DRY/RAIN/SNOW, RAINCHANCE, COLDCHANCE).
+
+30-10-2026, DavideRei
+- Added: MountHeight=2 in sphere.ini: like MountHeight=1 (can't enter under a roof while mounted) but for players only, mounted NPCs can walk into the buildings.
+    The same rule applies to the other MountHeight checks (teleport, summon, mount, FIX).
 - Fixed: BREAK (or CONTINUE on the last iteration) inside an IF in a script loop (FOR, WHILE, FORCHARS, FORITEMS, FORCONT*, FORCHARLAYER, FORCHARMEMORYTYPE...): the rest of the loop block was skipped from the middle, so the first ENDIF met was taken as the end of the block and the following lines were executed in the wrong place.
 - Fixed: BREAK in FOROBJS stopped only the items pass, the chars pass was executed anyway.
