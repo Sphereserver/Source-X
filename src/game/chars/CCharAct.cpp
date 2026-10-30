@@ -3989,7 +3989,7 @@ bool CChar::Horse_Mount(CChar *pHorse)
 		return false;
 	}
 
-	if ( g_Cfg.m_iMountHeight )
+	if ( IsMountHeightRestricted() )
 	{
 		if ( !IsVerticalSpace(GetTopPoint(), true) )	// is there space for the char + mount?
 		{
