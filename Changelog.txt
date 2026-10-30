@@ -4206,6 +4206,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 30-10-2026, DavideRei
 - Added: MountHeight=2 in sphere.ini: like MountHeight=1 (can't enter under a roof while mounted) but for players only, mounted NPCs can walk into the buildings.
     The same rule applies to the other MountHeight checks (teleport, summon, mount, FIX).
+- Fixed: a random choice in REAP of a REGIONRESOURCE ({i_ore_iron 1 i_ore_gold 1}) was evaluated only once, when the script was loaded: every gather gave the same item until the next resync. It's now evaluated again on every gather.
 - Fixed: BREAK (or CONTINUE on the last iteration) inside an IF in a script loop (FOR, WHILE, FORCHARS, FORITEMS, FORCONT*, FORCHARLAYER, FORCHARMEMORYTYPE...): the rest of the loop block was skipped from the middle, so the first ENDIF met was taken as the end of the block and the following lines were executed in the wrong place.
 - Fixed: BREAK in FOROBJS stopped only the items pass, the chars pass was executed anyway.
 - Changed: .LAST and .SELF don't log an error anymore when there is no target cursor open (they are often used in client macros).
