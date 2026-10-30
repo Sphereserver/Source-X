@@ -497,6 +497,7 @@ private:
 	void FixClimbHeight();
 	bool MoveToRoom( CRegion * pNewRoom, bool fAllowReject);
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
+	bool IsMountHeightRestricted() const;
 
 public:
     [[nodiscard]] RETURNS_NOTNULL

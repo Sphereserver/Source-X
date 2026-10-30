@@ -712,14 +712,13 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 	byte uiTargLight = (byte)std::min((int)UINT8_MAX, (fNight) ? g_Cfg.m_iLightNight : g_Cfg.m_iLightDay);	// Target light level.
 
 	// Check for clouds...if it is cloudy, then we don't even need to check for the effects of the moons...
-	if ( GetWeather())
-	{
-		// Clouds of some sort...
-		if (fNight)
-			uiTargLight += byte( g_Rand.Get16ValFast( 2 ) + 1 );	// 1-2 light levels darker if cloudy at night
-		else
-			uiTargLight += byte( g_Rand.Get16ValFast( 4 ) + 1 );	// 1-4 light levels darker if cloudy during the day.
-	}
+	// WEATHER_DRY and WEATHER_DEFAULT aren't 0 (WEATHER_RAIN is): check the cloudy types one by one.
+	// A fixed amount, not a random one: the light is recalculated on every tick and it would flicker.
+	const WEATHER_TYPE weather = GetWeather();
+	if ( (weather == WEATHER_RAIN) || (weather == WEATHER_STORM) || (weather == WEATHER_SNOW) )
+		uiTargLight += (fNight ? 2 : 4);	// rain, storm or snow: 2 light levels darker at night, 4 during the day
+	else if ( weather == WEATHER_CLOUDY )
+		uiTargLight += (fNight ? 1 : 2);	// just cloudy: 1 light level darker at night, 2 during the day
 
 	if ( fNight )
 	{
@@ -888,11 +887,20 @@ void CSector::SetWeather( WEATHER_TYPE w )
 
 	m_Env.m_Weather = w;
 
+	// The clouds change the light level too
+	const byte bLightPrv = m_Env.m_Light;
+	m_Env.m_Light = GetLightCalc( false );
+	const bool fLightChange = (m_Env.m_Light != bLightPrv);
+
 	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
 		if ( pChar->IsClientActive())
+		{
 			pChar->GetClientActive()->addWeather( w );
+			if ( fLightChange && !pChar->IsStatFlag( STATF_DEAD | STATF_NIGHTSIGHT ))
+				pChar->GetClientActive()->addLight();
+		}
 
 		if ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) )
             pChar->OnTrigger( CTRIG_EnvironChange, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pChar );
@@ -1269,6 +1277,12 @@ bool CSector::_OnTick()
 		{
 			fWeatherChange = true;
 			fEnvironChange = true;
+
+			// The light was calculated above with the previous weather
+			const byte bLightWeatherPrv = m_Env.m_Light;
+			m_Env.m_Light = GetLightCalc( false );
+			if ( m_Env.m_Light != bLightWeatherPrv )
+				fLightChange = true;
 		}
 	}
 

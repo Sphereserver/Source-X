@@ -1051,8 +1051,10 @@ int CItemBase::GetMakeValue( int iQualityLevel )
 void CItemBase::ResetMakeValue()
 {
 	ADDTOCALLSTACK("CItemBase::ResetMakeValue");
-	m_values.m_iLo = INT32_MIN;
-	m_values.m_iHi = INT32_MIN;
+	// Use the same "not calculated yet" marker checked by GetMakeValue (INT64_MIN). With INT32_MIN the value wasn't
+	//  recalculated at all: it became abs(INT32_MIN), so an itemdef without value suddenly had one, and its new
+	//  instances were created as CItemVendable (with a QUALITY that can't be loaded back at the next startup).
+	m_values.Init();
 	GetMakeValue(0);
 }
 
