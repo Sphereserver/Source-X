@@ -4179,8 +4179,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
     Defines the maximum range NPCs can target with spells (default value is 10). Override tag to change the range for a single NPC.
 
 21-10-2026, DavideRei
-- Added: MountHeight=2 in sphere.ini: like MountHeight=1 (can't enter under a roof while mounted) but for players only, mounted NPCs can walk into the buildings.
-    The same rule applies to the other MountHeight checks (teleport, summon, mount, FIX).
 - Added: LDB.ESCAPEDATA <text> (like MDB.ESCAPEDATA for MySQL): returns the text with every single quote doubled, to safely put it between single quotes in a SQLite statement.
 - Added: SkillDecay setting in sphere.ini (default 1). With SkillDecay=0 the skills locked down (arrow down) don't decay anymore while the other skills are raised.
 - Added: ARGN1 in @StepStealth trigger (R/W): how many stealth steps the move consumes. Default 2 if running or hovering, 1 otherwise.
@@ -4204,3 +4202,9 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Fixed: Animate Dead raised the corpse even when the summoned creature died while being placed (on a damaging field or a trap), using a dead or deleted char. Spell_Summon_Place also checks if the summon was deleted on placement.
 - Fixed: in @SpellEffect and @Effect the explode flag of the spell effect was set as LOCAL.Explode but read back as LOCAL.EffectExplode, so the explosion was always lost. It's now LOCAL.EffectExplode in both places.
 - Fixed: the weather made the light darker with clear weather and not with rain: WEATHER_DRY (0xFF) and WEATHER_DEFAULT (0xFE) aren't 0, WEATHER_RAIN is. Now rain, storm and snow are 2 light levels darker at night and 4 during the day, clouds 1 and 2: a fixed amount, the random one changed on every tick. The light is also updated when the weather changes, in the sector tick (it was calculated before the change) and with SetWeather (DRY/RAIN/SNOW, RAINCHANCE, COLDCHANCE).
+
+30-10-2026, DavideRei
+- Added: MountHeight=2 in sphere.ini: like MountHeight=1 (can't enter under a roof while mounted) but for players only, mounted NPCs can walk into the buildings.
+    The same rule applies to the other MountHeight checks (teleport, summon, mount, FIX).
+- Fixed: BREAK (or CONTINUE on the last iteration) inside an IF in a script loop (FOR, WHILE, FORCHARS, FORITEMS, FORCONT*, FORCHARLAYER, FORCHARMEMORYTYPE...): the rest of the loop block was skipped from the middle, so the first ENDIF met was taken as the end of the block and the following lines were executed in the wrong place.
+- Fixed: BREAK in FOROBJS stopped only the items pass, the chars pass was executed anyway.
