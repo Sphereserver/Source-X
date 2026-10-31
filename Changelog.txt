@@ -4210,3 +4210,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Fixed: BREAK (or CONTINUE on the last iteration) inside an IF in a script loop (FOR, WHILE, FORCHARS, FORITEMS, FORCONT*, FORCHARLAYER, FORCHARMEMORYTYPE...): the rest of the loop block was skipped from the middle, so the first ENDIF met was taken as the end of the block and the following lines were executed in the wrong place.
 - Fixed: BREAK in FOROBJS stopped only the items pass, the chars pass was executed anyway.
 - Changed: .LAST and .SELF don't log an error anymore when there is no target cursor open (they are often used in client macros).
+
+31-10-2026, DavideRei
+- Fixed: advanced LOS: the fix for the stacked items blocking the view never worked for the statics, the offset of the static in its 8x8 map block (0-7) was compared with the world coordinates of the target. It now works like for the dynamic items: the statics on the target tile, between the feet and the eyes of the char, don't block the LOS.
+- Fixed: advanced LOS: the minimum Z of the 3x3 tiles around the terrain tile was calculated only inside the 8x8 map block, ignoring the tiles of the neighbouring blocks.
