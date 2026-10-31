@@ -4210,3 +4210,10 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Fixed: BREAK (or CONTINUE on the last iteration) inside an IF in a script loop (FOR, WHILE, FORCHARS, FORITEMS, FORCONT*, FORCHARLAYER, FORCHARMEMORYTYPE...): the rest of the loop block was skipped from the middle, so the first ENDIF met was taken as the end of the block and the following lines were executed in the wrong place.
 - Fixed: BREAK in FOROBJS stopped only the items pass, the chars pass was executed anyway.
 - Changed: .LAST and .SELF don't log an error anymore when there is no target cursor open (they are often used in client macros).
+
+31-10-2026, DavideRei
+- Fixed: ISNEARTYPE (with .P, on points and in every hardcoded search using it, like forge, anvil and fire) could miss the statics in the last map block of the search area: the 8x8 blocks were walked in steps of 8 from the edge of the area instead of from the start of a block. At x=3224, a static at the same x with distance 1 was found only with distance 4.
+- Fixed: ISNEARTYPE ignored the arguments after the distance when they were separated by a comma (<ISNEARTYPE t_forge,3,1>), only spaces worked. Scripts passing the 3rd argument with a comma will now really search in the multis.
+- Fixed: the 4th argument of ISNEARTYPE was used only by ISNEARTYPE.P and only with the 3rd argument set. It now works in every form and on its own. It keeps only what has exactly the same Z of the caller, for items, terrain, statics and multi components, not only for the multis.
+- Fixed: ISNEARTYPETOP with a distance searched the statics only in the 8x8 map block of the point, now in all the blocks touched by the search area. The statics of the neighbouring blocks now compete for the top too.
+- Fixed: ISNEARTYPETOP calculated the position of the multi components from the searched point instead of from the multi.

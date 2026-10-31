@@ -445,6 +445,7 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 			pMulti = g_Cfg.GetMultiItemDefs(pItem);
 			if ( !pMulti )
 				continue;
+			const CPointMap& ptMulti = pItem->GetTopPoint();	// the component offsets are relative to the multi, not to pt
 			size_t iMultiQty = pMulti->GetItemCount();
 			for ( size_t iMulti = 0; iMulti < iMultiQty; pItemDef = nullptr, pMultiItem = nullptr, Height = 0, ++iMulti )
 			{
@@ -460,7 +461,7 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 				if ( !pMultiItem->m_visible )
 					continue;
 
-				ptTest = CPointMap( pMultiItem->m_dx + pt.m_x, pMultiItem->m_dy + pt.m_y, (char)( pMultiItem->m_dz + pt.m_z ), pt.m_map );
+				ptTest = CPointMap( pMultiItem->m_dx + ptMulti.m_x, pMultiItem->m_dy + ptMulti.m_y, (char)( pMultiItem->m_dz + ptMulti.m_z ), pt.m_map );
 
 				pItemDef = CItemBase::FindItemBase( pMultiItem->GetDispID() );
 				if ( pItemDef == nullptr )
@@ -509,75 +510,83 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 		}
 	}
 
-	// STATIC - checks one 8x8 block
-	const CServerMapBlock * pMapBlock = GetMapBlock( pt );
-	ASSERT( pMapBlock );
-
-	uint iStaticQty = pMapBlock->m_Statics.GetStaticQty();
-	if ( iStaticQty > 0 )  // no static items here.
-	{
-		const CUOStaticItemRec * pStatic = nullptr;
-
-		for ( uint i = 0; i < iStaticQty; ++i, pStatic = nullptr, Height = 0, pItemDef = nullptr )
-		{
-			pStatic = pMapBlock->m_Statics.GetStatic( i );
-
-			ptTest = CPointMap( pStatic->m_x + pMapBlock->m_x, pStatic->m_y + pMapBlock->m_y, pStatic->m_z, pt.m_map );
-
-			pItemDef = CItemBase::FindItemBase( pStatic->GetDispID() );
-			if ( pItemDef == nullptr )
-				continue;
-
-			//DEBUG_ERR(("pStatic->GetDispID() %d; name %s; pStatic->m_z %d\n",pStatic->GetDispID(),pItemDef->GetName(),pStatic->m_z));
-			Height = pItemDef->GetHeight();
-			if ( pItemDef->GetID() != pStatic->GetDispID() ) //not a parent item
-			{
-				pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pStatic->GetDispID()));
-				if ( ! pDupeDef )
-				{
-					g_Log.EventDebug("Failed to get non-parent reference (static) (DispID 0%x) (X: %d Y: %d Z: %d)\n",pStatic->GetDispID(),ptTest.m_x,ptTest.m_y,ptTest.m_z);
-					Height = pItemDef->GetHeight();
-				}
-				else
-					Height = pDupeDef->GetHeight();
-			}
-			ptTest.m_z = minimum(ptTest.m_z + Height, UO_SIZE_Z); //height + current position = the top point
-
-			if ( pt.GetDist( ptTest ) > iDistance )
-				continue;
-
-			//if ( ptElem[2].m_z > pStatic->m_z )
-			if ( ptElem[2].m_z > ptTest.m_z )
-				continue;
-
-			if ( ((( pStatic->m_z - pt.m_z ) > 0) && ( pStatic->m_z - pt.m_z ) > RESOURCE_Z_CHECK ) || ((( pt.m_z - pStatic->m_z ) < 0) && (( pt.m_z - pStatic->m_z ) < - RESOURCE_Z_CHECK )))
-				continue;
-
-			if (( ptTest.m_z < ptElem[2].m_z ) || (( ptTest.m_z == ptElem[2].m_z ) && ( fElem[2] )))
-				continue;
-
-			ptElem[2] = ptTest;
-			fElem[2] = false;
-
-			//DEBUG_ERR(("static pItemDef->IsType( iType %d) %d;pItemDef->GetType() %d;pItemDef->GetID() %d;pItemDef->GetDispID() %d\n",iType,pItemDef->IsType( iType ),pItemDef->GetType(),pItemDef->GetID(),pItemDef->GetDispID()));
-			if ( pItemDef->IsType( iType ) )
-			{
-				//DEBUG_ERR(("found %d; ptTest: %d,%d,%d\n",__LINE__,ptTest.m_x,ptTest.m_y,ptTest.m_z));
-				fElem[2] = true;
-				//DEBUG_ERR(("ptElem[iRetElem].m_z %d, ptElem[2].m_z %d\n",ptElem[iRetElem].m_z,ptElem[2].m_z));
-				//if ( ptElem[iRetElem].m_z > ptElem[2].m_z )
-				if ( ptElem[2].m_z > ptElem[iRetElem].m_z )
-					iRetElem = 2;
-			}
-		}
-	}
-
-	// Check for appropriate terrain type
+	// STATIC - checks every 8x8 block touched by the search area
 	CRectMap rect;
 	rect.SetRect( pt.m_x - iDistance, pt.m_y - iDistance,
 		pt.m_x + iDistance + 1, pt.m_y + iDistance + 1,
 		pt.m_map);
 
+	for ( int xBlock = UO_BLOCK_ALIGN(rect.m_left); xBlock < rect.m_right; xBlock += UO_BLOCK_SIZE )
+	{
+		for ( int yBlock = UO_BLOCK_ALIGN(rect.m_top); yBlock < rect.m_bottom; yBlock += UO_BLOCK_SIZE )
+		{
+			const CPointMap ptBlock((short)xBlock, (short)yBlock, pt.m_z, pt.m_map);
+			if ( !ptBlock.IsValidXY() )	// the rect can go past the map edges
+				continue;
+
+			const CServerMapBlock * pMapBlock = GetMapBlock( ptBlock );
+			if ( !pMapBlock )
+				continue;
+
+			const uint iStaticQty = pMapBlock->m_Statics.GetStaticQty();
+			const CUOStaticItemRec * pStatic = nullptr;
+
+			for ( uint i = 0; i < iStaticQty; ++i, pStatic = nullptr, Height = 0, pItemDef = nullptr )
+			{
+				pStatic = pMapBlock->m_Statics.GetStatic( i );
+
+				ptTest = CPointMap( pStatic->m_x + pMapBlock->m_x, pStatic->m_y + pMapBlock->m_y, pStatic->m_z, pt.m_map );
+
+				pItemDef = CItemBase::FindItemBase( pStatic->GetDispID() );
+				if ( pItemDef == nullptr )
+					continue;
+
+				//DEBUG_ERR(("pStatic->GetDispID() %d; name %s; pStatic->m_z %d\n",pStatic->GetDispID(),pItemDef->GetName(),pStatic->m_z));
+				Height = pItemDef->GetHeight();
+				if ( pItemDef->GetID() != pStatic->GetDispID() ) //not a parent item
+				{
+					pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pStatic->GetDispID()));
+					if ( ! pDupeDef )
+					{
+						g_Log.EventDebug("Failed to get non-parent reference (static) (DispID 0%x) (X: %d Y: %d Z: %d)\n",pStatic->GetDispID(),ptTest.m_x,ptTest.m_y,ptTest.m_z);
+						Height = pItemDef->GetHeight();
+					}
+					else
+						Height = pDupeDef->GetHeight();
+				}
+				ptTest.m_z = minimum(ptTest.m_z + Height, UO_SIZE_Z); //height + current position = the top point
+
+				if ( pt.GetDist( ptTest ) > iDistance )
+					continue;
+
+				//if ( ptElem[2].m_z > pStatic->m_z )
+				if ( ptElem[2].m_z > ptTest.m_z )
+					continue;
+
+				if ( ((( pStatic->m_z - pt.m_z ) > 0) && ( pStatic->m_z - pt.m_z ) > RESOURCE_Z_CHECK ) || ((( pt.m_z - pStatic->m_z ) < 0) && (( pt.m_z - pStatic->m_z ) < - RESOURCE_Z_CHECK )))
+					continue;
+
+				if (( ptTest.m_z < ptElem[2].m_z ) || (( ptTest.m_z == ptElem[2].m_z ) && ( fElem[2] )))
+					continue;
+
+				ptElem[2] = ptTest;
+				fElem[2] = false;
+
+				//DEBUG_ERR(("static pItemDef->IsType( iType %d) %d;pItemDef->GetType() %d;pItemDef->GetID() %d;pItemDef->GetDispID() %d\n",iType,pItemDef->IsType( iType ),pItemDef->GetType(),pItemDef->GetID(),pItemDef->GetDispID()));
+				if ( pItemDef->IsType( iType ) )
+				{
+					//DEBUG_ERR(("found %d; ptTest: %d,%d,%d\n",__LINE__,ptTest.m_x,ptTest.m_y,ptTest.m_z));
+					fElem[2] = true;
+					//DEBUG_ERR(("ptElem[iRetElem].m_z %d, ptElem[2].m_z %d\n",ptElem[iRetElem].m_z,ptElem[2].m_z));
+					//if ( ptElem[iRetElem].m_z > ptElem[2].m_z )
+					if ( ptElem[2].m_z > ptElem[iRetElem].m_z )
+						iRetElem = 2;
+				}
+			}
+		}
+	}
+
+	// Check for appropriate terrain type
 	const CUOMapMeter * pMeter = nullptr;
 	for ( int x = rect.m_left; x < rect.m_right; ++x, pMeter = nullptr )
 	{
@@ -651,12 +660,12 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 #undef RESOURCE_Z_CHECK
 }
 
-bool CWorldMap::IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti ) // static
+bool CWorldMap::IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti, bool fLimitZ ) // static
 {
 	ADDTOCALLSTACK("CWorldMap::IsItemTypeNear");
 	if ( !pt.IsValidPoint() )
 		return false;
-	const CPointMap ptn = FindItemTypeNearby( pt, iType, iDistance, fCheckMulti );
+	const CPointMap ptn = FindItemTypeNearby( pt, iType, iDistance, fCheckMulti, fLimitZ );
 	return ptn.IsValidPoint();
 }
 
@@ -746,11 +755,15 @@ CPointMap CWorldMap::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int
 	const CUOStaticItemRec * pStatic = nullptr;
 	const CItemBase * pItemDef = nullptr;
 
-	for (int x = rect.m_left; x < rect.m_right; x += UO_BLOCK_SIZE, pMapBlock = nullptr )
+	// Walk the 8x8 blocks touched by the rect: start from the block boundary, or stepping by UO_BLOCK_SIZE can skip the last block.
+	for (int x = UO_BLOCK_ALIGN(rect.m_left); x < rect.m_right; x += UO_BLOCK_SIZE, pMapBlock = nullptr )
 	{
-		for ( int y = rect.m_top; y < rect.m_bottom; y += UO_BLOCK_SIZE, pMapBlock = nullptr )
+		for ( int y = UO_BLOCK_ALIGN(rect.m_top); y < rect.m_bottom; y += UO_BLOCK_SIZE, pMapBlock = nullptr )
 		{
             const CPointMap ptTest((short)x, (short)y, pt.m_z, pt.m_map);
+			if ( !ptTest.IsValidXY() )	// the rect can go past the map edges
+				continue;
+
 			pMapBlock = GetMapBlock( ptTest );
 
 			if ( !pMapBlock )
