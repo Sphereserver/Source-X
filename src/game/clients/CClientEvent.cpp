@@ -10,6 +10,7 @@
 #include "../items/CItemContainer.h"
 #include "../items/CItemMessage.h"
 #include "../items/CItemMulti.h"
+#include "../items/CItemStone.h"
 #include "../items/CItemVendable.h"
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../CSector.h"
@@ -2037,6 +2038,33 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 	pChar->NPC_OnHear(&pszText[i], m_pChar);
 }
 
+static CItemStone * CClientEvent_GetGuildStone(CChar * pChar)
+{
+	CItemStone * pStone = pChar->Guild_Find(MEMORY_GUILD);
+	if (pStone == nullptr)
+		return nullptr;
+
+	CStoneMember * pMember = pStone->GetMember(pChar);
+	return (pMember && pMember->IsPrivMember()) ? pStone : nullptr;
+}
+
+static void CClientEvent_SendGuildChat(CItemStone * pStone, CChar * pSpeaker, const nachar * pText, HUE_TYPE hue, FONT_TYPE font, CLanguageID lang)
+{
+	for (CStoneMember * pMember = static_cast<CStoneMember *>(pStone->GetContainerHead()); pMember != nullptr; pMember = pMember->GetNext())
+	{
+		if (!pMember->IsPrivMember())
+			continue;
+
+		CChar * pGuildChar = pMember->GetLinkUID().CharFind();
+		if ((pGuildChar == nullptr) || (pGuildChar->Guild_Find(MEMORY_GUILD) != pStone))
+			continue;
+
+		CClient * pClient = pGuildChar->GetClientActive();
+		if (pClient != nullptr)
+			pClient->addBarkUNICODE(pText, pSpeaker, hue, TALKMODE_GUILD, font, lang);
+	}
+}
+
 // PC speech: response to ASCII speech request
 void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool fNoStrip)
 {
@@ -2051,6 +2079,14 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 	// These modes are server->client only
 	if ( mode == 1 || mode == 3 || mode == 4 || mode == 5 || mode == 6 || mode == 7 || mode == 10 || mode == 11 || mode == 12 )
 		return;
+
+	CItemStone * pGuildStone = nullptr;
+	if (mode == TALKMODE_GUILD)
+	{
+		pGuildStone = CClientEvent_GetGuildStone(m_pChar);
+		if (pGuildStone == nullptr)
+			return;
+	}
 
 	if ( (wHue < 2) || (wHue > HUE_DYE_HIGH) )
 		wHue = HUE_SAY_DEF;
@@ -2098,8 +2134,8 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 				GetSocketID(), m_pChar->GetName(), pszText, mode, fCancelSpeech ? " (muted)" : "");
 		}
 
-		// Guild and Alliance mode will not pass this
-		if ( mode == 13 || mode == 14 )
+		// Alliance mode is not supported.
+		if ( mode == TALKMODE_ALLIANCE )
 			return;
 
 		Str_CopyLimitNull(z, pszText, sizeof(z));
@@ -2119,6 +2155,18 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 					if (( z[i] >= 'A' ) && ( z[i] <= 'Z' ))
 						z[i] += 0x20;
 			}
+		}
+
+		if (mode == TALKMODE_GUILD)
+		{
+			if (!fCancelSpeech && (len <= 128))
+			{
+				nachar wText[MAX_TALK_BUFFER];
+				const int textLen = CvtSystemToNETUTF16(wText, ARRAY_COUNT(wText), z, (int)strlen(z));
+				if (textLen > 0)
+					CClientEvent_SendGuildChat(pGuildStone, m_pChar, wText, wHue, m_pChar->m_fonttype, pAccount->m_lang);
+			}
+			return;
 		}
 
 		if ( !fCancelSpeech && ( len <= 128 ) ) // From this point max 128 chars
@@ -2150,6 +2198,14 @@ void CClient::Event_TalkUNICODE(nachar* wszText, int iTextLen, HUE_TYPE wHue, TA
 	// These modes are server->client only
 	if ( mMode == 1 || mMode == 3 || mMode == 4 || mMode == 5 || mMode == 6 || mMode == 7 || mMode == 10 || mMode == 11 || mMode == 12 )
 		return;
+
+	CItemStone * pGuildStone = nullptr;
+	if (mMode == TALKMODE_GUILD)
+	{
+		pGuildStone = CClientEvent_GetGuildStone(m_pChar);
+		if (pGuildStone == nullptr)
+			return;
+	}
 
 	if ((wHue < 2) || (wHue > HUE_DYE_HIGH))
 		wHue = HUE_SAY_DEF;
@@ -2183,8 +2239,8 @@ void CClient::Event_TalkUNICODE(nachar* wszText, int iTextLen, HUE_TYPE wHue, TA
 				m_pChar->GetName(), pAccount->m_lang.GetStr(), pszText, mMode, fCancelSpeech ? " (muted)" : "" );
 		}
 
-		// Guild and Alliance mode will not pass this.
-		if ( mMode == 13 || mMode == 14 )
+		// Alliance mode is not supported.
+		if ( mMode == TALKMODE_ALLIANCE )
 			return;
 
 		if ( g_Cfg.m_fSuppressCapitals )
@@ -2204,6 +2260,13 @@ void CClient::Event_TalkUNICODE(nachar* wszText, int iTextLen, HUE_TYPE wHue, TA
 
 				iLen = CvtSystemToNETUTF16(wszText, iTextLen, szText, (int)chars);
 			}
+		}
+
+		if (mMode == TALKMODE_GUILD)
+		{
+			if (!fCancelSpeech && (iLen <= 128))
+				CClientEvent_SendGuildChat(pGuildStone, m_pChar, puText, wHue, font, pAccount->m_lang);
+			return;
 		}
 
 		if ( !fCancelSpeech && ( iLen <= 128 ) ) // From this point max 128 chars
