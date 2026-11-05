@@ -2929,8 +2929,9 @@ byte CClient::Setup_Play( uint iSlot ) // After hitting "Play Character" button
 	if ( pCharLast && pAccount->IsMyAccountChar( pCharLast ) && pAccount->GetPrivLevel() <= PLEVEL_GM &&
 		! pCharLast->IsDisconnected() && (pChar->GetUID() != pCharLast->GetUID()))
 	{
+	    // Login was successful, display warning only.
 		addIdleWarning(PacketWarningMessage::CharacterInWorld);
-		return(PacketLoginError::CharIdle);
+		return PacketLoginError::Success;
 	}
 
 	// LastLogged update

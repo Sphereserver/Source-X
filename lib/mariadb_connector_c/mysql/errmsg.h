@@ -107,15 +107,24 @@ extern const char *mariadb_client_errors[];	/* Error messages */
 #define CR_ERR_NET_WRITE 5014
 #define CR_ERR_NET_UNCOMPRESS 5015
 #define CR_ERR_STMT_PARAM_CALLBACK 5016
+#define CR_ERR_BINLOG_UNCOMPRESS 5017
+#define CR_ERR_CHECKSUM_VERIFICATION_ERROR 5018
+#define CR_ERR_UNSUPPORTED_BINLOG_FORMAT 5019
+#define CR_UNKNOWN_BINLOG_EVENT 5020
+#define CR_BINLOG_ERROR 5021
+#define CR_BINLOG_INVALID_FILE 5022
+#define CR_BINLOG_SEMI_SYNC_ERROR 5023
+#define CR_INVALID_CLIENT_FLAG 5024
+#define CR_ERR_MISSING_ERROR_INFO 5026
 
 /* Always last, if you add new error codes please update the
    value for CR_MARIADB_LAST_ERROR */
-#define CR_MARIADB_LAST_ERROR CR_ERR_STMT_PARAM_CALLBACK
+#define CR_MARIADB_LAST_ERROR CR_ERR_MISSING_ERROR_INFO
 
 #endif
 
-#define IS_MYSQL_ERROR(code) ((code) > CR_MIN_ERROR && (code) < CR_MYSQL_LAST_ERROR)
-#define IS_MARIADB_ERROR(code) ((code) > CER_MIN_ERROR && (code) < CR_MARIADB_LAST_ERROR)
+#define IS_MYSQL_ERROR(code) ((code) > CR_MIN_ERROR && (code) <= CR_MYSQL_LAST_ERROR)
+#define IS_MARIADB_ERROR(code) ((code) > CER_MIN_ERROR && (code) <= CR_MARIADB_LAST_ERROR)
 
 #define ER(code) IS_MYSQL_ERROR((code)) ? client_errors[(code) - CR_MIN_ERROR] : \
                  IS_MARIADB_ERROR((code)) ?  mariadb_client_errors[(code) - CER_MIN_ERROR] : \

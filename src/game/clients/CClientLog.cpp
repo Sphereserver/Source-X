@@ -403,23 +403,23 @@ bool CClient::OnRxConsole( const byte * pData, uint iLen )
 						m_Targ_Text.Clear();
 						return OnRxConsoleLoginComplete();
 					}
-					else if ( ! sMsg.IsEmpty())
-					{
-						SysMessage( sMsg );
-						return false;
-					}
-					m_Targ_Text.Clear();
+                    if (!sMsg.IsEmpty())
+                    {
+                        SysMessage(sMsg);
+                        return false;
+                    }
+                    m_Targ_Text.Clear();
 				}
 				return true;
 			}
-			else
-			{
-				iRet = g_Serv.OnConsoleCmd( m_Targ_Text, this );
+            const CSString sMsg = m_Targ_Text;
+            iRet = g_Serv.OnConsoleCmd(m_Targ_Text, this);
 
-				if (g_Cfg.m_fTelnetLog && GetPrivLevel() >= g_Cfg.m_iCommandLog)
-					g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), static_cast<lpctstr>(m_Targ_Text), iRet);
-			}
-		}
+            if (g_Cfg.m_fTelnetLog && GetPrivLevel() >= g_Cfg.m_iCommandLog)
+            {
+                g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), static_cast<lpctstr>(sMsg), iRet);
+            }
+        }
 	}
 	return true;
 }
@@ -553,6 +553,12 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 				 (iLen != 3 || pData[1] != '\n' || pData[2] != '\0') )
 				break;
 
+			if ( g_Cfg.m_fUseTelnet == false )
+			{
+				g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Telnet console request from %s has been rejected.\n", GetSocketID(), GetPeerStr());
+				return false;
+			}
+
 			// enter into remote admin mode. (look for password).
 			SetConnectType( CONNECT_TELNET );
 			m_zLogin[0] = 0;
@@ -594,6 +600,12 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 				 (iLen != 3 || pData[1] != '\r' || pData[2] != '\n') &&
 				 (iLen != 3 || pData[1] != '\n' || pData[2] != '\0') )
 				break;
+
+			if ( g_Cfg.m_fUseAxis == false )
+			{
+				g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Axis connection request from %s has been rejected.\n", GetSocketID(), GetPeerStr());
+				return false;
+			}
 
 			// enter into Axis mode. (look for password).
 			SetConnectType( CONNECT_AXIS );

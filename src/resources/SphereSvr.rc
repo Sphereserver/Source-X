@@ -132,7 +132,7 @@ BEGIN
     LTEXT           "This software makes use of:",7,10,45,100,8
     LTEXT           "DEELX Regular Expression Engine (v1.2)\nCopyright (C) 2006 RegExLab.com",8,21,60,300,16
     LTEXT           "libev library (v4.24)\nGeneral Public License v2 (GPLv2) 2007-2013 Marc Alexander Lehmann",9,21,80,300,16
-    LTEXT           "MariaDB C Connector (v3.3.4)\nLesser General Public License v2.1 (LGPLv2.1) 2009-2026 MariaDB Foundation",10,21,100,300,16
+    LTEXT           "MariaDB C Connector (v3.3.21)\nLesser General Public License v2.1 (LGPLv2.1) 2009-2026 MariaDB Foundation",10,21,100,300,16
     LTEXT           "SQLite (v3.49.1)\nGeneral Public License (GPL) 2000-2026",11,21,120,300,16
     LTEXT           "Twofish encryption library (v1.0)\nCopyright (C) 1998 Bruce Schneier, Doug Whiting, John Kelsey, Chris Hall, David Wagner",12,21,140,300,16
     LTEXT           "Zlib data compression library (v1.3.1)\nCopyright (C) 1995-2026 Jean-loup Gailly, Mark Adler",13,21,160,300,16
@@ -167,6 +167,7 @@ BEGIN
 	BEGIN
 		MENUITEM "Copy",			IDM_EDIT_COPY
 		MENUITEM SEPARATOR
+        MENUITEM "Console Clear",   IDM_CLEAR_CONSOLE
 		MENUITEM "Resync Pause",	IDM_RESYNC_PAUSE
 		MENUITEM SEPARATOR
 		MENUITEM "Status...",		IDM_STATUS

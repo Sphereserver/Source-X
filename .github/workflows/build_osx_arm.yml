@@ -32,9 +32,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
+    - name: Remove untrusted Homebrew tap (pre-installed on runner)
+      run: brew untap aws/tap || true
+
     - name: Install prerequisites
       run:  |
             sw_vers
@@ -92,7 +95,7 @@ jobs:
           run-id: ${{ github.run_id }}
 
       - name: Create release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

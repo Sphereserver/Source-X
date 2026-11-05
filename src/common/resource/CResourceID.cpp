@@ -10,14 +10,22 @@ static constexpr lpctstr _ptcWarnInvalidResource = "Expected a valid ResourceID,
 
 CResourceIDBase::CResourceIDBase(RES_TYPE restype) // explicit
 {
-    // single instance type.
-    ASSERT(restype < RES_QTY);
+    if (restype >= RES_QTY)
+    {
+        g_Log.EventError("Expected a valid ResourceType, received invalid: %i!\n", restype);
+        return;
+    }
+    // Single instance type.
     m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT);
 }
 
 CResourceIDBase::CResourceIDBase(RES_TYPE restype, int iIndex) // explicit
 {
-    ASSERT(restype < RES_QTY);
+    if (restype >= RES_QTY)
+    {
+        g_Log.EventError("Expected a valid ResourceType, received invalid: %i!\n", restype);
+        return;
+    }
     m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | (iIndex & RES_INDEX_MASK);
 }
 
