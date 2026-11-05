@@ -4217,3 +4217,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Fixed: "Timer expired without DECAY flag" errors on lights: the burning timer wasn't cleared when a light was doused (usually a light put in a backpack while lit) or when an NPC put its light away in the morning.
 - Fixed: buffer over-reads and off-by-one writes reported by GCC (CLanguageID::Set, CScript::WriteKeyStr, text of unicode speech and language packets, Str_CopyLimitNull).
 - Changed: with EF_FollowerList, the followers that don't exist anymore or that have another owner are removed from the list when it's updated.
+
+05-11-2026, canerksk
+- Added: NAME.PREFIX and NAME.SUFFIX support for items in addItemName, matching existing addCharName behaviour.
