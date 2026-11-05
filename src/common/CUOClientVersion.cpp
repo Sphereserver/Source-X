@@ -275,10 +275,11 @@ void CUOClientVersion::ApplyVersionFromStringNewFormat(lptstr ptcVersion, bool f
     if (dot3 == np)
         goto ret_err;
 
-    const std::string_view sv1(sv.data(), dot1);
-    const std::string_view sv2(sv.data() + dot1 + 1, dot2 - dot1 - 1);
-    const std::string_view sv3(sv.data() + dot2 + 1, dot3 - dot2 - 1);
-    const std::string_view sv4(sv.data() + dot3 + 1);
+    // Using string instead of string_view here, because we need null-terminated strings for cstr_to_num.
+    const std::string sv1(sv.data(), dot1);
+    const std::string sv2(sv.data() + dot1 + 1, dot2 - dot1 - 1);
+    const std::string sv3(sv.data() + dot2 + 1, dot3 - dot2 - 1);
+    const std::string sv4(sv.data() + dot3 + 1);
 
     bool ok = true;
     try
