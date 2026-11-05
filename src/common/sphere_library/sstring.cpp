@@ -1016,11 +1016,12 @@ size_t Str_CopyLimitNull(lptstr_restrict pDst, lpctstr_restrict pSrc, size_t uiM
     // Reserve one byte for the string terminator
     const size_t uiCopyMax = uiMaxSize - 1;
 
-    // Find the terminator within the first copyMax bytes (fast memchr)
-    const void* nul = memchr(pSrc, '\0', uiCopyMax);
-    const size_t len = nul
-                          ? (static_cast<const char*>(nul) - pSrc)  // length up to the terminator
-                          : uiCopyMax;                                // no terminator found within limit
+    // Find the terminator within the first copyMax bytes.
+    // Not memchr: its bound is the size of the destination, which can be bigger than the source
+    //  object (GCC -Wstringop-overread when the call is inlined with a short source).
+    size_t len = 0;
+    while ((len < uiCopyMax) && (pSrc[len] != '\0'))
+        ++len;
 
     // Copy the determined length and append terminator
     memcpy(pDst, pSrc, len);
