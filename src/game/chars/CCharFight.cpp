@@ -334,7 +334,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 		return true;	// field spell ?
 	if (pCharSrc == this)
 		return true;	// self induced
-	if (IsStatFlag(STATF_DEAD|STATF_STONE))
+	if (IsStatFlag(STATF_DEAD|STATF_STONE|STATF_RIDDEN))	// a ridden or shrunken NPC isn't in the world
 		return false;
 
 	if (fShouldReveal)
@@ -1028,7 +1028,8 @@ effect_bounce:
 		return 0;
 
 	// Apply damage
-	SoundChar(CRESND_GETHIT);
+	if ( !Can(CAN_C_STATUE) )
+		SoundChar(CRESND_GETHIT);
 	UpdateStatVal( STAT_STR, -iDmg);
 	if ( pSrc->IsClientActive() )
 		pSrc->GetClientActive()->addHitsUpdate( this );	// always send updates to src
@@ -1057,7 +1058,7 @@ effect_bounce:
 		return iDmg;
 	}
 
-	if (m_atFight.m_iWarSwingState != WAR_SWING_SWINGING)	// don't interrupt my swing animation
+	if ((m_atFight.m_iWarSwingState != WAR_SWING_SWINGING) && !Can(CAN_C_STATUE))	// don't interrupt my swing animation (statues don't move)
 		UpdateAnimate(ANIM_GET_HIT);
 
 	return iDmg;

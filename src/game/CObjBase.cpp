@@ -643,6 +643,10 @@ void CObjBase::Emote(lpctstr pText, CClient * pClientExclude, bool fForcePossess
 	CObjBase *pObjTop = static_cast<CObjBase*>(GetTopLevelObj());
 	if ( !pObjTop )
 		return;
+	// A statue (CAN_C_STATUE, e.g. a petrified char) does not emote: timed effects like poison would still
+	//  show their emotes (and the temporary name) while the char is supposed to be a stone.
+	if ( pObjTop->IsChar() && pObjTop->Can(CAN_C_STATUE) )
+		return;
 
 	tchar *pszThem = Str_GetTemp();
 	tchar *pszYou = Str_GetTemp();
@@ -686,6 +690,10 @@ void CObjBase::EmoteObj(lpctstr pText)
 	CObjBase *pObjTop = static_cast<CObjBase*>(GetTopLevelObj());
 	if ( !pObjTop )
 		return;
+	// A statue (CAN_C_STATUE, e.g. a petrified char) does not emote: timed effects like poison would still
+	//  show their emotes (and the temporary name) while the char is supposed to be a stone.
+	if ( pObjTop->IsChar() && pObjTop->Can(CAN_C_STATUE) )
+		return;
 
 	tchar *pszYou = Str_GetTemp();
 
@@ -709,6 +717,10 @@ void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, b
 
 	CObjBase *pObjTop = static_cast<CObjBase*>(GetTopLevelObj());
 	if ( !pObjTop )
+		return;
+	// A statue (CAN_C_STATUE, e.g. a petrified char) does not emote: timed effects like poison would still
+	//  show their emotes (and the temporary name) while the char is supposed to be a stone.
+	if ( pObjTop->IsChar() && pObjTop->Can(CAN_C_STATUE) )
 		return;
 
 	tchar *pszThem = Str_GetTemp();

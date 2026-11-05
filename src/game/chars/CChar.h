@@ -497,6 +497,7 @@ private:
 	void FixClimbHeight();
 	bool MoveToRoom( CRegion * pNewRoom, bool fAllowReject);
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
+	bool IsMountHeightRestricted() const;
 
 public:
     [[nodiscard]] RETURNS_NOTNULL
@@ -1193,7 +1194,7 @@ public:
 	CChar * Use_Figurine( CItem * pItem, bool fCheckFollowerSlots = true );
     CItem * Make_Figurine( const CUID uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
-    bool FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots = 0, bool fCheckOnly = false );
+    bool FollowersUpdate(CChar *pCharPet, short iPetFollowerSlots = 0, bool fCheckOnly = false, bool fRemove = false );
     short GetFollowerSlots() const;
     short GetCurFollowers() const;
 
