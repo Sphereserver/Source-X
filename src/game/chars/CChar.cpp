@@ -589,7 +589,7 @@ void CChar::ClearPlayer()
 	{
 		if (g_Serv.GetServerMode() != ServMode::Exiting)
 		{
-			g_Log.EventWarn("Character '%s'(UID 0%x) on account '%s' as been deleted.\n", GetName(), (dword)GetUID(), pAccount->GetName());
+			g_Log.EventWarn("Character '%s'(UID 0%x) on account '%s' has been deleted.\n", GetName(), (dword)GetUID(), pAccount->GetName());
 		}
 
 		pAccount->DetachChar(this);	// unlink me from my account.
@@ -784,7 +784,7 @@ char CChar::GetFixZ( const CPointMap& pt, uint64 uiBlockFlags)
 			return pt.m_z;
 	}
 
-	if ( (uiHeightMount + pt.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_ALLMOVE) )
+	if ( (uiHeightMount + pt.m_z >= block.m_Top.m_z) && IsMountHeightRestricted() && !IsPriv(PRIV_ALLMOVE) )
 		return pt.m_z;
 
 	return block.m_Bottom.m_z;
@@ -2399,8 +2399,9 @@ do_default:
 
             CChar* pCharArg = CUID::CharFindFromUID(m_followers[uiIndex].uid);
             if (!pCharArg)
-                return false;
+                return true;    // The follower doesn't exist anymore: return 0 (sVal already set) instead of an error, so scripts can check it.
 
+            SKIP_SEPARATORS(ptcKey);
             if (*ptcKey == '\0')
             {
                 sVal.SetValTrue();
@@ -4802,7 +4803,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 			CChar * pChar = CUID::CharFindFromUID(s.GetArgDWVal()); // otherwise we try to run it from the CChar with the given UID.
             if (pChar)
-                return pChar->NPC_PetSetOwner(this);
+                return NPC_PetSetOwner(pChar);
             return false;   // Something went wrong, giving a warning of it.
         }
 

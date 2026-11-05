@@ -42,7 +42,7 @@ jobs:
             sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
 
     - name: Set up ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@v1.2.23
       with:
         key: ${{github.job}}
 

@@ -5373,6 +5373,10 @@ bool CItem::Use_Light()
 	else if ( IsType(IT_LIGHT_OUT) )
 	{
 		Sound(m_itLight.m_burned ? 0x4b8 : 0x3be);
+		// Clear the timer used to burn the light while it was lit: otherwise SetDecayTime does nothing (it doesn't
+		//  override a non-decay timer) and that timer expires later on a doused light
+		//  ("Timer expired without DECAY flag", usually on lights put in a backpack while lit).
+		_SetTimeout(-1);
 		SetDecayTime(0);
 	}
 

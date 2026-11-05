@@ -594,7 +594,7 @@ void CChar::NPC_PetClearOwners()
 	if ( pOwner && IsSetOF(OF_PetSlots) )
 	{
         const short iFollowerSlots = GetFollowerSlots();
-        pOwner->FollowersUpdate(this, -iFollowerSlots);
+        pOwner->FollowersUpdate(this, iFollowerSlots, false, true);
 	}
 }
 
