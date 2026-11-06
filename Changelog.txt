@@ -4211,6 +4211,21 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Fixed: BREAK in FOROBJS stopped only the items pass, the chars pass was executed anyway.
 - Changed: .LAST and .SELF don't log an error anymore when there is no target cursor open (they are often used in client macros).
 
-31-10-2026, DavideRei
+05-11-2026, DavideRei
+- Fixed: CURFOLLOWER.n of a follower that doesn't exist anymore returned an error instead of 0, and CURFOLLOWER.n.<property> didn't skip the separator before the property name.
+- Fixed: removing a follower with FOLLOWERSLOTS=0 (with OF_PetSlots) was handled as an addition, because the removal was requested passing the negative slots (-0 == 0). CChar::FollowersUpdate has now a fRemove argument. @FollowersUpdate arguments are unchanged (ARGN1 = 1 when removing, ARGN2 = slots).
+- Fixed: "Timer expired without DECAY flag" errors on lights: the burning timer wasn't cleared when a light was doused (usually a light put in a backpack while lit) or when an NPC put its light away in the morning.
+- Fixed: buffer over-reads and off-by-one writes reported by GCC (CLanguageID::Set, CScript::WriteKeyStr, text of unicode speech and language packets, Str_CopyLimitNull).
+- Changed: with EF_FollowerList, the followers that don't exist anymore or that have another owner are removed from the list when it's updated.
+
+05-11-2026, canerksk
+- Added: NAME.PREFIX and NAME.SUFFIX support for items in addItemName, matching existing addCharName behaviour.
+
+06-11-2026, DavideRei
+- Fixed: ISNEARTYPE (with .P, on points and in every hardcoded search using it, like forge, anvil and fire) could miss the statics in the last map block of the search area: the 8x8 blocks were walked in steps of 8 from the edge of the area instead of from the start of a block. At x=3224, a static at the same x with distance 1 was found only with distance 4.
+- Fixed: ISNEARTYPE ignored the arguments after the distance when they were separated by a comma (<ISNEARTYPE t_forge,3,1>), only spaces worked. Scripts passing the 3rd argument with a comma will now really search in the multis.
+- Fixed: the 4th argument of ISNEARTYPE was used only by ISNEARTYPE.P and only with the 3rd argument set. It now works in every form and on its own. It keeps only what has exactly the same Z of the caller, for items, terrain, statics and multi components, not only for the multis.
+- Fixed: ISNEARTYPETOP with a distance searched the statics only in the 8x8 map block of the point, now in all the blocks touched by the search area. The statics of the neighbouring blocks now compete for the top too.
+- Fixed: ISNEARTYPETOP calculated the position of the multi components from the searched point instead of from the multi.
 - Fixed: advanced LOS: the fix for the stacked items blocking the view never worked for the statics, the offset of the static in its 8x8 map block (0-7) was compared with the world coordinates of the target. It now works like for the dynamic items: the statics on the target tile, between the feet and the eyes of the char, don't block the LOS.
 - Fixed: advanced LOS: the minimum Z of the 3x3 tiles around the terrain tile was calculated only inside the 8x8 map block, ignoring the tiles of the neighbouring blocks.
