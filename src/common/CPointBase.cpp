@@ -731,14 +731,18 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 			int iType = g_Cfg.ResourceGetIndexType( RES_TYPEDEF, ptcKey );
 			int iDistance = 0;
 			bool bCheckMulti = false;
+			bool fLimitZ = false;
 
 			SKIP_IDENTIFIERSTRING( ptcKey );
 			SKIP_SEPARATORS( ptcKey );
 			SKIP_ARGSEP( ptcKey );
 
 			if ( *ptcKey ) iDistance = Exp_GetVal(ptcKey);
+			SKIP_ARGSEP( ptcKey );	// Exp_GetVal doesn't go past a comma
 			if ( *ptcKey ) bCheckMulti = Exp_GetVal(ptcKey) != 0;
-			sVal.FormatVal( CWorldMap::IsItemTypeNear(*this, IT_TYPE(iType), iDistance, bCheckMulti));
+			SKIP_ARGSEP( ptcKey );
+			if ( *ptcKey ) fLimitZ = Exp_GetVal(ptcKey) != 0;
+			sVal.FormatVal( CWorldMap::IsItemTypeNear(*this, IT_TYPE(iType), iDistance, bCheckMulti, fLimitZ));
 			break;
 		}
 		case PT_REGION:
