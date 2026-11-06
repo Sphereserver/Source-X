@@ -294,17 +294,22 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 						aaa
 						min_z is determined as a minimum of all a/X terrain, where X is ptNow
 						*/
-						byte pos_x = UO_BLOCK_OFFSET(ptNow.m_x) > 1 ? UO_BLOCK_OFFSET(ptNow.m_x - 1) : 0;
-						byte pos_y = UO_BLOCK_OFFSET(ptNow.m_y) > 1 ? UO_BLOCK_OFFSET(ptNow.m_y - 1) : 0;
-						const byte defx = UO_BLOCK_OFFSET(ptNow.m_x);
-						const byte defy = UO_BLOCK_OFFSET(ptNow.m_y);
-						min_z = pBlock->GetTerrain(pos_x, pos_y)->m_z;
-						max_z = pBlock->GetTerrain(defx, defy)->m_z;
-						for ( byte posy = pos_y; (abs(defx - UO_BLOCK_OFFSET(pos_x)) <= 1 && pos_x <= 7); ++pos_x )
+						min_z = max_z = pBlock->GetTerrain(UO_BLOCK_OFFSET(ptNow.m_x), UO_BLOCK_OFFSET(ptNow.m_y))->m_z;
+						for ( int xAround = ptNow.m_x - 1; xAround <= ptNow.m_x + 1; ++xAround )
 						{
-							for ( pos_y = posy; (abs(defy - UO_BLOCK_OFFSET(pos_y)) <= 1 && pos_y <= 7); ++pos_y )
+							for ( int yAround = ptNow.m_y - 1; yAround <= ptNow.m_y + 1; ++yAround )
 							{
-								char terrain_z = pBlock->GetTerrain(pos_x, pos_y)->m_z;
+								// The surrounding tiles can belong to a neighbouring block.
+								const CPointMap ptAround((short)xAround, (short)yAround, ptNow.m_z, ptNow.m_map);
+								if ( !ptAround.IsValidXY() )
+									continue;
+
+								const bool fSameBlock = (UO_BLOCK_ALIGN(xAround) == pBlock->m_x) && (UO_BLOCK_ALIGN(yAround) == pBlock->m_y);
+								const CUOMapMeter *pMeterAround = fSameBlock ? pBlock->GetTerrain(UO_BLOCK_OFFSET(xAround), UO_BLOCK_OFFSET(yAround)) : CWorldMap::GetMapMeter(ptAround);
+								if ( pMeterAround == nullptr )
+									continue;
+
+								const short terrain_z = pMeterAround->m_z;
 								min_z = minimum(min_z, terrain_z);
 							}
 						}
@@ -343,7 +348,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 						continue;
 
 					//Fix for Stacked items blocking view
-					if ( (pStatic->m_x == ptDst.m_x) && (pStatic->m_y == ptDst.m_y) && (pStatic->m_z >= GetTopZ()) && (pStatic->m_z <= ptSrc.m_z) )
+					if ( (pStatic->m_x + pBlock->m_x == ptDst.m_x) && (pStatic->m_y + pBlock->m_y == ptDst.m_y) && (pStatic->m_z >= GetTopZ()) && (pStatic->m_z <= ptSrc.m_z) )
 						continue;
 
 					pItemDef = CItemBase::FindItemBase(pStatic->GetDispID());
