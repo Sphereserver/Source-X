@@ -12,7 +12,25 @@ on:
   workflow_dispatch:
 
 jobs:
+  # This job checks if the secret is available
+  check-secret:
+    runs-on: ubuntu-latest
+    outputs:
+      has_token: ${{ steps.check.outputs.has_token }}
+    steps:
+      - name: Check for Coverity Token
+        id: check
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.COVERITY_TOKEN }}" ]; then
+            echo "has_token=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_token=false" >> $GITHUB_OUTPUT
+          fi
+
   latest:
+        needs: check-secret
+        if: needs.check-secret.outputs.has_token == 'true'
         runs-on: ubuntu-24.04
         permissions:
           contents: read
