@@ -4232,3 +4232,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 12-11-2026, Mulambo
 - Fixed: "://" part of a string is not treated as comment. Strings like https://www.something.com where stripped to 'https:', because anything after "//" was treated as a comment.
+
+13-11-2026, Mulambo
+- Changed (security): `weblink` protocol is now HTTPS by default. Every url sent to `weblink` (ip address, no protocol, http://, ftp:// or any other protocol) now starts with https:// to prevent malicious intents.
