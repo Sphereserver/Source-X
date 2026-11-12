@@ -1013,7 +1013,9 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 		return nullptr;
 
 	// Skill effects how much of the ore I can get all at once.
-	if ( pOreDef->m_ReapItem == ITEMID_NOTHING )
+	// A REAP with a random choice is picked again on every gather.
+	const ITEMID_TYPE idReap = pOreDef->GetReapItem();
+	if ( idReap == ITEMID_NOTHING )
 		return nullptr;		// I intended for there to be nothing here
 
 	// Reap amount is semi-random
@@ -1033,7 +1035,7 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 	//(Region)ResourceGather behaviour
     CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
     pScriptArgs->Init(wAmount, 0, 0, pResBit);
-    pScriptArgs->m_VarsLocal.SetNum("ResourceID",pOreDef->m_ReapItem);
+    pScriptArgs->m_VarsLocal.SetNum("ResourceID",idReap);
 
     TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
 	if ( IsTrigUsed(TRIGGER_REGIONRESOURCEGATHER) )

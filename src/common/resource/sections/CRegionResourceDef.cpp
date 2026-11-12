@@ -65,8 +65,14 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
         case RMC_DEFNAME: // "DEFNAME",
             return SetResourceName( s.GetArgStr());
         case RMC_REAP: // "REAP",
-            m_ReapItem = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
+        {
+            // A random choice ({item 1 item 2 ...}) would be evaluated only here, once per script load (startup or resync),
+            //  giving always the same item until the next load: keep the expression to pick again on every gather.
+            lpctstr ptcReap = s.GetArgStr();
+            m_sReapExpr = (strchr(ptcReap, '{') != nullptr) ? ptcReap : "";
+            m_ReapItem = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ptcReap));
             break;
+        }
         case RMC_REAPAMOUNT:
             m_vcReapAmount.Load( s.GetArgRaw() );
             break;
@@ -139,4 +145,16 @@ CRegionResourceDef::CRegionResourceDef( CResourceID rid ) :
 
 CRegionResourceDef::~CRegionResourceDef()
 {
+}
+
+ITEMID_TYPE CRegionResourceDef::GetReapItem() const
+{
+    ADDTOCALLSTACK("CRegionResourceDef::GetReapItem");
+    if (m_sReapExpr.IsEmpty())
+        return m_ReapItem;
+
+    const int iIndex = g_Cfg.ResourceGetIndexType(RES_ITEMDEF, m_sReapExpr.GetBuffer());
+    if (iIndex < 0)
+        return m_ReapItem;
+    return (ITEMID_TYPE)iIndex;
 }

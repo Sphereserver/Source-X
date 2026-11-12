@@ -4201,3 +4201,19 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Added: UseAxis setting in sphere.ini (default 1). With UseAxis=0 the Axis connection requests on the game port (staff login with a clear-text password, then Axis.db is sent) are refused and logged.
 - Fixed: Animate Dead raised the corpse even when the summoned creature died while being placed (on a damaging field or a trap), using a dead or deleted char. Spell_Summon_Place also checks if the summon was deleted on placement.
 - Fixed: in @SpellEffect and @Effect the explode flag of the spell effect was set as LOCAL.Explode but read back as LOCAL.EffectExplode, so the explosion was always lost. It's now LOCAL.EffectExplode in both places.
+- Fixed: the weather made the light darker with clear weather and not with rain: WEATHER_DRY (0xFF) and WEATHER_DEFAULT (0xFE) aren't 0, WEATHER_RAIN is. Now rain, storm and snow are 2 light levels darker at night and 4 during the day, clouds 1 and 2: a fixed amount, the random one changed on every tick. The light is also updated when the weather changes, in the sector tick (it was calculated before the change) and with SetWeather (DRY/RAIN/SNOW, RAINCHANCE, COLDCHANCE).
+
+30-10-2026, DavideRei
+- Added: MountHeight=2 in sphere.ini: like MountHeight=1 (can't enter under a roof while mounted) but for players only, mounted NPCs can walk into the buildings.
+    The same rule applies to the other MountHeight checks (teleport, summon, mount, FIX).
+- Fixed: a random choice in REAP of a REGIONRESOURCE ({i_ore_iron 1 i_ore_gold 1}) was evaluated only once, when the script was loaded: every gather gave the same item until the next resync. It's now evaluated again on every gather.
+- Fixed: BREAK (or CONTINUE on the last iteration) inside an IF in a script loop (FOR, WHILE, FORCHARS, FORITEMS, FORCONT*, FORCHARLAYER, FORCHARMEMORYTYPE...): the rest of the loop block was skipped from the middle, so the first ENDIF met was taken as the end of the block and the following lines were executed in the wrong place.
+- Fixed: BREAK in FOROBJS stopped only the items pass, the chars pass was executed anyway.
+- Changed: .LAST and .SELF don't log an error anymore when there is no target cursor open (they are often used in client macros).
+
+05-11-2026, DavideRei
+- Fixed: CURFOLLOWER.n of a follower that doesn't exist anymore returned an error instead of 0, and CURFOLLOWER.n.<property> didn't skip the separator before the property name.
+- Fixed: removing a follower with FOLLOWERSLOTS=0 (with OF_PetSlots) was handled as an addition, because the removal was requested passing the negative slots (-0 == 0). CChar::FollowersUpdate has now a fRemove argument. @FollowersUpdate arguments are unchanged (ARGN1 = 1 when removing, ARGN2 = slots).
+- Fixed: "Timer expired without DECAY flag" errors on lights: the burning timer wasn't cleared when a light was doused (usually a light put in a backpack while lit) or when an NPC put its light away in the morning.
+- Fixed: buffer over-reads and off-by-one writes reported by GCC (CLanguageID::Set, CScript::WriteKeyStr, text of unicode speech and language packets, Str_CopyLimitNull).
+- Changed: with EF_FollowerList, the followers that don't exist anymore or that have another owner are removed from the list when it's updated.

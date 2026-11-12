@@ -189,7 +189,7 @@ CServerConfig::CServerConfig()
 	m_iStamRunningPenaltyOverweight = 100;
 	m_iStaminaLossAtWeight 	= 150;
 	m_iStaminaLossOverweight = 5;
-	m_iMountHeight			= false;
+	m_iMountHeight			= 0;
 	m_iMoveRate				= 100;
 	m_iArcheryMinDist		= 2;
 	m_iArcheryMaxDist		= 15;
@@ -942,7 +942,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "MINKARMA",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMinKarma)				}},
 	{ "MONSTERFEAR",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fMonsterFear)			}},
 	{ "MONSTERFIGHT",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fMonsterFight)			}},
-	{ "MOUNTHEIGHT",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_iMountHeight)			}},
+	{ "MOUNTHEIGHT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMountHeight)			}},
 	{ "MOVERATE",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMoveRate)				}},
 	{ "MULFILES",				{ ELEM_VOID,	0												}},
 	{ "MURDERDECAYTIME",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMurderDecayTime)		}},
