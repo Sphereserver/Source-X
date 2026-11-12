@@ -4229,3 +4229,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Fixed: ISNEARTYPETOP calculated the position of the multi components from the searched point instead of from the multi.
 - Fixed: advanced LOS: the fix for the stacked items blocking the view never worked for the statics, the offset of the static in its 8x8 map block (0-7) was compared with the world coordinates of the target. It now works like for the dynamic items: the statics on the target tile, between the feet and the eyes of the char, don't block the LOS.
 - Fixed: advanced LOS: the minimum Z of the 3x3 tiles around the terrain tile was calculated only inside the 8x8 map block, ignoring the tiles of the neighbouring blocks.
+
+12-11-2026, Mulambo
+- Fixed: "://" part of a string is not treated as comment. Strings like https://www.something.com where stripped to 'https:', because anything after "//" was treated as a comment.
