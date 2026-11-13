@@ -59,7 +59,7 @@ public:
 	// Object position-based search
 
 	static CPointMap FindItemTypeNearby( const CPointMap & pt, IT_TYPE iType, int iDistance = 0, bool fCheckMulti = false, bool fLimitZ = false );
-	static bool IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti );
+	static bool IsItemTypeNear( const CPointMap & pt, IT_TYPE iType, int iDistance, bool fCheckMulti, bool fLimitZ = false );
 
 	static CPointMap FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance = 0 );
 	static bool IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance = 0 );

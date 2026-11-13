@@ -244,6 +244,39 @@ CItem *CContainer::ContentFind(CResourceID const& rid, dword dwArg, int iDescend
 	return nullptr;
 }
 
+CItem *CContainer::ContentFindEvent(CResourceID const& rid, bool fBaseEvents, int iDescendLevels ) const
+{
+	ADDTOCALLSTACK("CContainer::ContentFindEvent");
+	// FINDEVENT / FINDTEVENT: like ContentFind, but the item is chosen by one of its EVENTS / TEVENTS.
+
+	if ( rid.GetResIndex() == 0 )
+		return nullptr;
+
+	for (CSObjContRec* pObjRec : *this)
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		const bool fMatch = fBaseEvents
+			? pItem->Base_GetDef()->m_TEvents.ContainsResourceID(rid)
+			: pItem->m_OEvents.ContainsResourceID(rid);
+		if ( fMatch )
+			return pItem;
+
+		if ( iDescendLevels <= 0 )
+			continue;
+
+		CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
+		if ( pCont )
+		{
+			if ( !pCont->IsSearchable() )
+				continue;
+			CItem *pItemInCont = pCont->ContentFindEvent(rid, fBaseEvents, iDescendLevels - 1);
+			if ( pItemInCont )
+				return pItemInCont;
+		}
+	}
+	return nullptr;
+}
+
 TRIGRET_TYPE CContainer::OnContTriggerForLoop(
     CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole *pSrc,
     CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext,
@@ -293,6 +326,9 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(
 
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
+		// The script can be positioned in the middle of the block (BREAK, or CONTINUE on the last iteration, maybe from inside
+		//  an IF): go back to the start of the block before skipping it, otherwise the first ENDIF met is taken as its end.
+		s.SeekContext(StartContext);
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
         TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult);
 		if ( iRet != TRIGRET_ENDIF )
@@ -344,6 +380,9 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
 
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
+		// The script can be positioned in the middle of the block (BREAK, or CONTINUE on the last iteration, maybe from inside
+		//  an IF): go back to the start of the block before skipping it, otherwise the first ENDIF met is taken as its end.
+		s.SeekContext(StartContext);
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
         TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult);
 		if ( iRet != TRIGRET_ENDIF )
@@ -672,6 +711,22 @@ bool CContainer::r_GetRefContainer( lpctstr &ptcKey, CScriptObj *&pRef )
 			if (idx >= GetContentCount())
 				return false;
 			pRef = dynamic_cast<CItem*>(GetContentIndex(idx));
+			SKIP_SEPARATORS(ptcKey);
+			return true;
+		}
+		else if ( !strnicmp(ptcKey, "TEVENT", 6) )	// findtevent.<events section>: by the TEVENTS of the itemdef
+		{
+			ptcKey += 6;
+			SKIP_SEPARATORS(ptcKey);
+			pRef = ContentFindEvent(g_Cfg.ResourceGetID_EatStr(RES_EVENTS, ptcKey), true);
+			SKIP_SEPARATORS(ptcKey);
+			return true;
+		}
+		else if ( !strnicmp(ptcKey, "EVENT", 5) )	// findevent.<events section>: by the EVENTS of the item
+		{
+			ptcKey += 5;
+			SKIP_SEPARATORS(ptcKey);
+			pRef = ContentFindEvent(g_Cfg.ResourceGetID_EatStr(RES_EVENTS, ptcKey), false);
 			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}

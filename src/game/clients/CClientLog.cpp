@@ -192,15 +192,31 @@ void CClient::addSysMessage(lpctstr pszMsg) // System message (In lower left cor
 	addBarkParse(pszMsg, nullptr, HUE_TEXT_DEF, TALKMODE_SAY);
 }
 
-
-void CClient::addWebLaunch( lpctstr pPage )
-{
+void CClient::addWebLaunch(const lpctstr pUrl) const {
 	ADDTOCALLSTACK("CClient::addWebLaunch");
-	// Direct client to a web page
-	if ( !pPage || !pPage[0] )
+	// Missing address.
+	if (!pUrl || !pUrl[0]) {
 		return;
+	}
+
+	tchar szUrl[SCRIPT_MAX_LINE_LEN];
+
+    // Https is present.
+	if (!strnicmp(pUrl, "https://", 8)) {
+		snprintf(szUrl, sizeof(szUrl), "%s", pUrl);
+	}
+    // Replace http with https.
+	else if (!strnicmp(pUrl, "http://", 7)) {
+		snprintf(szUrl, sizeof(szUrl), "https://%s", pUrl + 7);
+	}
+    // Prepend https.
+	else {
+		snprintf(szUrl, sizeof(szUrl), "https://%s", pUrl);
+	}
+
+    // Send it to the client.
 	SysMessageDefault(DEFMSG_WEB_BROWSER_START);
-	new PacketWebPage(this, pPage);
+	new PacketWebPage(this, szUrl);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -553,6 +569,12 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 				 (iLen != 3 || pData[1] != '\n' || pData[2] != '\0') )
 				break;
 
+			if ( g_Cfg.m_fUseTelnet == false )
+			{
+				g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Telnet console request from %s has been rejected.\n", GetSocketID(), GetPeerStr());
+				return false;
+			}
+
 			// enter into remote admin mode. (look for password).
 			SetConnectType( CONNECT_TELNET );
 			m_zLogin[0] = 0;
@@ -594,6 +616,12 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 				 (iLen != 3 || pData[1] != '\r' || pData[2] != '\n') &&
 				 (iLen != 3 || pData[1] != '\n' || pData[2] != '\0') )
 				break;
+
+			if ( g_Cfg.m_fUseAxis == false )
+			{
+				g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Axis connection request from %s has been rejected.\n", GetSocketID(), GetPeerStr());
+				return false;
+			}
 
 			// enter into Axis mode. (look for password).
 			SetConnectType( CONNECT_AXIS );
