@@ -100,14 +100,15 @@ void CClient::Event_Item_Dye( CUID uid, HUE_TYPE wHue ) // Rehue an item
 	if (m_pChar == nullptr)
 		return;
 
-	CObjBase *pObj = uid.ObjFind();
+    CObjBase *pObj = uid.ObjFind();
+    if (!pObj || (GetTargMode() != CLIMODE_DYE)) {
+        return;
+    }
 	if ( !m_pChar->CanTouch(pObj) )
 	{
 		SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_DYE_REACH));
 		return;
 	}
-	if ( GetTargMode() != CLIMODE_DYE )
-		return;
 
 	ClearTargMode();
 
@@ -162,14 +163,15 @@ void CClient::Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor )
 	if ( m_pChar == nullptr )
 		return;
 
-	CItemMessage * pBook = dynamic_cast <CItemMessage *> (uid.ItemFind());
+    CItemMessage * pBook = dynamic_cast <CItemMessage *> (uid.ItemFind());
+    if (!pBook || !pBook->IsBookWritable()) {
+        return;
+    }
 	if ( !m_pChar->CanTouch(pBook) )
 	{
 		SysMessage( g_Cfg.GetDefaultMsg(DEFMSG_REACH_FAIL) );
 		return;
 	}
-	if ( !pBook->IsBookWritable() )
-		return;
 
     if ( Str_Untrusted_InvalidTermination(pszTitle) || Str_Untrusted_InvalidTermination(pszAuthor) )
 		return;
@@ -1216,14 +1218,16 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
                 if (IsSetOF(OF_PetSlots))
                 {
                     CItemBase* pItemPet = CItemBase::FindItemBase(pItem->GetID());
-                    CCharBase* pPetDef = CCharBase::FindCharBase(CREID_TYPE(pItemPet->m_ttFigurine.m_idChar.GetResIndex()));
-                    if (pPetDef)
-                    {
-                        const short uiFollowerSlots = n64_narrow_n16(pItem->GetDefNum("FOLLOWERSLOTS", true));
-                        if (!m_pChar->FollowersUpdate(pVendor, (uiFollowerSlots * items[i].m_vcAmount), true))
+                    if (pItemPet) {
+                        CCharBase* pPetDef = CCharBase::FindCharBase(CREID_TYPE(pItemPet->m_ttFigurine.m_idChar.GetResIndex()));
+                        if (pPetDef)
                         {
-                            m_pChar->SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
-                            return;
+                            const short uiFollowerSlots = n64_narrow_n16(pItem->GetDefNum("FOLLOWERSLOTS", true));
+                            if (!m_pChar->FollowersUpdate(pVendor, (uiFollowerSlots * items[i].m_vcAmount), true))
+                            {
+                                m_pChar->SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
+                                return;
+                            }
                         }
                     }
                 }
@@ -1901,8 +1905,9 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 
 	// Are there items on the ground that might hear u ?
 	CSector *pSector = m_pChar->GetTopSector();
-	if ( pSector->HasListenItems() )
+	if (pSector && pSector->HasListenItems()) {
 		pSector->OnHearItem(m_pChar, pszText);
+	}
 
 	// Find an NPC that may have heard us.
 	CChar *pChar = nullptr;
@@ -2428,10 +2433,11 @@ void CClient::Event_SingleClick( CUID uid )
 	// PS: Clients using tooltips don't send single click
 	//	   requests when clicking on obj.
 
-	if ( m_pChar == nullptr )
+    CObjBase * pObj = uid.ObjFind();
+	if (!pObj || (m_pChar == nullptr)) {
 		return;
+	}
 
-	CObjBase * pObj = uid.ObjFind();
 	if ( !m_pChar->CanSee(pObj) )
 	{
 		// ALLNAMES makes this happen as we are running thru an area,

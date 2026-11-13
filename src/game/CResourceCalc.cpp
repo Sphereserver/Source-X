@@ -271,34 +271,36 @@ int CServerConfig::Calc_CombatChanceToParry(CChar* pChar, CItem*& pItemParry)
 		else if (pChar->m_uidWeapon.IsItem())		// parry using weapon
 		{
 			CItem* pTempItemParry = pChar->m_uidWeapon.ItemFind();
-			if (fCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1))
-			{
-				pItemParry = pTempItemParry;
+		    if (pTempItemParry) {
+			    if (fCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1))
+			    {
+				    pItemParry = pTempItemParry;
 
-				iChanceSE = iParrying * iBushido / 48000;
-				if ((iParrying >= 1000) || (iBushido >= 1000))
-					iChanceSE += 5;
+				    iChanceSE = iParrying * iBushido / 48000;
+				    if ((iParrying >= 1000) || (iBushido >= 1000))
+					    iChanceSE += 5;
 
-				iChanceLegacy = iParrying / 80;
-				if (iParrying >= 1000)
-					iChanceLegacy += 5;
+				    iChanceLegacy = iParrying / 80;
+				    if (iParrying >= 1000)
+					    iChanceLegacy += 5;
 
-				iParryChance = maximum(iChanceSE, iChanceLegacy);
-			}
-			else if (fCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2))
-			{
-				pItemParry = pTempItemParry;
+				    iParryChance = maximum(iChanceSE, iChanceLegacy);
+			    }
+			    else if (fCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2))
+			    {
+				    pItemParry = pTempItemParry;
 
-				iChanceSE = iParrying * iBushido / 41140;
-				if ((iParrying >= 1000) || (iBushido >= 1000))
-					iChanceSE += 5;
+				    iChanceSE = iParrying * iBushido / 41140;
+				    if ((iParrying >= 1000) || (iBushido >= 1000))
+					    iChanceSE += 5;
 
-				iChanceLegacy = iParrying / 80;
-				if (iParrying >= 1000)
-					iChanceLegacy += 5;
+				    iChanceLegacy = iParrying / 80;
+				    if (iParrying >= 1000)
+					    iChanceLegacy += 5;
 
-				iParryChance = maximum(iChanceSE, iChanceLegacy);
-			}
+				    iParryChance = maximum(iChanceSE, iChanceLegacy);
+			    }
+		    }
 		}
 	}
 	else    // Legacy formula (pre Samurai Empire)
@@ -311,8 +313,8 @@ int CServerConfig::Calc_CombatChanceToParry(CChar* pChar, CItem*& pItemParry)
 		else if (pChar->m_uidWeapon.IsItem())		// parry using weapon
 		{
 			CItem* pTempItemParry = pChar->m_uidWeapon.ItemFind();
-			if ((fCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1)) ||
-				(fCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2)))
+			if (pTempItemParry && ((fCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1)) ||
+				(fCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2))))
 			{
 				pItemParry = pTempItemParry;
 				iParryChance = iParrying / 80;

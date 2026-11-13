@@ -1420,7 +1420,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	}
 
     const CRegion *pArea = GetRegion();
-    if (pArea->IsFlag(REGION_FLAG_NOMINING))
+    if (!pArea || pArea->IsFlag(REGION_FLAG_NOMINING))
     {
         SysMessageDefault(DEFMSG_MINING_2);
         return -SKTRIG_QTY;

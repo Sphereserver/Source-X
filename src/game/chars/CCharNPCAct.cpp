@@ -1580,6 +1580,10 @@ void CChar::NPC_LootMemory( CItem * pItem )
 	// I have already looked at it.
 
 	CItem * pMemory = Memory_AddObjTypes( pItem, MEMORY_SPEAK );
+    if (!pMemory) {
+      return;
+    }
+
 	pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_IGNORE;
 
 	// If the item is set to decay.

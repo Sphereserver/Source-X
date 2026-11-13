@@ -1321,7 +1321,7 @@ void CItemMultiCustom::GetLockdownsAt(int16 dx, int16 dy, int8 dz, std::vector<C
     for (std::vector<CUID>::iterator it = _lLockDowns.begin(); it != _lLockDowns.end(); ++it)
     {
         CItem *pItem = (*it).ItemFind();
-        if ((pItem->GetTopPoint().m_x == iFixedX)
+        if (pItem && (pItem->GetTopPoint().m_x == iFixedX)
             && pItem->GetTopPoint().m_y == iFixedY
             && (CalculateLevel(pItem->GetTopPoint().m_z) == iFloor))
         {
@@ -1343,7 +1343,7 @@ void CItemMultiCustom::GetSecuredAt(int16 dx, int16 dy, int8 dz, std::vector<CUI
     for (std::vector<CUID>::iterator it = _lSecureContainers.begin(); it != _lSecureContainers.end(); ++it)
     {
         CItemContainer *pCont = static_cast<CItemContainer*>((*it).ItemFind());
-        if ((pCont->GetTopPoint().m_x == iFixedX)
+        if (pCont && (pCont->GetTopPoint().m_x == iFixedX)
             && pCont->GetTopPoint().m_y == iFixedY
             && (CalculateLevel(pCont->GetTopPoint().m_z) == iFloor))
         {
@@ -1376,7 +1376,7 @@ void CItemMultiCustom::ClearFloor(int8 iFloor)
         {
             CUID uid(_lSecureContainers[i]);
             CItemContainer *pCont = static_cast<CItemContainer*>(uid.ItemFind());
-            if ((pCont->GetTopPoint().m_z >= iMinZ) && (pCont->GetTopPoint().m_z <= iMaxZ))
+            if (pCont && (pCont->GetTopPoint().m_z >= iMinZ) && (pCont->GetTopPoint().m_z <= iMaxZ))
             {
                 Release(uid, true);
                 pCont->RemoveFromView();
@@ -1392,7 +1392,7 @@ void CItemMultiCustom::ClearFloor(int8 iFloor)
         {
             CUID uid = _lLockDowns[i];
             CItem *pItem = uid.ItemFind();
-            if ((pItem->GetTopPoint().m_z >= iMinZ) && (pItem->GetTopPoint().m_z <= iMaxZ))
+            if (pItem && (pItem->GetTopPoint().m_z >= iMinZ) && (pItem->GetTopPoint().m_z <= iMaxZ))
             {
                 UnlockItem(uid, true);
                 pItem->RemoveFromView();
@@ -1408,7 +1408,7 @@ void CItemMultiCustom::ClearFloor(int8 iFloor)
         {
             CUID uid = _lLockDowns[i];
             CItemMulti *pAddon = static_cast<CItemMulti*>(uid.ItemFind());
-            if ((pAddon->GetTopPoint().m_z >= iMinZ) && (pAddon->GetTopPoint().m_z <= iMaxZ))
+            if (pAddon && (pAddon->GetTopPoint().m_z >= iMinZ) && (pAddon->GetTopPoint().m_z <= iMaxZ))
             {
                 pAddon->Redeed(false, false);
             }

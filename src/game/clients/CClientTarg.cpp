@@ -2069,7 +2069,10 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			{
 				// 1 pile of wool yields three balls of yarn
 				SysMessageDefault( DEFMSG_ITEMUSE_WOOL_CREATE );
-				pNewItem = CItem::CreateScript( ITEMID_YARN1, m_pChar );
+			    pNewItem = CItem::CreateScript( ITEMID_YARN1, m_pChar );
+			    if (!pNewItem) {
+			        return false;
+			    }
 				if ( pNewItem->GetAmount() == 1 )
 					pNewItem->SetAmountUpdate( 3 );
 			}
@@ -2078,6 +2081,9 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				// 1 pile of cotton yields six spools of thread
 				SysMessageDefault( DEFMSG_ITEMUSE_COTTON_CREATE );
 				pNewItem = CItem::CreateScript( ITEMID_THREAD1, m_pChar );
+			    if (!pNewItem) {
+			        return false;
+			    }
 				if ( pNewItem->GetAmount() == 1 )
 					pNewItem->SetAmountUpdate( 6 );
 			}
