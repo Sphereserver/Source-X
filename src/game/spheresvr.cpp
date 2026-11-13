@@ -237,7 +237,7 @@ int Sphere_InitServer( int argc, char *argv[] )
     ThreadHolder::markServEnteredRunMode();
 
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
-	g_Log.Event(LOGM_INIT, "\nStartup complete (items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T ", Accounts = %" PRIuSIZE_T ")\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS), g_Serv.StatGet(SERV_STAT_ACCOUNTS));
+	g_Log.Event(LOGM_INIT, "\nStartup complete (items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T ", accounts=%" PRIuSIZE_T ")\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS), g_Serv.StatGet(SERV_STAT_ACCOUNTS));
 
 #ifdef _WIN32
 	g_Log.Event(LOGM_INIT, "Use '?' to view available console commands\n\n");

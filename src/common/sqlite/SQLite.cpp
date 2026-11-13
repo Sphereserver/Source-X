@@ -369,6 +369,7 @@ bool CSQLite::RollbackTransaction()
 enum LDBO_TYPE
 {
 	LDBO_CONNECTED,
+	LDBO_ESCAPEDATA,
     LDBO_FILENAME,
 	LDBO_ROW,
 	LDBO_QTY
@@ -377,6 +378,7 @@ enum LDBO_TYPE
 lpctstr const CSQLite::sm_szLoadKeys[LDBO_QTY+1] =
 {
 	"CONNECTED",
+	"ESCAPEDATA",
     "FILENAME",
 	"ROW",
 	nullptr
@@ -432,6 +434,21 @@ bool CSQLite::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, boo
 		case LDBO_CONNECTED:
 			sVal.FormatVal(IsOpen());
 			break;
+
+		case LDBO_ESCAPEDATA:
+		{
+			// <LDB.ESCAPEDATA text> (like MDB.ESCAPEDATA): returns the text with every single quote doubled,
+			//  so that it can be safely put between single quotes in a SQL statement.
+			ptcKey += strlen(sm_szLoadKeys[index]);
+			GETNONWHITESPACE(ptcKey);
+			sVal.Clear();
+			for (; *ptcKey != '\0'; ++ptcKey)
+			{
+				if (*ptcKey == '\'')
+					sVal.Add('\'');
+				sVal.Add(*ptcKey);
+			}
+		} break;
 
         case LDBO_FILENAME:
             if (!_fInMemory)

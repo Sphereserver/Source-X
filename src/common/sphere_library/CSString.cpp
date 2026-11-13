@@ -124,6 +124,11 @@ bool CSString::IsValid() const noexcept
 
 int CSString::Resize(int iNewLength, bool fPreciseSize)
 {
+    // Shouldn't really happen, just in case.
+    if (iNewLength < 0) {
+        return -1;
+    }
+
     const bool fValid = IsValid();
 
     // Special‐case zero length: revert to empty literal.

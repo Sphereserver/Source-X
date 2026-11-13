@@ -35,6 +35,10 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 	if (!pObj)
 		return false;
 
+	// An object being deleted (deferred deletion) can't be found by its UID anymore: @ClientTooltip scripts would fail on it (ACT, REFx)
+	if (pObj->_IsBeingDeleted())
+		return false;
+
 	if (PacketPropertyList::CanSendTo(GetNetState()) == false)
 		return false;
 

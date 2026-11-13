@@ -31,9 +31,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
+    - name: Remove untrusted Homebrew tap (pre-installed on runner)
+      run: brew untap aws/tap || true
+
     - name: Install prerequisites
       run:  |
             sw_vers
@@ -63,8 +66,8 @@ jobs:
 
     # Upload artifact linked to the workflow run - only if the run is for a pull request, or for selected branches
     - name: Upload artifact
-      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
-      uses: actions/upload-artifact@v4
+      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v7
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -84,14 +87,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download builds
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: Build-osx-x86_64
           merge-multiple: true
           run-id: ${{ github.run_id }}
 
       - name: Create release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -110,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download builds
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: Build-osx-x86_64
           merge-multiple: true

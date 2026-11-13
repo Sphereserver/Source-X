@@ -411,7 +411,7 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZer
     if ( pVarNum )
     {
         const int64 iOldVal = pVarNum->GetValNum();
-        fShouldWarn = fShouldWarn || (fWarnOverwrite && fResync && (iVal != iOldVal));
+        fShouldWarn = (fShouldWarn || (fWarnOverwrite && fResync)) && iVal != iOldVal;
         if ( fShouldWarn )
         {
             g_Log.EventWarn( "Replacing existing VarNum '%s' with number: 0%" PRIx64 " (%" PRId64 ")\n", pVarBase->GetKey(), iVal, iVal );
@@ -507,7 +507,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr ptcVal, 
     if ( pVarStr )
     {
         lpctstr ptcOldVal = pVarStr->GetValStr();
-        fShouldWarn = fShouldWarn || (fWarnOverwrite && fResync && (0 != strncmp(ptcVal, ptcOldVal, SCRIPT_MAX_LINE_LEN)));
+        fShouldWarn = (fShouldWarn || (fWarnOverwrite && fResync)) && strncmp(ptcVal, ptcOldVal, SCRIPT_MAX_LINE_LEN) != 0;
         if ( fShouldWarn )
         {
             g_Log.EventWarn( "Replacing existing VarStr '%s' with string: '%s'\n", pVarBase->GetKey(), ptcVal );
@@ -524,7 +524,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr ptcVal, 
         {
             g_Log.EventWarn( "Replacing existing VarNum '%s' with string: '%s'\n", pVarBase->GetKey(), ptcVal );
 #ifdef _DEBUG
-            const int64 iOldVal = pVarStr->GetValNum();
+            const int64 iOldVal = pVarBase->GetValNum();
             g_Log.EventDebug("Previous value: 0%" PRIx64 " (%" PRId64 ")\n", iOldVal, iOldVal);
 
 #endif

@@ -715,7 +715,7 @@ int64 CExpression::GetSingle(lpctstr & refStrExpr)
 
         if (fOverflow)
         {
-            g_Log.EventWarn("Hexadecimal value parsing will overflow 64 bits: %s.\n", ptcOrigExpr);
+            DEBUG_WARN(("Hexadecimal value parsing will overflow 64 bits: %s.\n", ptcOrigExpr));
             return -1;
         }
 
@@ -775,7 +775,7 @@ int64 CExpression::GetSingle(lpctstr & refStrExpr)
 
         if (overflow)
         {
-            g_Log.EventWarn("Decimal value parsing will overflow 64 bits: %s.\n", ptcOrigExpr);
+            DEBUG_WARN(("Decimal value parsing will overflow 64 bits: %s.\n", ptcOrigExpr));
             return -1;
         }
         return (llong)val;

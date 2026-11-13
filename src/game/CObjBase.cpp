@@ -643,6 +643,10 @@ void CObjBase::Emote(lpctstr pText, CClient * pClientExclude, bool fForcePossess
 	CObjBase *pObjTop = static_cast<CObjBase*>(GetTopLevelObj());
 	if ( !pObjTop )
 		return;
+	// A statue (CAN_C_STATUE, e.g. a petrified char) does not emote: timed effects like poison would still
+	//  show their emotes (and the temporary name) while the char is supposed to be a stone.
+	if ( pObjTop->IsChar() && pObjTop->Can(CAN_C_STATUE) )
+		return;
 
 	tchar *pszThem = Str_GetTemp();
 	tchar *pszYou = Str_GetTemp();
@@ -686,6 +690,10 @@ void CObjBase::EmoteObj(lpctstr pText)
 	CObjBase *pObjTop = static_cast<CObjBase*>(GetTopLevelObj());
 	if ( !pObjTop )
 		return;
+	// A statue (CAN_C_STATUE, e.g. a petrified char) does not emote: timed effects like poison would still
+	//  show their emotes (and the temporary name) while the char is supposed to be a stone.
+	if ( pObjTop->IsChar() && pObjTop->Can(CAN_C_STATUE) )
+		return;
 
 	tchar *pszYou = Str_GetTemp();
 
@@ -709,6 +717,10 @@ void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, b
 
 	CObjBase *pObjTop = static_cast<CObjBase*>(GetTopLevelObj());
 	if ( !pObjTop )
+		return;
+	// A statue (CAN_C_STATUE, e.g. a petrified char) does not emote: timed effects like poison would still
+	//  show their emotes (and the temporary name) while the char is supposed to be a stone.
+	if ( pObjTop->IsChar() && pObjTop->Can(CAN_C_STATUE) )
 		return;
 
 	tchar *pszThem = Str_GetTemp();
@@ -1387,7 +1399,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					int iType = g_Cfg.ResourceGetIndexType( RES_TYPEDEF, ptcKey );
 					int iDistance;
 					bool fCheckMulti;
-					bool fCheckMultiZ = false;
+					bool fLimitZ = false;
 
 					SKIP_IDENTIFIERSTRING( ptcKey );
 					SKIP_SEPARATORS( ptcKey );
@@ -1397,18 +1409,20 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 						iDistance	= 0;
 					else
 						iDistance	= Exp_GetVal( ptcKey );
+					SKIP_ARGSEP( ptcKey );	// Exp_GetVal doesn't go past a comma
 
 					if ( !*ptcKey )
 						fCheckMulti = false;
 					else
 						fCheckMulti = Exp_GetVal( ptcKey ) != 0;
+					SKIP_ARGSEP( ptcKey );
 
-					if (fCheckMulti && *ptcKey)
-						fCheckMultiZ = Exp_GetVal(ptcKey) != 0;
+					if ( *ptcKey )
+						fLimitZ = Exp_GetVal( ptcKey ) != 0;
 
 					if ( fP )
 					{
-						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::FindTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::FindItemTypeNearby(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti, fCheckMultiZ) );
+						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::FindTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::FindItemTypeNearby(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti, fLimitZ) );
 
 						if ( !pt.IsValidPoint() )
 							sVal.FormatVal( 0 );
@@ -1416,7 +1430,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 							sVal = pt.WriteUsed();
 					}
 					else
-						sVal.FormatVal( ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::IsTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::IsItemTypeNear(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti ) ) );
+						sVal.FormatVal( ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::IsTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::IsItemTypeNear(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti, fLimitZ ) ) );
 				}
 			}
 			break;
