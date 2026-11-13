@@ -501,7 +501,13 @@ public:
 
     void addCodexOfWisdom(dword dwTopicID, bool fForceOpen = false);
 	void addDyeOption( const CObjBase * pBase );
-	void addWebLaunch( lpctstr pMsg ); // Direct client to a web page
+
+    /**
+	 * Sends open webpage request to the client with URL address. The address is forced to be https (so it won't be abused with JavaScript and similar schemes).
+	 *
+	 * @param pUrl URL to be sent to the client.
+	 */
+    void addWebLaunch(lpctstr pUrl) const;
 
 	void addPromptConsole(CLIMODE_TYPE mode, lpctstr pMsg, CUID context1 = {}, CUID context2 = {}, bool fUnicode = false);
 	void addTarget( CLIMODE_TYPE targmode, lpctstr pMsg, bool fAllowGround = false, bool fCheckCrime = false, int64 iTicksTimeout = 0, int iCliloc = 0 ); // Send targetting cursor to client

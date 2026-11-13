@@ -405,7 +405,14 @@ size_t CScriptKeyAlloc::ParseKeyEnd()
 			break;
 		if ( ch == '/' && m_pszKey[len + 1] == '/' )
 		{
-			// Remove comment at end of line.
+		    // Don't treat "://" (http://, https://) as a comment start.
+		    if ( (len > 0) && (m_pszKey[len - 1] == ':') )
+		    {
+		        ++len;	// skip the second slash too
+		        continue;
+		    }
+
+		    // Remove comment at end of line.
 			break;
 		}
 	}
