@@ -1064,7 +1064,9 @@ void CChar::Use_Drink( CItem * pItem )
 		else
 		{
 			CItem *pSpell = Spell_Effect_Create(SPELL_Liquor, LAYER_FLAG_Drunk, g_Cfg.GetSpellEffect(SPELL_Liquor, iStrength), (int64)dwDelay, this);
-			pSpell->m_itSpell.m_spellcharges = 10;	// how long to last.
+		    if (pSpell) {
+			  pSpell->m_itSpell.m_spellcharges = 10;	// how long to last.
+		    }
 		}
 	}
 	else if ( pItem->IsType(IT_POTION) )
@@ -1118,7 +1120,7 @@ void CChar::Use_Drink( CItem * pItem )
     if (idbottle != ITEMID_NOTHING)
     {
         CItem* pBottle = CItem::CreateScript(idbottle, this);
-        if (wBottleAmount > 0)
+        if (pBottle && wBottleAmount > 0)
         {
             pBottle->SetAmount(wBottleAmount);
             ItemBounce(pBottle, g_Cfg.m_iBounceMessage);
