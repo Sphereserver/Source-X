@@ -29,6 +29,27 @@ namespace zlib {
 #include <algorithm>
 
 
+namespace
+{
+constexpr dword kKrLoginProtocolMajor = 66;
+constexpr dword kLegacyVersionMajorFactor = 100'00'00;
+
+// KR reports protocol version 66.x in 0xEF. Its 0xE1 client-type report arrives
+// only after the character list, so the account's saved login version is needed here.
+bool usesKrLoginPackets(const CNetState* pState, dword dwReportedVersion)
+{
+    if (pState->isClientKR())
+    {
+        return true;
+    }
+    if (dwReportedVersion == 0)
+    {
+        dwReportedVersion = pState->getReportedVersion();
+    }
+    return dwReportedVersion / kLegacyVersionMajorFactor == kKrLoginProtocolMajor;
+}
+}
+
 /***************************************************************************
  *
  *
@@ -3394,7 +3415,9 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	// since 7.0.13.0, start locations have extra information
 	dword tmVer = (dword)(account->m_TagDefs.GetKeyNum("clientversion"));
 	dword tmVerReported = (dword)(account->m_TagDefs.GetKeyNum("reportedcliver"));
-	if ( tmVer >= MINCLIVER_EXTRASTARTINFO || tmVerReported >= MINCLIVER_EXTRASTARTINFO )
+    const CNetState* ns = target->GetNetState();
+    const bool fKrLogin = usesKrLoginPackets(ns, tmVerReported);
+	if ( !fKrLogin && (tmVer >= MINCLIVER_EXTRASTARTINFO || tmVerReported >= MINCLIVER_EXTRASTARTINFO) )
 	{
 		// newer clients receive additional start info
 		for (size_t i = 0; i < startCount; ++i )
@@ -3424,9 +3447,8 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 		}
 	}
 
-    if (tmVerReported > 1'26'00'00)
+    if (fKrLogin || tmVerReported > 1'26'00'00)
     {
-		const CNetState* ns = target->GetNetState();
         dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
             std::max(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
         if (ns->getClientType() == CLIENTTYPE_2D)
@@ -3867,7 +3889,8 @@ PacketEnableFeatures::PacketEnableFeatures(const CClient* target, dword flags) :
 	dword tmVerReported = (dword)(account->m_TagDefs.GetKeyNum("reportedcliver"));
 
 	// since 6.0.14.2, feature flags are 4 bytes instead of 2.
-	if (tmVer >= MINCLIVER_EXTRAFEATURES || tmVerReported >= MINCLIVER_EXTRAFEATURES)
+	if (!usesKrLoginPackets(target->GetNetState(), tmVerReported)
+        && (tmVer >= MINCLIVER_EXTRAFEATURES || tmVerReported >= MINCLIVER_EXTRAFEATURES))
 		writeInt32(flags);
 	else
 		writeInt16((word)(flags));
