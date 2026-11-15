@@ -8,6 +8,7 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 	ADDTOCALLSTACK("CCrypto::DecryptLogin");
     // Algorithm: a kind of rotation cipher
 
+    constexpr dword kX86ShiftCountMask = 0x1fu; // SHR r32, CL masks the count to five bits.
     const dword dwCliVer = GetClientVerNumber();
 	if ( dwCliVer >= 1253700u )
 	{
@@ -44,16 +45,16 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 			dword MaskHi = m_CryptMaskHi;
             dword MaskShiftOperand, MaskShifted;
 
-            MaskShiftOperand = ((5 * MaskHi * MaskHi) & 0xff);
-            MaskShifted = (MaskShiftOperand >= 32u /*sizeof(dword)*/) ? 0u : (m_MasterHi >> MaskShiftOperand);
+            MaskShiftOperand = ((5 * MaskHi * MaskHi) & kX86ShiftCountMask);
+            MaskShifted = m_MasterHi >> MaskShiftOperand;
 			m_CryptMaskHi =
 				MaskShifted
 				+ (MaskHi * m_MasterHi)
 				+ (MaskLo * MaskLo * 0x35ce9581)
 				+ 0x07afcc37;
 
-            MaskShiftOperand = ((3 * MaskLo * MaskLo) & 0xff);
-            MaskShifted = (MaskShiftOperand >= 32u /*sizeof(dword)*/) ? 0u : (m_MasterLo >> MaskShiftOperand);
+            MaskShiftOperand = ((3 * MaskLo * MaskLo) & kX86ShiftCountMask);
+            MaskShifted = m_MasterLo >> MaskShiftOperand;
 			m_CryptMaskLo =
 				MaskShifted
 				+ (MaskLo * m_MasterLo)
@@ -92,7 +93,7 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 	}
     else if (pOutput != pInput)   // no crypt
     {
-        if (inLen >= outLen)
+        if (inLen > outLen)
             return false; // error: i'm trying to write more bytes than the output buffer length
         memcpy( pOutput, pInput, inLen );
     }

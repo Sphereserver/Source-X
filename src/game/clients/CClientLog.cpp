@@ -17,6 +17,11 @@ namespace zlib {
 #include <zlib/zlib.h>
 }
 
+namespace
+{
+constexpr dword kLastClientWithoutVersionRequest = 1'26'04'00;
+}
+
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.
 
@@ -931,8 +936,8 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
                         pAcc->m_TagDefs.SetNum("clientversion", m_Crypt.GetClientVerNumber());
 					if (GetNetState()->getReportedVersion())
                         pAcc->m_TagDefs.SetNum("reportedcliver", GetNetState()->getReportedVersion());
-                    else
-                        new PacketClientVersionReq(this); // client version 0 ? ask for it.
+                    else if (!m_Crypt.GetClientVerNumber() || m_Crypt.GetClientVerNumber() > kLastClientWithoutVersionRequest)
+                        new PacketClientVersionReq(this); // Old clients cannot parse 0xBD; unknown clients still need probing.
 				}
 				else
 				{
@@ -974,7 +979,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 					if ( tmSid != 0 && tmSid == pEvent->CharListReq.m_Account )
 					{
 						// request client version if the client has not reported it to server yet
-						if ( (tmVerReported == 0) && (tmVer > 1'26'04'00) )
+						if ( (tmVerReported == 0) && (tmVer > kLastClientWithoutVersionRequest) )
                         {   // if we send this packet to clients < 1.26.04.00 we'll desynchronize the stream and break the login process
 							new PacketClientVersionReq(this);
                         }
