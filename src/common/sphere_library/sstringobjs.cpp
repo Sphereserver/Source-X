@@ -104,6 +104,11 @@ void AbstractString::ensureLengthHeap(size_t newLength)
 		}
 		newBuf[m_length] = 0;
 		m_buf = newBuf;
+
+	    // Make sure we don't write through stale pointer.
+	    m_length = newLength;
+	    newBuf[m_length] = '\0';
+	    return;
 	}
 	m_length = newLength;
 	m_buf[m_length] = '\0';

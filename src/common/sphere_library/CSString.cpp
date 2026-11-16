@@ -182,8 +182,12 @@ int CSString::Resize(int iNewLength, bool fPreciseSize)
         ++gReallocs;
 #endif
 
-        if (fValid)
+        if (fValid) {
             delete[] m_pchData;
+	        // Make sure we don't write through stale pointer.
+	        m_pchData = nullptr;
+	        m_iMaxLength = 0;
+        }
 
 		m_pchData = pNewData;
         m_iMaxLength = iNewMax;
