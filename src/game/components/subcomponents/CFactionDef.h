@@ -80,61 +80,61 @@ public:
 
         // Elemental Group (opposed to Abyss Group)
         ELEMENTAL_SSLAYER   = _kuiSuperSlayerSpeciesIndex,          //  SuperSlayer
-        AIR_ELEMENTAL,
-        BLOOD_ELEMENTAL,
-        EARTH_ELEMENTAL,
-        FIRE_ELEMENTAL,
-        POISON_ELEMENTAL,
-        SNOW_ELEMENTAL,
-        WATER_ELEMENTAL,
-        ELEMENTAL_QTY,
+        AIR_ELEMENTAL = 2,
+        BLOOD_ELEMENTAL = 3,
+        EARTH_ELEMENTAL = 4,
+        FIRE_ELEMENTAL = 5,
+        POISON_ELEMENTAL = 6,
+        SNOW_ELEMENTAL = 7,
+        WATER_ELEMENTAL = 8,
+        ELEMENTAL_QTY = 9,
 
         // Abyss Group (opposed to Elemental and Fey Groups)
         DEMON_SSLAYER       = _kuiSuperSlayerSpeciesIndex,        // SuperSlayer
-        GARGOYLE,
-        ABYSS_QTY,
+        GARGOYLE = 2,
+        ABYSS_QTY = 3,
 
         // Humanoid Group (opposed to Undead Group)
         REPOND_SSLAYER      = _kuiSuperSlayerSpeciesIndex,        // SuperSlayer
-        GOBLIN,
-        VERMIN,
-        OGRE,
-        ORC,
-        TROLL,
-        HUMANOID_QTY,
+        GOBLIN = 2,
+        VERMIN = 3,
+        OGRE = 4,
+        ORC = 5,
+        TROLL = 6,
+        HUMANOID_QTY = 7,
 
         // Undead Group (opposed to Humanoid Group)
         UNDEAD_SSLAYER       = _kuiSuperSlayerSpeciesIndex,      // SuperSlayer
-        MAGE,
-        UNDEAD_QTY,
+        MAGE = 2,
+        UNDEAD_QTY = 3,
 
         // Arachnid Group (opposed to Reptilian Group)
         ARACHNID_SSLAYER     = _kuiSuperSlayerSpeciesIndex,      // SuperSlayer
-        SCORPION,
-        SPIDER,
-        TERATHAN,
-        ARACHNID_QTY,
+        SCORPION = 2,
+        SPIDER = 3,
+        TERATHAN = 4,
+        ARACHNID_QTY = 5,
 
         // Reptile Group (opposed to Arachnid)
         REPTILE_SSLAYER      = _kuiSuperSlayerSpeciesIndex,     // SuperSlayer
-        DRAGON,
-        OPHIDIAN,
-        SNAKE,
-        LIZARDMAN,
-        REPTILIAN_QTY,
+        DRAGON = 2,
+        OPHIDIAN = 3,
+        SNAKE = 4,
+        LIZARDMAN = 5,
+        REPTILIAN_QTY = 6,
 
         // Old Mondain’s Legacy Slayers
         BAT_SSLAYER          = _kuiSuperSlayerSpeciesIndex,
-        BEAR,
-        BEETLE,
-        BIRD,
+        BEAR = 2,
+        BEETLE = 3,
+        BIRD = 4,
         //ANIMAL_QTY, // This is not a real slayer group, but we might add ANIMAL_QTY for convenience
 
         // Standalone Slayers
         BOVINE_SSLAYER       = _kuiSuperSlayerSpeciesIndex,
-        FLAME,
-        ICE,
-        WOLF
+        FLAME = 2,
+        ICE = 3,
+        WOLF = 4
         //STANDALONE_QTY
     };
     // The upper 6 bytes are used to store the family/group as a bitmask.

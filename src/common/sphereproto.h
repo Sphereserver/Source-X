@@ -206,19 +206,19 @@ enum PARTYMSG_TYPE
 	PARTYMSG_Remove = 2,	// (to/from client) request to kick someone or notify that someone has been kicked.
 	PARTYMSG_MsgMember = 3,	// (from client ) send a msg to a single member.
 	PARTYMSG_Msg = 4,		// (to/from client) echos
-	PARTYMSG_Disband,
+	PARTYMSG_Disband = 5,
 	PARTYMSG_Option = 6,	// (from client) loot flag.
 	PARTYMSG_NotoInvited = 7,	// (to client) I've been invited to join another party.
 	PARTYMSG_Accept = 8,	// (from client) first
-	PARTYMSG_Decline,
-	PARTYMSG_QTY
+	PARTYMSG_Decline = 9,
+	PARTYMSG_QTY = 10
 };
 
 enum EXTDATA_TYPE
 {
 	EXTDATA_Fastwalk_Init	= 0x01,	// send to client
 	EXTDATA_Fastwalk_Add	= 0x02,	// send to client
-	EXTDATA_Unk3,
+	EXTDATA_Unk3            = 0x03,
 	EXTDATA_GumpChange		= 0x04,	// len=8 "00 00 00 67 00 00 00 00"
 	EXTDATA_ScreenSize		= 0x05,	// len=8 "00 00 02 80 00 00 00 0a"
 	EXTDATA_Party_Msg		= 0x06,	// len=5 data for total of 10. Client wants to add to the party.
@@ -228,7 +228,7 @@ enum EXTDATA_TYPE
 	EXTDATA_Wrestle_Stun    = 0x0a,	// From Client: Wrestling stun
 	EXTDATA_Lang			= 0x0b,	// len=3 = my language. ENU CLanguageID
 	EXTDATA_StatusClose		= 0x0c, // 12= closing a status window.
-	EXTDATA_Unk13,
+	EXTDATA_Unk13           = 0x0d,
 	EXTDATA_Yawn			= 0x0e, // Yawn animation
 	EXTDATA_Unk15			= 0x0f,	// Unknown, sent at login
 	EXTDATA_OldAOSTooltipInfo	= 0x10, // Equip info
@@ -271,7 +271,7 @@ enum EXTDATA_TYPE
 	//
 	EXTDATA_GargoyleFly		= 0x32, // client message
 	EXTDATA_WheelBoatMove = 0x33, // client message
-	EXTDATA_QTY
+	EXTDATA_QTY           = 0x34
 };
 
 enum EXTAOS_TYPE
@@ -378,53 +378,53 @@ enum EXTCMD_TYPE
 
 enum CHATMSG_TYPE	// Chat system messages.
 {
-	CHATMSG_AlreadyIgnoringMax			= 0x01,		// 1 - You are already ignoring the maximum amount of people
-	CHATMSG_AlreadyIgnoringPlayer,					// 2 - You are already ignoring <name>
-	CHATMSG_NowIgnoring,							// 3 - You are now ignoring <name>
-	CHATMSG_NoLongerIgnoring,						// 4 - You no longer ignoring <name>
-	CHATMSG_NotIgnoring,							// 5 - You are not ignoring <name>
-	CHATMSG_NoLongerIgnoringAnyone,					// 6 - You are no longer ignoring anyone
-	CHATMSG_InvalidConferenceName,					// 7 - That is not a valid conference name
-	CHATMSG_AlreadyAConference,						// 8 - There is already a conference of that name
-	CHATMSG_MustHaveOps,							// 9 - You must have operator status to do this
-	CHATMSG_ConferenceRenamed,						// a - Conference <name> renamed to .
-	CHATMSG_MustBeInAConference,					// b - You must be in a conference to do this. To join a conference, select one from the Conference menu
-	CHATMSG_NoPlayer,								// c - There is no player named <name>
-	CHATMSG_NoConference,							// d - There is no conference named <name>
-	CHATMSG_IncorrectPassword,						// e - That is not the correct password
-	CHATMSG_PlayerIsIgnoring,						// f - <name> has chosen to ignore you. None of your messages to them will get through
-	CHATMSG_RevokedSpeaking,						// 10 - The moderator of this conference has not given you speaking priveledges.
-	CHATMSG_ReceivingPrivate,						// 11 - You can now receive private messages
-	CHATMSG_NoLongerReceivingPrivate,				// 12 - You will no longer receive private messages. Those who send you a message will be notified that you are blocking incoming messages
-	CHATMSG_ShowingName,							// 13 - You are now showing your character name to any players who inquire with the whois command
-	CHATMSG_NotShowingName,							// 14 - You are no long showing your character name to any players who inquire with the whois command
-	CHATMSG_PlayerIsAnonymous,						// 15 - <name> is remaining anonymous
-	CHATMSG_PlayerNotReceivingPrivate,				// 16 - <name> has chosen to not receive private messages at the moment
-	CHATMSG_PlayerKnownAs,							// 17 - <name> is known in the lands of britania as .
-	CHATMSG_PlayerIsKicked,							// 18 - <name> has been kicked out of the conference
-	CHATMSG_ModeratorHasKicked,						// 19 - <name>, a conference moderator, has kicked you out of the conference
-	CHATMSG_AlreadyInConference,					// 1a - You are already in the conference <name>
-	CHATMSG_PlayerNoLongerModerator,				// 1b - <name> is no longer a conference moderator
-	CHATMSG_PlayerIsAModerator,						// 1c - <name> is now a conference moderator
-	CHATMSG_RemovedListModerators,					// 1d - <name> has removed you from the list of conference moderators.
-	CHATMSG_YouAreAModerator,						// 1e - <name> has made you a conference moderator
-	CHATMSG_PlayerNoSpeaking,						// 1f - <name> no longer has speaking priveledges in this conference.
-	CHATMSG_PlayerNowSpeaking,						// 20 - <name> now has speaking priveledges in this conference
-	CHATMSG_ModeratorRemovedSpeaking,				// 21 - <name>, a channel moderator, has removed your speaking priveledges for this conference.
-	CHATMSG_ModeratorGrantSpeaking,					// 22 - <name>, a channel moderator, has granted you speaking priveledges for this conference.
-	CHATMSG_SpeakingByDefault,						// 23 - From now on, everyone in the conference will have speaking priviledges by default.
-	CHATMSG_ModeratorsSpeakDefault,					// 24 - From now on, only moderators in this conference will have speaking priviledges by default.
-	CHATMSG_PlayerTalk,								// 25 - <name>:
-	CHATMSG_PlayerEmote,							// 26 - *<name>*
-	CHATMSG_PlayerPrivate,							// 27 - [<name>]:
-	CHATMSG_PasswordChanged,						// 28 - The password to the conference has been changed
-	CHATMSG_NoMorePlayersAllowed,					// 29 - Sorry--the conference named <name> is full and no more players are allowed in.
-	CHATMSG_Banning,								// 2a - You are banning <name> from this conference.
-	CHATMSG_ModeratorHasBanned,						// 2b - <name>, a conference moderator, has banned you from the conference.
-	CHATMSG_Banned,									// 2c - You have been banned from this conference.
+	CHATMSG_AlreadyIgnoringMax			= 0x01,		// You are already ignoring the maximum amount of people
+	CHATMSG_AlreadyIgnoringPlayer = 0x02,			// You are already ignoring <name>
+	CHATMSG_NowIgnoring = 0x03,						// You are now ignoring <name>
+	CHATMSG_NoLongerIgnoring = 0x04,				// You no longer ignoring <name>
+	CHATMSG_NotIgnoring = 0x05,						// You are not ignoring <name>
+	CHATMSG_NoLongerIgnoringAnyone = 0x06,			// You are no longer ignoring anyone
+	CHATMSG_InvalidConferenceName = 0x07,			// That is not a valid conference name
+	CHATMSG_AlreadyAConference = 0x08,				// There is already a conference of that name
+	CHATMSG_MustHaveOps = 0x09,						// You must have operator status to do this
+	CHATMSG_ConferenceRenamed = 0x0a,				// Conference <name> renamed to .
+	CHATMSG_MustBeInAConference = 0x0b,				// You must be in a conference to do this. To join a conference, select one from the Conference menu
+	CHATMSG_NoPlayer = 0x0c,						// There is no player named <name>
+	CHATMSG_NoConference = 0x0d,					// There is no conference named <name>
+	CHATMSG_IncorrectPassword = 0x0e,				// That is not the correct password
+	CHATMSG_PlayerIsIgnoring = 0x0f,				// <name> has chosen to ignore you. None of your messages to them will get through
+	CHATMSG_RevokedSpeaking = 0x10,					// The moderator of this conference has not given you speaking privileges.
+	CHATMSG_ReceivingPrivate = 0x11,				// You can now receive private messages
+	CHATMSG_NoLongerReceivingPrivate = 0x12,		// You will no longer receive private messages. Those who send you a message will be notified that you are blocking incoming messages
+	CHATMSG_ShowingName = 0x13,						// You are now showing your character name to any players who inquire with the whois command
+	CHATMSG_NotShowingName = 0x14,					// You are no long showing your character name to any players who inquire with the whois command
+	CHATMSG_PlayerIsAnonymous = 0x15,				// <name> is remaining anonymous
+	CHATMSG_PlayerNotReceivingPrivate = 0x16,		// <name> has chosen to not receive private messages at the moment
+	CHATMSG_PlayerKnownAs = 0x17,					// <name> is known in the lands of britania as .
+	CHATMSG_PlayerIsKicked = 0x18,					// <name> has been kicked out of the conference
+	CHATMSG_ModeratorHasKicked = 0x19,				// <name>, a conference moderator, has kicked you out of the conference
+	CHATMSG_AlreadyInConference = 0x1a,				// You are already in the conference <name>
+	CHATMSG_PlayerNoLongerModerator = 0x1b,			// <name> is no longer a conference moderator
+	CHATMSG_PlayerIsAModerator = 0x1c,				// <name> is now a conference moderator
+	CHATMSG_RemovedListModerators = 0x1d,			// <name> has removed you from the list of conference moderators.
+	CHATMSG_YouAreAModerator = 0x1e,				// <name> has made you a conference moderator
+	CHATMSG_PlayerNoSpeaking = 0x1f,				// <name> no longer has speaking privileges in this conference.
+	CHATMSG_PlayerNowSpeaking = 0x20,				// <name> now has speaking privileges in this conference
+	CHATMSG_ModeratorRemovedSpeaking = 0x21,		// <name>, a channel moderator, has removed your speaking privileges for this conference.
+	CHATMSG_ModeratorGrantSpeaking = 0x22,			// <name>, a channel moderator, has granted you speaking privileges for this conference.
+	CHATMSG_SpeakingByDefault = 0x23,				// From now on, everyone in the conference will have speaking privileges by default.
+	CHATMSG_ModeratorsSpeakDefault = 0x24,			// From now on, only moderators in this conference will have speaking privileges by default.
+	CHATMSG_PlayerTalk = 0x25,						// <name>:
+	CHATMSG_PlayerEmote = 0x26,						// *<name>*
+	CHATMSG_PlayerPrivate = 0x27,					// [<name>]:
+	CHATMSG_PasswordChanged = 0x28,					// The password to the conference has been changed
+	CHATMSG_NoMorePlayersAllowed = 0x29,			// Sorry--the conference named <name> is full and no more players are allowed in.
+	CHATMSG_Banning = 0x2a,							// You are banning <name> from this conference.
+	CHATMSG_ModeratorHasBanned = 0x2b,				// <name>, a conference moderator, has banned you from the conference.
+	CHATMSG_Banned = 0x2c,							// You have been banned from this conference.
 
-	CHATMSG_TrialAccOnlyHelpChannel		= 0x03f5,	// 3f5 - Trial accounts may only join the Help channel.
-	CHATMSG_TrialAccNoCustomChannel,				// 3f6 - Trial accounts may not participate in custom channels.
+	CHATMSG_TrialAccOnlyHelpChannel		= 0x03f5,	// Trial accounts may only join the Help channel.
+	CHATMSG_TrialAccNoCustomChannel     = 0x03f6,	// Trial accounts may not participate in custom channels.
 
 
 	// Actions (client -> server)					// OLD CHAT		NEW CHAT
@@ -460,14 +460,14 @@ enum CHATMSG_TYPE	// Chat system messages.
 
 	// Commands (client <- server)					// OLD CHAT		NEW CHAT
 	CHATCMD_AddChannel					= 0x3E8,	// x			x
-	CHATCMD_RemoveChannel,							// x			x
+	CHATCMD_RemoveChannel = 0x3e9,					// x			x
 	CHATCMD_SetChatName					= 0x3EB,	// x
-	CHATCMD_CloseChatWindow,						// x
-	CHATCMD_OpenChatWindow,							// x
-	CHATCMD_AddMemberToChannel,						// x
-	CHATCMD_RemoveMemberFromChannel,				// x
-	CHATCMD_ClearMembers,							// x
-	CHATCMD_JoinedChannel,							// x			x
+	CHATCMD_CloseChatWindow = 0x3ec,				// x
+	CHATCMD_OpenChatWindow = 0x3ed,					// x
+	CHATCMD_AddMemberToChannel = 0x3ee,				// x
+	CHATCMD_RemoveMemberFromChannel = 0x3ef,		// x
+	CHATCMD_ClearMembers = 0x3f0,					// x
+	CHATCMD_JoinedChannel = 0x3f1,					// x			x
 	CHATCMD_LeftChannel					= 0x3F4		//				x
 };
 
@@ -516,9 +516,9 @@ enum WEATHER_TYPE : uchar
 	WEATHER_DEFAULT = 0xFE,
 	WEATHER_DRY = 0xFF,
 	WEATHER_RAIN = 0,
-	WEATHER_STORM,
-	WEATHER_SNOW,
-	WEATHER_CLOUDY	// not client supported ? (Storm brewing)
+	WEATHER_STORM = 1,
+	WEATHER_SNOW = 2,
+	WEATHER_CLOUDY = 3	// not client supported ? (Storm brewing)
 };
 
 enum SCROLL_TYPE	// Client messages for scrolls types.
