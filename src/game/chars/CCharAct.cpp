@@ -3115,14 +3115,16 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 			{
 				fCanAddToPack = false;
 				const CItem* pCont = dynamic_cast<const CItem*>(pItem->GetContainer());
-				if (pPrevCont == pCont) //In the same cont, but unable to go there
-					fDropOnGround = true;
-				else //we changed the cont in the script
-				{
-					tchar* pszMsg = Str_GetTemp();
-					snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_BOUNCE_CONT), pCont->GetName());
-					pszWhere = pszMsg;
-				}
+                if (pCont) {
+				    if (pPrevCont == pCont) //In the same cont, but unable to go there
+					    fDropOnGround = true;
+				    else //we changed the cont in the script
+				    {
+					    tchar* pszMsg = Str_GetTemp();
+					    snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_BOUNCE_CONT), pCont->GetName());
+					    pszWhere = pszMsg;
+				    }
+                }
 			}
 		}
 	}
@@ -5493,6 +5495,10 @@ bool CChar::SetPrivLevel(CTextConsole * pSrc, lpctstr pszFlags)
 		return false;
 
 	CAccount *pAccount = m_pPlayer->GetAccount();
+    if (!pAccount) {
+		return false;
+    }
+
 	PLEVEL_TYPE PrivLevel = CAccount::GetPrivLevelText(pszFlags);
 
 	// Remove Previous GM Robe

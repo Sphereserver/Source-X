@@ -2581,7 +2581,7 @@ bool CClient::addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag
 	ASSERT(pBoard);
 
 	CItemMessage *pMsgItem = static_cast<CItemMessage *>(uidMsg.ItemFind());
-	if (pBoard->IsItemInside( pMsgItem ) == false)
+	if (!pMsgItem || (pBoard->IsItemInside( pMsgItem ) == false))
 		return false;
 
 	// check author is properly linked
@@ -2928,7 +2928,7 @@ byte CClient::Setup_Play( uint iSlot ) // After hitting "Play Character" button
 		return( PacketLoginError::BadCharacter );
 
 	CChar * pChar = m_tmSetupCharList[ iSlot ].CharFind();
-	if ( !pAccount->IsMyAccountChar( pChar ))
+	if (!pChar || !pAccount->IsMyAccountChar( pChar ))
 		return( PacketLoginError::BadCharacter );
 
 	CChar * pCharLast = pAccount->m_uidLastChar.CharFind();
@@ -2956,8 +2956,12 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 	if ( iSlot >= ARRAY_COUNT(m_tmSetupCharList))
 		return PacketDeleteError::NotExist;
 
-	CChar * pChar = m_tmSetupCharList[iSlot].CharFind();
-	if ( ! GetAccount()->IsMyAccountChar( pChar ))
+    CChar * pChar = m_tmSetupCharList[iSlot].CharFind();
+    if (!pChar) {
+        return PacketDeleteError::NotExist;
+    }
+
+    if ( ! GetAccount()->IsMyAccountChar( pChar ))
 		return PacketDeleteError::BadPass;
 
 	if ( ! pChar->IsDisconnected())

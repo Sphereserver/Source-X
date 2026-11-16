@@ -44,6 +44,10 @@ void CChatChannel::WhoIs(lpctstr pszBy, lpctstr pszMember)
 {
     ADDTOCALLSTACK("CChatChannel::WhoIs");
     CChatChanMember * pBy = FindMember(pszBy);
+    if (!pBy) {
+        return;
+    }
+
     CChatChanMember * pMember = FindMember(pszMember);
     CChar * pChar = pMember? pMember->GetClientActive()->GetChar() : nullptr;
     if (!pMember||!pChar)
@@ -403,7 +407,7 @@ void CChatChannel::Broadcast(CHATMSG_TYPE iType, lpctstr pszName, lpctstr pszTex
     CSString sName;
     CChatChanMember *pSendingMember = FindMember(pszName);
 
-    if (iType >= CHATMSG_PlayerTalk && iType <= CHATMSG_PlayerPrivate) // Only chat, emote, and privates get a color status number
+    if (pSendingMember && iType >= CHATMSG_PlayerTalk && iType <= CHATMSG_PlayerPrivate) // Only chat, emote, and privates get a color status number
         g_Serv.m_Chats.FormatName(sName, pSendingMember, fOverride);
     else
         sName = pszName;
@@ -418,7 +422,7 @@ void CChatChannel::Broadcast(CHATMSG_TYPE iType, lpctstr pszName, lpctstr pszTex
         }
 
             // If it's a private message, then tell the sender the recipient is ignoring them
-        else if (iType == CHATMSG_PlayerPrivate)
+        else if (pSendingMember && iType == CHATMSG_PlayerPrivate)
         {
             pSendingMember->SendChatMsg(CHATMSG_PlayerIsIgnoring, m_Members[i]->GetChatName());
         }
