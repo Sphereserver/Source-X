@@ -999,7 +999,7 @@ bool PacketBookPageEdit::onReceive(CNetState* net)
 	word pageCount = readInt16();
 
 	CItem* book = bookSerial.ItemFind();
-	if (character->CanSee(book) == false)
+	if (!book || character->CanSee(book) == false)
 	{
 		client->addObjectRemoveCantSee(bookSerial, "the book");
 		return true;
@@ -1190,7 +1190,7 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 	CUID messageSerial(readInt32());
 
 	CItemContainer* board = dynamic_cast<CItemContainer*>( boardSerial.ItemFind() );
-	if (character->CanSee(board) == false)
+	if (!board || character->CanSee(board) == false)
 	{
 		client->addObjectRemoveCantSee(boardSerial, "the board");
 		return true;
@@ -1278,7 +1278,7 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 		{
 			// remove the message
 			CItemMessage* message = dynamic_cast<CItemMessage*>( messageSerial.ItemFind() );
-			if (board->IsItemInside(message) == false)
+			if (!message || board->IsItemInside(message) == false)
 			{
 				client->SysMessageDefault(DEFMSG_ITEMUSE_BBOARD_COR);
 				return true;
@@ -1663,12 +1663,16 @@ bool PacketCreateNew::onReceive(CNetState* net)
 
 	//CItemBase * pItemDef = CItemBase::FindItemBase( shirtid );
 	CItem* pItem = CItem::CreateScript( shirtid );
-	pItem->SetHue(shirthue);
-	pChar->LayerAdd(pItem);
+    if (pItem) {
+	  pItem->SetHue(shirthue);
+	  pChar->LayerAdd(pItem);
+    }
 
 	pItem = CItem::CreateScript( faceid );
-	pItem->SetHue(facehue);
-	pChar->LayerAdd(pItem);
+    if (pItem) {
+      pItem->SetHue(facehue);
+      pChar->LayerAdd(pItem);
+    }
 
 	return true;
 }

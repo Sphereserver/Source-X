@@ -1252,7 +1252,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		}
 		else
 		{
-			if ( item->IsAttr(ATTR_INVIS) && !viewer->CanSee(item) )
+			if (!viewer || (item->IsAttr(ATTR_INVIS) && !viewer->CanSee(item)))
 				continue;
 		}
 
@@ -2712,7 +2712,7 @@ PacketCorpseEquipment::PacketCorpseEquipment(CClient* target, const CItemContain
 	for (CSObjContRec* pObjRec : *corpse)
 	{
 		CItem* item = static_cast<CItem*>(pObjRec);
-		if (item->IsAttr(ATTR_INVIS) && viewer->CanSee(item) == false)
+		if (!viewer || (item->IsAttr(ATTR_INVIS) && viewer->CanSee(item) == false))
 			continue;
 
 		layer = (LAYER_TYPE)(item->GetContainedLayer());

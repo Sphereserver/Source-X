@@ -338,7 +338,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 
 		// Is the object on a person ? check the weight.
 		CObjBaseTemplate * pObjTop = pObjOn->GetTopLevelObj();
-		if ( pObjTop->IsChar())
+		if (pObjTop && pObjTop->IsChar())
 		{
 			CChar * pChar = dynamic_cast <CChar*>( pObjTop );
 			ASSERT(pChar);
@@ -379,7 +379,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 			}
 		}
 
-		if (pObjTop->IsItem())
+		if (pObjTop && pObjTop->IsItem())
 		{
 			CItemContainer * pTopContainer = dynamic_cast<CItemContainer*>(pObjTop);
 			if (pTopContainer && !pTopContainer->CanContainerHold(pItem, m_pChar))
