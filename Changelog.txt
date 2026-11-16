@@ -4239,3 +4239,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 13-11-2026, DavideRei
 - Fixed: tooltips were sent for objects waiting for the deferred deletion: @ClientTooltip scripts failed on them (ACT, REFx can't find them by UID anymore).
+
+16-11-2026, nightNR
+- Fixed: blocked accounts were unblocked after a server restart: BLOCK=1 read from the account file was ignored while loading, and the next save dropped it (#1616). The f_onaccount_block and f_onaccount_unblock functions are still not called while loading.
