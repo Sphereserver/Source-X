@@ -4242,3 +4242,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 16-11-2026, nightNR
 - Fixed: blocked accounts were unblocked after a server restart: BLOCK=1 read from the account file was ignored while loading, and the next save dropped it (#1616). The f_onaccount_block and f_onaccount_unblock functions are still not called while loading.
+
+17-11-2026, nightNR
+- Fixed: a player could walk through a blocking item (e.g. an energy field) when the terrain on that tile is above the head of the char, like the hidden terrain over a cave floor (e.g. 2558,500 at the Minoc cave entrance): the terrain replaced the item as the tile to stand on. With the item removed on the client (e.g. by a client command or plugin), the server accepted the step.
