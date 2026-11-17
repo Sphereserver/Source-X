@@ -151,6 +151,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
 	m_CanUse = pItemDef->m_CanUse;
 	m_wAmount = 1;
 	m_containedGridIndex = 0;
+	_fUnequipping = false;
 	m_dwDispIndex = ITEMID_NOTHING;
 
 

@@ -4242,3 +4242,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 16-11-2026, nightNR
 - Fixed: blocked accounts were unblocked after a server restart: BLOCK=1 read from the account file was ignored while loading, and the next save dropped it (#1616). The f_onaccount_block and f_onaccount_unblock functions are still not called while loading.
+
+17-11-2026, nightNR
+- Fixed: an item moved again while it was being unequipped (from its own @Unequip trigger) was removed twice: the item bonuses (BONUSSTR, resistances...) were subtracted twice, the item was added twice to the backpack with its weight, and the server asserted on 'pObjRec->GetParent() == this' (#1617). This happened when @Unequip lowered the STR under the item REQSTR (the STR check bounced the same item again, and with scripts using @DropOn_Item @Unequip was fired over and over) or when @Unequip moved or removed the item itself (BOUNCE, CONT=, REMOVE).

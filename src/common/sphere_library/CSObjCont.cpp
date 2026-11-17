@@ -101,7 +101,7 @@ void CSObjCont::InsertContentHead(CSObjContRec* pNewRec)
 }
 */
 
-void CSObjCont::InsertContentTail(CSObjContRec* pNewRec)
+bool CSObjCont::InsertContentTail(CSObjContRec* pNewRec)
 {
 #ifdef _DEBUG
 	const_iterator itEnd = cend();
@@ -111,9 +111,16 @@ void CSObjCont::InsertContentTail(CSObjContRec* pNewRec)
 #endif
 
     pNewRec->RemoveSelf();
-    pNewRec->m_pParent = this;
+    if (pNewRec->GetParent() != nullptr)
+    {
+        // Removing it from the old container fired something (eg. a script trigger) that already moved it
+        //  somewhere else (or here) or deleted it. Inserting it now would place it in two lists at the same time.
+        return false;
+    }
 
+    pNewRec->m_pParent = this;
     _Contents.emplace_back(pNewRec);
+    return true;
 }
 
 void CSObjCont::OnRemoveObj(CSObjContRec* pObjRec)	// Override this --> called when removed from list.

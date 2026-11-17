@@ -135,16 +135,23 @@ int CContainer::FixWeight()
 	return m_totalweight;
 }
 
-void CContainer::ContentAddPrivate( CItem *pItem )
+bool CContainer::ContentAddPrivate( CItem *pItem )
 {
 	ADDTOCALLSTACK("CContainer::ContentAddPrivate");
 	// We are adding to a CChar or a CItemContainer
 	ASSERT(pItem);
 	ASSERT(pItem->IsValidUID());	// it should be valid at this point.
 	if ( pItem->GetParent() == this )
-		return;
+	{
+		return true;
+	}
 
-	CSObjCont::InsertContentTail( pItem );
+	if (!CSObjCont::InsertContentTail( pItem ))
+	{
+		// A trigger fired while removing it from its old container (eg. @Unequip) already moved or deleted it.
+		//  It has been already added (with its weight) to its new container: don't do it again.
+		return false;
+	}
 	//pItem->RemoveUIDFlags(UID_O_DISCONNECT);
 
 	if ( !pItem->IsType(IT_EQ_TRADE_WINDOW) )  //Don't apply trade window layer item weight on character weight.
@@ -181,6 +188,7 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 			}
 		}
 	}
+	return true;
 }
 
 void CContainer::OnRemoveObj(CSObjContRec *pObjRec )	// Override this = called when removed from list.
