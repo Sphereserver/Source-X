@@ -2854,6 +2854,11 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 
 			// protect from snoop - disallow picking from not opened containers
 			bool fIsInOpenedContainer = false;
+
+		    if (!client) {
+		      return -1;
+		    }
+
 			CClient::OpenedContainerMap_t::iterator itContainerFound = client->m_openedContainers.find( pItemCont->GetUID().GetPrivateUID() );
 			if ( itContainerFound != client->m_openedContainers.end() )
 			{
@@ -6161,6 +6166,9 @@ bool CChar::OnTickPeriodic()
     if (IsClientActive())
     {
         CClient* pClient = GetClientActive();
+        if (!pClient) {
+          return true;
+        }
 
         // Players have a silly "always run" flag that gets stuck on.
         if ( (iTimeCur - pClient->m_timeLastEventWalk) > (2 * MSECS_PER_TENTH) )
