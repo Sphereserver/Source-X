@@ -394,28 +394,32 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 
 void CAccount::SetBlockStatus(bool fNewStatus)
 {
+    if (IsPriv(PRIV_BLOCKED) == fNewStatus)
+    {
+        return;
+    }
+
+    // The block state is stored in the account file only as the BLOCK key (PRIV is saved with PRIV_BLOCKED masked out),
+    //  so the flag must be applied while loading too. Only the script triggers are skipped while loading.
     if (!g_Serv.IsLoadingGeneric())
     {
-        if (IsPriv(PRIV_BLOCKED) && fNewStatus == false) {
-
-            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-            pScriptArgs->Init(GetName());
-            TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
-            g_Serv.r_Call("f_onaccount_unblock", pScriptArgs, &g_Serv, nullptr, &iRet);
-            if (iRet == TRIGRET_RET_TRUE)
-                return;
-            ClearPrivFlags(PRIV_BLOCKED);
-        }
-        else if (!IsPriv(PRIV_BLOCKED) && fNewStatus == true)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(GetName());
+        TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
+        g_Serv.r_Call(fNewStatus ? "f_onaccount_block" : "f_onaccount_unblock", pScriptArgs, &g_Serv, nullptr, &iRet);
+        if (iRet == TRIGRET_RET_TRUE)
         {
-            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-            pScriptArgs->Init(GetName());
-            TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
-            g_Serv.r_Call("f_onaccount_block", pScriptArgs, &g_Serv, nullptr, &iRet);
-            if (iRet == TRIGRET_RET_TRUE)
-                return;
-            SetPrivFlags(PRIV_BLOCKED);
+            return;
         }
+    }
+
+    if (fNewStatus)
+    {
+        SetPrivFlags(PRIV_BLOCKED);
+    }
+    else
+    {
+        ClearPrivFlags(PRIV_BLOCKED);
     }
 }
 
