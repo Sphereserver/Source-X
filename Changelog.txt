@@ -4239,3 +4239,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 13-11-2026, DavideRei
 - Fixed: tooltips were sent for objects waiting for the deferred deletion: @ClientTooltip scripts failed on them (ACT, REFx can't find them by UID anymore).
+
+17-11-2026, nightNR
+- Fixed: chars deleted during their location effects (eg: a summon dispelled by a field @STEP, an NPC killed by a fire field or a trap) could stay in the world as orphans, alive and without the summon memory. The "run away from the threat" step that followed moved the char into a sector and took it out of the deletion queue. Deleted chars are not processed or moved anymore.
