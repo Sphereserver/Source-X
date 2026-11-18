@@ -46,5 +46,5 @@ body:
       options:
          - "master"
          - "dev"
-      validations:
-        required: true
+    validations:
+      required: true
