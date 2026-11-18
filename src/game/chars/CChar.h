@@ -161,7 +161,8 @@ public:
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
 
 	int64  _iTimeCreate;	    // When was I created ?
-	int64  _iTimePeriodicTick;
+	int64  _iTimePeriodicTick;  // != 0 if _hookPeriodicTickWheel is linked in the world periodic ticking wheel.
+	TickWheelHook<CChar> _hookPeriodicTickWheel;
 	int64  _iTimeNextRegen;	    // When did I get my last regen tick ?
 
 	int64 _iTimeLastHitsUpdate;
