@@ -24,27 +24,25 @@ private:
     friend class CWorldTickingList;
 
     // Generic Timers. Calls to OnTick.
+    // Ordered by timeout: each tick only looks at the head of the container, up to the first entry not yet expired.
+    //  Each object stores the iterator of its own entry (CTimedObject::_itWorldTickEntry), so adding, removing or
+    //  rescheduling it doesn't need to search or rebuild the container.
     using TickingTimedObjEntry = std::pair<int64, CTimedObject*>;
-    struct WorldTickList : public std::vector<TickingTimedObjEntry>
+    struct WorldTickList : public TimedObjTickMap
     {
         MT_CMUTEX_DEF;
     };
-    WorldTickList _vTimedObjsTimeouts;
-    std::vector<CTimedObject*> _vTimedObjsTimeoutsEraseReq;
-    std::vector<TickingTimedObjEntry> _vTimedObjsTimeoutsAddReq;
-    std::vector<TickingTimedObjEntry> _vTimedObjsTimeoutsElementBuffer;
+    WorldTickList _mTimedObjsTimeouts;
     std::vector<CTimedObject*> _vTimedObjsTimeoutsBuffer;
 
     // Calls to OnTickPeriodic. CChar regens and periodic checks.
+    //  Same as above, the char stores the iterator of its entry (CChar::_itPeriodicTickEntry).
     using TickingPeriodicCharEntry = std::pair<int64, CChar*>;
-    struct CharTickList : public std::vector<TickingPeriodicCharEntry>
+    struct CharTickList : public CharPeriodicTickMap
     {
         MT_CMUTEX_DEF;
     };
-    CharTickList _vPeriodicCharsTicks;
-    std::vector<CChar*> _vPeriodicCharsEraseRequests;
-    std::vector<TickingPeriodicCharEntry> _vPeriodicCharsAddRequests;
-    std::vector<TickingPeriodicCharEntry> _vPeriodicCharsElementBuffer;
+    CharTickList _mPeriodicCharsTicks;
     std::vector<CChar*> _vPeriodicCharsTicksBuffer;
 
     // Calls to OnTickStatusUpdate. Periodically send updated infos to the clients.
@@ -56,9 +54,6 @@ private:
     std::vector<CObjBase*> _vObjStatusUpdatesEraseRequests;
     std::vector<CObjBase*> _vObjStatusUpdatesAddRequests;
     std::vector<CObjBase*> _vObjStatusUpdatesTickBuffer;
-
-    // Reuse the same container (using void pointers statically casted) to avoid unnecessary reallocations.
-    std::vector<size_t> _vIndexMiscBuffer;
 
     //----
 

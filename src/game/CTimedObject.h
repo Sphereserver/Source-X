@@ -7,8 +7,16 @@
 #define _INC_CTIMEDOBJECT_H
 
 #include "../sphere/ProfileData.h"
+#include <map>
 
 class CComponent;
+class CTimedObject;
+class CChar;
+
+// Scheduler containers of CWorldTicker, ordered by the tick time. Objects keep the iterator of their own entry,
+//  so they can be removed or rescheduled without searching the whole container.
+using TimedObjTickMap     = std::multimap<int64, CTimedObject*>;
+using CharPeriodicTickMap = std::multimap<int64, CChar*>;
 
 class CTimedObject
 {
@@ -29,8 +37,9 @@ private:
     PROFILE_TYPE _profileType;
     bool _fIsSleeping;
 
-    bool _fIsInWorldTickList;
-    bool _fIsInWorldTickAddList;
+    bool _fIsInWorldTickList;               // true if _itWorldTickEntry is valid.
+    TimedObjTickMap::iterator _itWorldTickEntry;
+    TimedObjTickMap::node_type _nhWorldTickSpare;  // Our container node while not in the list, reused when rescheduled (no allocation).
 
     /**
     * @brief clears the timeout.
@@ -42,6 +51,10 @@ public:             void  ClearTimeoutRaw() noexcept;
 public:
     CTimedObject(PROFILE_TYPE profile) noexcept;
     virtual ~CTimedObject();
+
+    // The object stores the iterator of its entry in the world ticking list: a copy would point to the entry of the original.
+    CTimedObject(const CTimedObject&) = delete;
+    CTimedObject& operator=(const CTimedObject&) = delete;
 
 protected:
     inline bool _IsTimeoutTickingActive() noexcept;
@@ -189,7 +202,7 @@ void CTimedObject::_SetAwakeFlagRaw()
 
 bool CTimedObject::_IsTimeoutTickingActive() noexcept
 {
-    return _fIsInWorldTickList || _fIsInWorldTickAddList;
+    return _fIsInWorldTickList;
 }
 
 bool CTimedObject::_IsTimerSet() const noexcept
