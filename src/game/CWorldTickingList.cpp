@@ -56,45 +56,15 @@ void CWorldTickingList::ClearTickingLists() // static
 {
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._vTimedObjsTimeouts.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._wheelTimedObjs.MT_CMUTEX);
 #endif
-        for (auto& cont = g_World._Ticker._vTimedObjsTimeouts; auto& elem : cont) {
-            DEBUG_ASSERT(elem.second->_fIsInWorldTickAddList == false);
-            elem.second->_fIsInWorldTickList = false;
-        }
-        for (auto& cont = g_World._Ticker._vTimedObjsTimeoutsAddReq; auto& elem : cont) {
-            DEBUG_ASSERT(elem.second->_fIsInWorldTickList == false);
-            elem.second->_fIsInWorldTickAddList = false;
-        }
-#ifdef _DEBUG
-        for (auto& cont = g_World._Ticker._vTimedObjsTimeoutsEraseReq; auto& elem : cont) {
-            DEBUG_ASSERT(elem->_fIsInWorldTickList == false);
-            DEBUG_ASSERT(elem->_fIsInWorldTickAddList == false);
-        }
-#endif
-        g_World._Ticker._vTimedObjsTimeouts.clear();
-        g_World._Ticker._vTimedObjsTimeoutsAddReq.clear();
-        g_World._Ticker._vTimedObjsTimeoutsEraseReq.clear();
+        g_World._Ticker._wheelTimedObjs.Clear([](CTimedObject* pObj) { pObj->_fIsInWorldTickList = false; });
     }
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._vPeriodicCharsTicks.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._wheelPeriodicChars.MT_CMUTEX);
 #endif
-        for (auto& cont = g_World._Ticker._vPeriodicCharsTicks ; auto& elem : cont) {
-            elem.second->_iTimePeriodicTick = 0;
-        }
-        for (auto& cont = g_World._Ticker._vPeriodicCharsAddRequests; auto& elem : cont) {
-            elem.second->_iTimePeriodicTick = 0;
-        }
-#ifdef _DEBUG
-        for (auto& cont = g_World._Ticker._vPeriodicCharsEraseRequests; auto& elem : cont) {
-            DEBUG_ASSERT(elem->_iTimePeriodicTick == 0);
-        }
-#endif
-
-        g_World._Ticker._vPeriodicCharsTicks.clear();
-        g_World._Ticker._vPeriodicCharsAddRequests.clear();
-        g_World._Ticker._vPeriodicCharsEraseRequests.clear();
+        g_World._Ticker._wheelPeriodicChars.Clear([](CChar* pChar) { pChar->_iTimePeriodicTick = 0; });
     }
     {
 #if MT_ENGINES

@@ -7,6 +7,7 @@
 #define _INC_CTIMEDOBJECT_H
 
 #include "../sphere/ProfileData.h"
+#include "CTickWheel.h"
 
 class CComponent;
 
@@ -29,8 +30,8 @@ private:
     PROFILE_TYPE _profileType;
     bool _fIsSleeping;
 
-    bool _fIsInWorldTickList;
-    bool _fIsInWorldTickAddList;
+    bool _fIsInWorldTickList;               // true if _hookWorldTickWheel is linked in the world ticking wheel.
+    TickWheelHook<CTimedObject> _hookWorldTickWheel;
 
     /**
     * @brief clears the timeout.
@@ -42,6 +43,10 @@ public:             void  ClearTimeoutRaw() noexcept;
 public:
     CTimedObject(PROFILE_TYPE profile) noexcept;
     virtual ~CTimedObject();
+
+    // The world ticking wheel links the object by the address of its hook: a copy would have the links of the original.
+    CTimedObject(const CTimedObject&) = delete;
+    CTimedObject& operator=(const CTimedObject&) = delete;
 
 protected:
     inline bool _IsTimeoutTickingActive() noexcept;
@@ -189,7 +194,7 @@ void CTimedObject::_SetAwakeFlagRaw()
 
 bool CTimedObject::_IsTimeoutTickingActive() noexcept
 {
-    return _fIsInWorldTickList || _fIsInWorldTickAddList;
+    return _fIsInWorldTickList;
 }
 
 bool CTimedObject::_IsTimerSet() const noexcept
