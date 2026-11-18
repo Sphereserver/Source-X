@@ -982,7 +982,7 @@ void CSector::OnHearItem( CChar * pChar, lpctstr pszText )
 	}
 }
 
-void CSector::MoveItemToSector( CItem * pItem )
+bool CSector::MoveItemToSector( CItem * pItem )
 {
 	ADDTOCALLSTACK("CSector::MoveItemToSector");
     // Remove from previous list and put in new.
@@ -991,9 +991,10 @@ void CSector::MoveItemToSector( CItem * pItem )
 
     // Already here?
     if (IsItemInSector(pItem))
-        return;
+        return true;
 
-    m_Items.AddItemToSector(pItem);
+    if (!m_Items.AddItemToSector(pItem))
+        return false;
 
     // TODO: might it be redundant to check every time if the sector can/should sleep or not (via CanSleep)?
     if (_IsSleeping())
@@ -1021,6 +1022,7 @@ void CSector::MoveItemToSector( CItem * pItem )
         if (pItem->IsSleeping())
             pItem->GoAwake();
     }
+    return true;
 }
 
 bool CSector::MoveCharToSector( CChar * pChar )

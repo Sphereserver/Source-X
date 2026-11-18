@@ -66,7 +66,8 @@ public:
 	CItemsList(const CItemsList& copy) = delete;
 	CItemsList& operator=(const CItemsList& other) = delete;
 
-	void AddItemToSector( CItem * pItem );
+	// Returns false if the item wasn't added, because a trigger fired while removing it from its old container moved it elsewhere (or deleted it).
+	bool AddItemToSector( CItem * pItem );
 
 protected:
 	void OnRemoveObj(CSObjContRec* pObRec);	// Override this = called when removed from list.

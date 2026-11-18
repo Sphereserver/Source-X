@@ -797,7 +797,19 @@ void CChar::Stat_StrCheckEquip()
 {
 	for (CSObjContRec* pObjRec : GetIterationSafeCont())
 	{
+		if (pObjRec->GetParent() != this)
+		{
+			// Already moved away by a trigger fired by a previous bounce.
+			continue;
+		}
+
 		CItem* pItem = static_cast<CItem*>(pObjRec);
+		if (pItem->IsUnequipping())
+		{
+			// It's already being removed (its @Unequip trigger is lowering the STR): don't remove it twice.
+			continue;
+		}
+
 		if (!CanEquipStr(pItem))
 		{
 			SysMessagef("%s %s.", g_Cfg.GetDefaultMsg(DEFMSG_EQUIP_NOT_STRONG_ENOUGH), pItem->GetName());

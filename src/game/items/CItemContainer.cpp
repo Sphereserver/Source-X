@@ -675,7 +675,11 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 		}
 	}
 
-	CContainer::ContentAddPrivate(pItem);
+	if (!CContainer::ContentAddPrivate(pItem))
+	{
+		// Moved elsewhere (or deleted) by a trigger fired while removing it from its old container.
+		return;
+	}
 	pItem->SetContainedPoint(pt);
 	pItem->SetContainedGridIndex(gridIndex);
 

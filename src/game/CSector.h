@@ -87,7 +87,8 @@ public:		virtual bool IsDeleted() const override;
 	size_t GetItemComplexity() const;
     bool CheckItemComplexity() const noexcept;
 	bool IsItemInSector( const CItem * pItem ) const;
-	void MoveItemToSector( CItem * pItem );
+	// Returns false if the item wasn't moved here, because a trigger fired while removing it from its old container moved it elsewhere (or deleted it).
+	bool MoveItemToSector( CItem * pItem );
 
 	void AddListenItem();
 	void RemoveListenItem();

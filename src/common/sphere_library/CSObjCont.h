@@ -182,8 +182,9 @@ public:
     /**
     * @brief Insert a record at tail.
     * @param pNewRec record to insert.
+    * @return false if the record wasn't inserted, because removing it from its old container moved it elsewhere (or deleted it).
     */
-    void InsertContentTail(CSObjContRec* pNewRec);
+    bool InsertContentTail(CSObjContRec* pNewRec);
 
 protected:
     /**

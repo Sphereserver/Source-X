@@ -298,7 +298,11 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			layer = LAYER_NONE;
 	}
 
-	CContainer::ContentAddPrivate( pItem );
+	if (!CContainer::ContentAddPrivate( pItem ))
+	{
+		// Moved elsewhere (or deleted) by a trigger fired while removing it from its old container.
+		return;
+	}
 	pItem->SetEquipLayer( layer );
 
 	// update flags etc for having equipped this.
@@ -406,8 +410,26 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
 	LAYER_TYPE layer = pItem->GetEquipLayer();
 	if (( IsTrigUsed(TRIGGER_UNEQUIP) ) || ( IsTrigUsed(TRIGGER_ITEMUNEQUIP) ))
 	{
-		if ( layer != LAYER_DRAGGING && ! g_Serv.IsLoadingGeneric())
+		// Don't fire @Unequip again if this item is moved again from inside its own @Unequip trigger.
+		if ( layer != LAYER_DRAGGING && ! g_Serv.IsLoadingGeneric() && !pItem->IsUnequipping() )
+		{
+			// The item is still equipped while the trigger runs: mark it, so that nothing removes it again in the meanwhile
+			//  (eg. Stat_StrCheckEquip bouncing it when the script lowers the STR).
+			struct UnequippingGuard
+			{
+				CItem* _pItem;
+				explicit UnequippingGuard(CItem* pItemArg) noexcept : _pItem(pItemArg) { _pItem->SetUnequipping(true); }
+				~UnequippingGuard() noexcept { _pItem->SetUnequipping(false); }
+			} unequippingGuard(pItem);
+
             pItem->OnTrigger( ITRIG_UNEQUIP, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this );
+		}
+
+		if (pItem->GetParent() != this)
+		{
+			// The trigger already moved (or deleted) this item, so it has already been fully unequipped by that nested removal.
+			return;
+		}
 	}
 
 	CContainer::OnRemoveObj( pObRec );
@@ -3213,10 +3235,12 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
         // If i have changed the container via scripts, we shouldn't change item's position again here
         if (pItemContPrev == pItem->GetContainer())
         {
-            pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
-            fDisplayMsg = true;
             pItem->RemoveFromView();
-            pItem->MoveToDecay(GetTopPoint(), iDecayTime);	// drop it on ground
+            if (pItem->MoveToDecay(GetTopPoint(), iDecayTime))	// drop it on ground
+            {
+                pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
+                fDisplayMsg = true;
+            }
         }
 	}
 

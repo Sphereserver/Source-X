@@ -51,11 +51,13 @@ public:
     virtual void OnRemoveObj(CSObjContRec* pObjRec) override;
 
     /**
-     * @fn  void CContainer::ContentAddPrivate( CItem * pItem );
+     * @fn  bool CContainer::ContentAddPrivate( CItem * pItem );
      * @brief  Adds an item to this CContainer.
      * @param [in,out]  pItem   If non-null, the item.
+     * @return  false if the item wasn't added, because a trigger fired while removing it from its old container
+     *          already moved it elsewhere (or deleted it). The caller must not handle it as contained here.
      */
-    void ContentAddPrivate(CItem* pItem);
+    bool ContentAddPrivate(CItem* pItem);
 
     void r_WriteContent(CScript& s) const;
 

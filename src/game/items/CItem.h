@@ -105,6 +105,7 @@ protected:
 	uint64	m_CanUse;		// Base attribute flags. can_u_all/male/female..
     uint64	m_Attr;
     uchar m_containedGridIndex;	// Which grid have i been placed in ? (when in a container)
+    bool _fUnequipping;         // Being unequipped: the @Unequip trigger is running, the item is still on the char but is leaving it.
 
 public:
     byte m_speed;
@@ -787,6 +788,13 @@ public:
 	}
 	void SetContainedGridIndex(uchar index) noexcept {
 		m_containedGridIndex = index;
+	}
+
+	bool IsUnequipping() const noexcept {
+		return _fUnequipping;
+	}
+	void SetUnequipping(bool fUnequipping) noexcept {
+		_fUnequipping = fUnequipping;
 	}
 
 	virtual void Update( const CClient * pClientExclude = nullptr ) override;	// send this new item to everyone.
