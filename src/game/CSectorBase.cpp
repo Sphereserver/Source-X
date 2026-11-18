@@ -95,7 +95,7 @@ void CItemsList::OnRemoveObj(CSObjContRec* pObjRec)
 	pItem->SetUIDContainerFlags(UID_O_DISCONNECT);	// It is no place for the moment.
 }
 
-void CItemsList::AddItemToSector( CItem * pItem )
+bool CItemsList::AddItemToSector( CItem * pItem )
 {
 	ADDTOCALLSTACK("CItemsList::AddItemToSector");
 	// Add to top level.
@@ -138,11 +138,17 @@ void CItemsList::AddItemToSector( CItem * pItem )
 
 #endif
 
-        CSObjCont::InsertContentTail(pItem); // this also removes the Char from the old sector
+        if (!CSObjCont::InsertContentTail(pItem)) // this also removes the Item from the old container
+        {
+            // A trigger fired while removing it from its old container (eg. @Unequip) already moved or deleted it:
+            //  the script wins, don't place it here.
+            return false;
+        }
         DEBUG_ASSERT(pItem->GetParent() == this);
 	}
 
     pItem->RemoveUIDFlags(UID_O_DISCONNECT);
+    return true;
 }
 
 

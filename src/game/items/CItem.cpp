@@ -1566,7 +1566,12 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	CSector * pSector = pt.GetSector();
 	ASSERT( pSector );
-	pSector->MoveItemToSector(this);	// This also awakes the item
+	if (!pSector->MoveItemToSector(this))	// This also awakes the item
+	{
+		// A trigger fired while removing it from its old container (eg. @Unequip) already moved or deleted it:
+		//  the script wins, leave it where it is now.
+		return false;
+	}
 
 	// Is this area too complex ?
 	if ( ! g_Serv.IsLoadingGeneric())
@@ -1655,7 +1660,11 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
     // If i have changed the container via scripts, we shouldn't change item's position again here
     if (pCont == GetContainer())
     {
-        MoveTo(ptNewPlace);
+        if (!MoveTo(ptNewPlace))
+        {
+            // Moved elsewhere (or deleted) by a trigger fired while removing it from its old container (eg. @Unequip).
+            return false;
+        }
     }
 	Update();
 

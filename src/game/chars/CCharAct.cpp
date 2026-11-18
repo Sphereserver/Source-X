@@ -3235,10 +3235,12 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
         // If i have changed the container via scripts, we shouldn't change item's position again here
         if (pItemContPrev == pItem->GetContainer())
         {
-            pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
-            fDisplayMsg = true;
             pItem->RemoveFromView();
-            pItem->MoveToDecay(GetTopPoint(), iDecayTime);	// drop it on ground
+            if (pItem->MoveToDecay(GetTopPoint(), iDecayTime))	// drop it on ground
+            {
+                pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
+                fDisplayMsg = true;
+            }
         }
 	}
 
