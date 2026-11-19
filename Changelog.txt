@@ -4242,3 +4242,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 16-11-2026, nightNR
 - Fixed: blocked accounts were unblocked after a server restart: BLOCK=1 read from the account file was ignored while loading, and the next save dropped it (#1616). The f_onaccount_block and f_onaccount_unblock functions are still not called while loading.
+
+19-11-2026, nightNR
+- Fixed: crash at shutdown when a summoned NPC (a spell summon or a guard called by CallGuards) was in the world: closing its sector destroyed the NPC, removing its summon effect called Delete() on it again, and the NPC was freed a second time while its destructor was still running.

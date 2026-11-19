@@ -246,6 +246,12 @@ bool CObjBase::Delete(bool fForce)
 	ADDTOCALLSTACK("CObjBase::Delete");
     EXC_TRY("Cleanup in Delete method");
 
+    if (_IsBeingDestructed())
+    {
+        // Called (directly or through a virtual) while our destructor runs: the destructor is already deleting us.
+        return true;
+    }
+
     bool fScheduleDeletion = true;
     if (g_Serv.IsDestroyingWorld())
     {
