@@ -4242,3 +4242,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 16-11-2026, nightNR
 - Fixed: blocked accounts were unblocked after a server restart: BLOCK=1 read from the account file was ignored while loading, and the next save dropped it (#1616). The f_onaccount_block and f_onaccount_unblock functions are still not called while loading.
+
+19-11-2026, nightNR
+- Fixed: multis deleted without a region (never placed in the world, and every multi addon) were not removed from the world multis list. SERV.MULTIS then read deleted objects: wrong count, the same multi listed more times, possible crash.
+- Fixed: deleted guild and town stones were not removed from the world stones list. SERV.GUILDSTONES and SERV.TOWNSTONES then read deleted objects (wrong count, the same stone listed more times, possible crash), and the server could crash on shutdown or on a failed world load, deleting them a second time. The list doesn't own the stones anymore: they are deleted by the world like every other item.
