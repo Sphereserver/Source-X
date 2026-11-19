@@ -4242,3 +4242,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 16-11-2026, nightNR
 - Fixed: blocked accounts were unblocked after a server restart: BLOCK=1 read from the account file was ignored while loading, and the next save dropped it (#1616). The f_onaccount_block and f_onaccount_unblock functions are still not called while loading.
+
+18-11-2026, nightNR
+- Changed: the world timers (TIMER of the objects and the periodic ticks of the characters) are scheduled by a timing wheel. Adding, removing or rescheduling a timer takes constant time and doesn't allocate, each tick only visits the slots elapsed since the previous one. Timers expiring in the same tick still fire ordered by expiration time, then by the order they were set.
+- Added: sphere.ini setting TimerWheelSlots, the number of 25 ms slots of the timing wheel (default 131072, ~55 minutes). Timers set later than that wait in an overflow list.

@@ -24,27 +24,24 @@ private:
     friend class CWorldTickingList;
 
     // Generic Timers. Calls to OnTick.
+    // Timing wheel (see CTickWheel): each object is linked by its own hook (CTimedObject::_hookWorldTickWheel), so adding,
+    //  removing or rescheduling it never searches the container nor allocates. Each tick only visits the slots elapsed since the last one.
     using TickingTimedObjEntry = std::pair<int64, CTimedObject*>;
-    struct WorldTickList : public std::vector<TickingTimedObjEntry>
+    struct WorldTickWheel : public CTickWheel<CTimedObject>
     {
         MT_CMUTEX_DEF;
     };
-    WorldTickList _vTimedObjsTimeouts;
-    std::vector<CTimedObject*> _vTimedObjsTimeoutsEraseReq;
-    std::vector<TickingTimedObjEntry> _vTimedObjsTimeoutsAddReq;
-    std::vector<TickingTimedObjEntry> _vTimedObjsTimeoutsElementBuffer;
+    WorldTickWheel _wheelTimedObjs;
     std::vector<CTimedObject*> _vTimedObjsTimeoutsBuffer;
 
     // Calls to OnTickPeriodic. CChar regens and periodic checks.
+    //  Same as above, the char is linked by CChar::_hookPeriodicTickWheel.
     using TickingPeriodicCharEntry = std::pair<int64, CChar*>;
-    struct CharTickList : public std::vector<TickingPeriodicCharEntry>
+    struct CharTickWheel : public CTickWheel<CChar>
     {
         MT_CMUTEX_DEF;
     };
-    CharTickList _vPeriodicCharsTicks;
-    std::vector<CChar*> _vPeriodicCharsEraseRequests;
-    std::vector<TickingPeriodicCharEntry> _vPeriodicCharsAddRequests;
-    std::vector<TickingPeriodicCharEntry> _vPeriodicCharsElementBuffer;
+    CharTickWheel _wheelPeriodicChars;
     std::vector<CChar*> _vPeriodicCharsTicksBuffer;
 
     // Calls to OnTickStatusUpdate. Periodically send updated infos to the clients.
@@ -56,9 +53,6 @@ private:
     std::vector<CObjBase*> _vObjStatusUpdatesEraseRequests;
     std::vector<CObjBase*> _vObjStatusUpdatesAddRequests;
     std::vector<CObjBase*> _vObjStatusUpdatesTickBuffer;
-
-    // Reuse the same container (using void pointers statically casted) to avoid unnecessary reallocations.
-    std::vector<size_t> _vIndexMiscBuffer;
 
     //----
 

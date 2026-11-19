@@ -2,6 +2,7 @@ set(SPHERE_TESTS_SOURCES
     tests/src/t_num_parsing.cpp
     tests/src/t_CPointBase.cpp
     tests/src/t_CUOClientVersion.cpp
+    tests/src/t_CTickWheel.cpp
 )
 source_group(tests FILES ${SPHERE_TESTS_SOURCES})
 
