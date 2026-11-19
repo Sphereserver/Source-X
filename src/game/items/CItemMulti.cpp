@@ -50,6 +50,9 @@ CItemMulti::~CItemMulti()
 
     if (!m_pRegion)
     {
+        // Never placed in the world, or an addon (addons never get a region): nothing else to clean up,
+        //  but the constructor registered it in the world multis list.
+        g_World.m_Multis.erase_element(this);
         return;
     }
 
