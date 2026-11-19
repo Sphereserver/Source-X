@@ -161,7 +161,9 @@ public:
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
 
 	int64  _iTimeCreate;	    // When was I created ?
-	int64  _iTimePeriodicTick;
+	int64  _iTimePeriodicTick;  // != 0 if _itPeriodicTickEntry is valid (registered in the world periodic ticking list).
+	CharPeriodicTickMap::iterator _itPeriodicTickEntry;
+	CharPeriodicTickMap::node_type _nhPeriodicTickSpare;  // Our container node while not in the list, reused when rescheduled (no allocation).
 	int64  _iTimeNextRegen;	    // When did I get my last regen tick ?
 
 	int64 _iTimeLastHitsUpdate;

@@ -4242,3 +4242,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 16-11-2026, nightNR
 - Fixed: blocked accounts were unblocked after a server restart: BLOCK=1 read from the account file was ignored while loading, and the next save dropped it (#1616). The f_onaccount_block and f_onaccount_unblock functions are still not called while loading.
+
+18-11-2026, nightNR
+- Changed: the world timers (TIMER of the objects and the periodic ticks of the characters) are kept in a container ordered by expiration time, each object keeps its own entry. Adding, removing or rescheduling a timer doesn't rebuild the whole list anymore and doesn't allocate, each tick only visits the expired timers. Timers expiring in the same tick still fire ordered by expiration time, then by the order they were set.
