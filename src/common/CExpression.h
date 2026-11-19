@@ -218,6 +218,8 @@ class CExpression
 
     std::unique_ptr<PrvBuffersPool> _pBufs;
     int _iGetVal_Reentrant;
+    int _iGetSingle_Reentrant;      // Nesting depth of GetSingle (every recursive path of the parser goes through it).
+    int _iGetRangeNumber_Reentrant; // Nesting depth of the {} ranges: every level uses a few KB of stack.
 
 public:
 	static const char *m_sClassName;

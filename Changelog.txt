@@ -4242,3 +4242,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 16-11-2026, nightNR
 - Fixed: blocked accounts were unblocked after a server restart: BLOCK=1 read from the account file was ignored while loading, and the next save dropped it (#1616). The f_onaccount_block and f_onaccount_unblock functions are still not called while loading.
+
+19-11-2026, nightNR
+- Fixed: a long chain of unary operators in an expression (-, ~, !, like <EVAL ------...1>) crashed the server with a stack overflow: every operator was a recursive call with a 4 KB buffer on the stack. A script evaluating text typed by a player (<EVAL <ARGS>>) could be crashed with it. The operators are now read in a loop, and the expression is not copied anymore on every value read (it was only used for error messages).
+- Fixed: deeply nested ranges ({{{...}}}, around 90 levels) or values (parentheses, QVAL, functions) in an expression could also crash the server with a stack overflow. Nesting is now limited to 32 levels for ranges and 256 levels for values; a deeper expression logs an error and evaluates to 0. The "Deadlock detected" error (more than 128 nested values) now prints only the first 64 characters of the expression, like the new errors: it printed the whole remaining expression on every nested level, so evaluating one 3000 characters expression wrote 1.7 MB to the log.
