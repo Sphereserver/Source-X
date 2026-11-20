@@ -30,6 +30,9 @@ CItemStone::~CItemStone()
 {
 	EXC_TRY("Cleanup in destructor");
 
+	// The stone is deleted like every other world object: it must not stay in the stones list.
+	g_World.m_Stones.erase_element(this);
+
 	SetAmount(0);	// Tell everyone we are deleting.
 	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 

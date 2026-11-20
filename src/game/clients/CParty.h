@@ -7,16 +7,14 @@
 #define _INC_CPARTY_H
 
 #include "../../common/sphere_library/CSString.h"
-#include "../../common/sphere_library/CSObjListRec.h"
 #include "../../common/CScriptObj.h"
 #include "../../common/CVarDefMap.h"
 #include "../../common/sphereproto.h"
 #include "../chars/CCharRefArray.h"
 
-
 class PacketSend;
 
-class CPartyDef : public CSObjListRec, public CScriptObj
+class CPartyDef : public CScriptObj
 {
 	// a list of characters in the party.
 #define MAX_CHAR_IN_PARTY 10
@@ -49,6 +47,11 @@ private:
 
 public:
 	CPartyDef( CChar * pCharInvite, CChar * pCharAccept );
+
+    /**
+     * Detach characters that we somehow missed (on delete stack after deleting party etc.) so we can free the party.
+     */
+    ~CPartyDef() override;
 
 private:
 	CPartyDef(const CPartyDef& copy);
@@ -108,6 +111,5 @@ public:
     virtual bool r_LoadVal( CScript & s ) override;
     virtual bool r_Load( CScript & s ) override;
 };
-
 
 #endif // _INC_CPARTY_H

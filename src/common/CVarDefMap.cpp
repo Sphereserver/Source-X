@@ -232,14 +232,11 @@ void CVarDefMap::DeleteKey( lpctstr key )
 void CVarDefMap::Clear()
 {
 	ADDTOCALLSTACK_DEBUG("CVarDefMap::Clear");
-	iterator it = m_Container.begin();
-	while ( it != m_Container.end() )
+	// Delete all the elements, then empty the vector once: erasing them one by one from the front shifted the whole vector every time (O(n^2)).
+	for (CVarDefCont* pVar : m_Container)
 	{
-		delete (*it);	// This calls the appropriate destructors, from derived to base class, because the destructors are virtual.
-		m_Container.erase(it);
-		it = m_Container.begin();
+		delete pVar;	// This calls the appropriate destructors, from derived to base class, because the destructors are virtual.
 	}
-
 	m_Container.clear();
 }
 
@@ -637,29 +634,26 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 		CSString sMask(mask);
 		sMask.MakeLower();
 
-        size_t i = 0;
-		iterator it = m_Container.begin();
-		while ( it != m_Container.end() )
+		// Single pass: delete the matching elements and move the kept ones forward (their order, so the sorting, doesn't change),
+		//  then cut the tail once. Restarting from the beginning after every deletion was O(n^2).
+		iterator itKeep = m_Container.begin();
+		for (iterator it = m_Container.begin(); it != m_Container.end(); ++it)
 		{
-            CVarDefCont *pVarBase = (*it);
-			if (!pVarBase)
-				goto skip_cur;
-
+			CVarDefCont *pVarBase = (*it);
+			if (pVarBase)
 			{
 				CSString sKey(pVarBase->GetKey());
 				sKey.MakeLower();
 				if (strstr(sKey.GetBuffer(), sMask.GetBuffer()))
 				{
-					DeleteAt(i);
-					it = m_Container.begin();
-					i = 0;
+					delete pVarBase;
 					continue;
 				}
 			}
-        skip_cur:
-            ++it;
-            ++i;
+			*itKeep = pVarBase;
+			++itKeep;
 		}
+		m_Container.erase(itKeep, m_Container.end());
 	}
 	else
 	{

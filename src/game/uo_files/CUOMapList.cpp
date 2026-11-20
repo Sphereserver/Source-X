@@ -31,6 +31,7 @@ CUOMapList::CUOMapList() noexcept
 void CUOMapList::Clear() noexcept
 {
     m_mapGeoData.clear();
+    delete m_pMapDiffCollection;
     m_pMapDiffCollection = nullptr;
 
     constexpr int iMaxMapFileIdx = 6;
