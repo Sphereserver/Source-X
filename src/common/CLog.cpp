@@ -90,7 +90,6 @@ int CEventLog::EventEvent(lpctstr pszFormat, ...) noexcept
 CLog::CLog()
 {
 	m_fLockOpen = false;
-	m_pScriptContext = nullptr;
 	m_pObjectContext = nullptr;
 	m_dwMsgMask = LOGL_ERROR | LOGM_INIT | LOGM_CLIENTS_LOG | LOGM_GM_PAGE;
 	SetFilePath( SPHERE_FILE "log.log" );	// default name to go to.
@@ -98,16 +97,20 @@ CLog::CLog()
 
 CLog::~CLog() = default;
 
+// Script file being parsed by the current thread, used to prefix the logged messages with (file,line).
+// Per thread: only the thread running the script sets it and reads it, so no lock is needed.
+static thread_local const CScript * t_pScriptContext = nullptr;
+
 const CScript * CLog::_SetScriptContext( const CScript * pScriptContext )
 {
-	const CScript * pOldScript = m_pScriptContext;
-	m_pScriptContext = pScriptContext;
+	const CScript * pOldScript = t_pScriptContext;
+	t_pScriptContext = pScriptContext;
 	return pOldScript;
 }
 
 const CScript * CLog::SetScriptContext(const CScript * pScriptContext)
 {
-    MT_UNIQUE_LOCK_RETURN(this, CLog::_SetScriptContext(pScriptContext));
+    return CLog::_SetScriptContext(pScriptContext);
 }
 
 const CScriptObj * CLog::_SetObjectContext( const CScriptObj * pObjectContext )
@@ -264,10 +267,11 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 
 		// Get the script context. (if there is one)
 		tchar szScriptContext[ SPHERE_MAX_PATH + 16 ];
-		if ( !(dwMask & LOGM_NOCONTEXT) && m_pScriptContext )
+		const CScript * pScriptContext = t_pScriptContext;
+		if ( !(dwMask & LOGM_NOCONTEXT) && pScriptContext )
 		{
-			CScriptLineContext LineContext = m_pScriptContext->GetContext();
-			snprintf( szScriptContext, sizeof(szScriptContext),"(%s,%d)", m_pScriptContext->GetFileTitle(), LineContext.m_iLineNum );
+			CScriptLineContext LineContext = pScriptContext->GetContext();
+			snprintf( szScriptContext, sizeof(szScriptContext),"(%s,%d)", pScriptContext->GetFileTitle(), LineContext.m_iLineNum );
 		}
 		else
         {

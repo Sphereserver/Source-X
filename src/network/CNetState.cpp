@@ -26,12 +26,14 @@ CNetState::CNetState(int id) :
     m_useAsync = false;
     m_iConnectionTimeMs = -1;
     m_packetExceptions = 0;
-    _iInByteCounter = _iOutByteCounter = 0;
+    _iInByteCounter = 0;
+    _iOutByteCounter = 0;
     m_clientType = CLIENTTYPE_2D;
     m_clientVersionNumber = 0;
     m_reportedVersionNumber = 0;
     m_isInUse = false;
     m_parent = nullptr;
+    _fReleasedByThread = false;
 
     clear();
 }
@@ -206,6 +208,7 @@ void CNetState::init(SOCKET socket, CSocketAddress addr)
     CheckReportNetAPIErr(iSockRet, "NetState::init.TCP_NODELAY");
 
     m_iConnectionTimeMs = CSTime::GetMonotonicSysTimeMilli();
+    _fReleasedByThread = false;
 
     g_Serv.StatInc(SERV_STAT_CLIENTS);
     CClient* client = new CClient(this);
@@ -242,8 +245,9 @@ void CNetState::markReadClosed(void) volatile
 
     DEBUGNETWORK(("%x:Client being closed by read-thread\n", m_id));
     m_isReadClosed = true;
-    if (m_parent != nullptr && m_parent->getPriority() == ThreadPriority::Disabled)
-        m_parent->awaken();
+    CNetworkThread* pParent = m_parent;
+    if (pParent != nullptr && pParent->getPriority() == ThreadPriority::Disabled)
+        pParent->awaken();
 }
 
 void CNetState::markWriteClosed(void) volatile
@@ -379,7 +383,7 @@ void CNetState::endTransaction(void)
 
     //DEBUGNETWORK(("%x:Scheduling packet transaction to be sent.\n", id()));
 
-    m_parent->queuePacketTransaction(m_outgoing.pendingTransaction);
+    CNetworkOutput::QueuePacketTransaction(m_outgoing.pendingTransaction);
     m_outgoing.pendingTransaction = nullptr;
 }
 

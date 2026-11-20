@@ -90,7 +90,8 @@ private:
 	CSTime m_dateStamp;			// last real time stamp.
 	CSString m_sBaseDir;
 
-	const CScript * m_pScriptContext;		// The current context.
+	// The current script context is kept per thread (see CLog.cpp): a script runs and sets it on one thread,
+	//  while other threads (network, async db) may log at the same time.
 	const CScriptObj * m_pObjectContext;	// The current context.
 
 	static CSTime sm_prevCatchTick;			// don't flood with these.

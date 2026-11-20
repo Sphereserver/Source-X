@@ -430,7 +430,7 @@ void CNetworkManager::tick(void)
 
         // If the client hasn't completed login for a definite amount of time, disconnect it...
         const CClient* pClient = state->getClient();
-        if (!pClient || (pClient->GetConnectType() == CONNECT_UNK))
+        if ((!pClient || (pClient->GetConnectType() == CONNECT_UNK)) && !(isThreaded() && state->isClosing()))
         {
             const int64 iTimeSinceConnectionMs = iCurSysTimeMs - state->m_iConnectionTimeMs;
             const int64 iTimeoutIncompleteConnectionMs = g_Cfg._iTimeoutIncompleteConnectionMs;
@@ -440,10 +440,17 @@ void CNetworkManager::tick(void)
                 g_Log.Event(LOGM_CLIENTS_LOG | LOGL_WARN, // LOGM_NOCONTEXT
                     "%x:Force closing connection from IP %s. Reason: timed out before completing login.\n",
                     state->id(), state->m_peerAddress.GetAddrStr());
-                //state->markReadClosed();
-                //state->markWriteClosed();
-                state->clear();
-                continue;
+                if (isThreaded())
+                {
+                    // the network thread may be using this state right now: close it, the network thread releases it
+                    //  and then it's cleared below
+                    state->markReadClosed();
+                }
+                else
+                {
+                    state->clear();
+                    continue;
+                }
             }
         }
 
@@ -451,7 +458,8 @@ void CNetworkManager::tick(void)
         EXC_SET_BLOCK("cleaning queues");
         for (int priority = 0; priority < PacketSend::PRI_QTY; ++priority)
             state->m_outgoing.queue[priority].clean();
-        state->m_outgoing.asyncQueue.clean();
+        if (isOutputThreaded() == false) // with threaded output the async queue is written by the network thread, which cleans it
+            state->m_outgoing.asyncQueue.clean();
 
         EXC_SET_BLOCK("check closing");
         if (state->isClosing() == false)
@@ -491,7 +499,8 @@ void CNetworkManager::tick(void)
         }
 
         EXC_SET_BLOCK("check closed");
-        if (state->isClosed() && state->isSendingAsync() == false)
+        // with threaded network, wait until the network thread has stopped using this state
+        if (state->isClosed() && state->isSendingAsync() == false && (isThreaded() == false || state->isReleasedByThread()))
         {
             EXC_SET_BLOCK("clear socket");
             DEBUGNETWORK(("%x:Client is being cleared since marked to close.\n", state->id()));
@@ -511,6 +520,12 @@ void CNetworkManager::tick(void)
                 (*it)->tick();
         }
     }
+    else
+    {
+        // the quota check can fire a script trigger, so with threaded network it's done here, by the main thread
+        for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
+            (*it)->checkStatesDataQuota();
+    }
 
     EXC_CATCH;
     //EXC_DEBUG_START;
@@ -528,12 +543,10 @@ void CNetworkManager::processAllInput(void)
         acceptNewConnection();
     }
 
-    if (isInputThreaded() == false)	// Don't do this if the input is multi threaded, since the CNetworkThread ticks automatically by itself
-    {
-        // force each thread to process input (NOT THREADSAFE)
-        for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
-            (*it)->processInput();
-    }
+    // Process the input of each network thread. When the input is multi threaded, the network threads only receive the data
+    //  and here the main thread handles the received packets.
+    for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
+        (*it)->processInput();
 }
 
 void CNetworkManager::processAllOutput(void)
@@ -546,6 +559,15 @@ void CNetworkManager::processAllOutput(void)
         // force each thread to process output (NOT THREADSAFE)
         for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
             (*it)->processOutput();
+    }
+    else
+    {
+        // wake up the network threads with new packets to send, instead of waiting for their next tick
+        for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
+        {
+            if ((*it)->isActive() && (*it)->takeOutputQueued())
+                (*it)->awaken();
+        }
     }
 }
 

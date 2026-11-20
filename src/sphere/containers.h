@@ -6,101 +6,74 @@
 #ifndef _INC_CONTAINERS_H
 #define _INC_CONTAINERS_H
 
-#include <list>
+#include <atomic>
+#include <deque>
+#include <mutex>
 //#include "../common/CException.h" // included in the precompiled header
-// a thread-safe implementation of a queue container that doesn't use any locks
-// this only works as long as there is only a single reader thread and writer thread (can be different)
 
+// A thread-safe queue, written by one thread and read by another one (they can be different).
+// Each operation takes a short lock: the previous lock-free implementation over a std::list was not safe even with a single
+//  reader and a single writer, because the writer's clean() moved back the read position, so an element could be read twice.
+// empty() and size() don't lock: they're polled often (e.g. CNetState::hasPendingData), so they read a counter kept by push and pop.
 
 template<class T>
 class ThreadSafeQueue
 {
-public:
-	typedef std::list<T> list;
-	typedef typename std::list<T>::iterator iterator;
-	typedef typename std::list<T>::const_iterator const_iterator;
-
 private:
-	list m_list;
-	iterator m_head;
-	iterator m_tail;
+    mutable std::mutex m_mutex;
+    std::deque<T> m_queue;
+    std::atomic<size_t> m_uiCount{0};
 
 public:
-	ThreadSafeQueue() noexcept
-	{
-        m_list.emplace_back(T{}); // at least one element must be in the queue
-		m_head = m_list.begin();
-		m_tail = m_list.end();
-	}
+    ThreadSafeQueue() = default;
 
-	ThreadSafeQueue( const ThreadSafeQueue& copy ) = delete;
-	ThreadSafeQueue& operator=( const ThreadSafeQueue& other ) = delete;
+    ThreadSafeQueue( const ThreadSafeQueue& copy ) = delete;
+    ThreadSafeQueue& operator=( const ThreadSafeQueue& other ) = delete;
 
 public:
-	// Append an element to the end of the queue (writer)
-	void push( const T& value ) noexcept
-	{
-		m_list.emplace_back( value );
-		m_tail = m_list.end();
-		clean();
-	}
+    // Append an element to the end of the queue (writer)
+    void push( const T& value )
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_queue.emplace_back( value );
+        m_uiCount.store(m_queue.size(), std::memory_order_release);
+    }
 
-	// Erase elements from before reader head (writer)
-	void clean( void )
-	{
-        m_head = m_list.erase( m_list.begin(), m_head );
-	}
+    // Release the memory of the elements already read (writer). The elements are now released when they are read.
+    void clean( void ) noexcept
+    {
+    }
 
-	// Retrieve the number of elements in the queue (reader/writer)
-	size_t size( void ) const
-	{
-		if ( empty() )
-			return 0;
+    // Retrieve the number of elements in the queue (reader/writer)
+    size_t size( void ) const noexcept
+    {
+        return m_uiCount.load(std::memory_order_acquire);
+    }
 
-		size_t toSkip = 1;
-		for ( const_iterator it = m_list.cbegin(), end = m_list.cend(); (it != m_head) && (it != end); ++it )
-			++toSkip;
+    // Determine if the queue is empty (reader/writer)
+    bool empty( void ) const noexcept
+    {
+        return (m_uiCount.load(std::memory_order_acquire) == 0);
+    }
 
-		return m_list.size() - toSkip;
-	}
+    // Remove the first element from the queue (reader)
+    void pop( void )
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if ( m_queue.empty() )
+            throw CSError( LOGL_ERROR, 0, "No elements to read from queue." );
+        m_queue.pop_front();
+        m_uiCount.store(m_queue.size(), std::memory_order_release);
+    }
 
-	// Determine if the queue is empty (reader/writer)
-	bool empty( void ) const
-	{
-		iterator next = m_head;
-		++next;
-
-		return ( next == m_tail );
-	}
-
-	// Remove the first element from the queue (reader)
-	void pop( void )
-	{
-		if ( empty() )
-			throw CSError( LOGL_ERROR, 0, "No elements to read from queue." );
-
-		iterator next = m_head;
-		++next;
-
-		if ( next != m_tail )
-			m_head = next;
-	}
-
-	// Retrieve the first element in the queue (reader)
-	T front( void ) const
-	{
-		if ( empty() == false )
-		{
-			iterator next = m_head;
-			++next;
-
-			if ( next != m_tail )
-				return *next;
-		}
-
-		// this should never happen
-		throw CSError( LOGL_ERROR, 0, "No elements to read from queue." );
-	}
+    // Retrieve the first element in the queue (reader)
+    T front( void ) const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if ( m_queue.empty() )
+            throw CSError( LOGL_ERROR, 0, "No elements to read from queue." );  // this should never happen
+        return m_queue.front();
+    }
 };
 
 #endif // _INC_CONTAINERS_H

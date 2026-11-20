@@ -22,7 +22,7 @@ static const char* GenerateNetworkThreadName(size_t id)
 
 CNetworkThread::CNetworkThread(CNetworkManager* manager, size_t id)
     : AbstractSphereThread(GenerateNetworkThreadName(id), ThreadPriority::Disabled),
-    m_manager(manager), m_id(id), _iTimeLastStateDataCheck(0)
+    m_manager(manager), m_id(id), _iTimeLastStateDataCheck(0), _fOutputQueued(false)
 {
 }
 
@@ -34,8 +34,7 @@ void CNetworkThread::assignNetworkState(CNetState* state)
 {
     ADDTOCALLSTACK("CNetworkThread::assignNetworkState");
     m_assignQueue.push(state);
-    if (getPriority() == ThreadPriority::Disabled)
-        awaken();
+    awaken();
 }
 
 void CNetworkThread::queuePacket(PacketSend* packet, bool appendTransaction)
@@ -87,6 +86,13 @@ void CNetworkThread::dropInvalidStates(void)
             state->setParentThread(nullptr);
             it = m_states.erase(it);
         }
+        else if (isActive() && state->isClosed() && state->isSendingAsync() == false)
+        {
+            // state is closed: stop using it and let the main thread clear it (CNetworkManager::tick)
+            state->setParentThread(nullptr);
+            it = m_states.erase(it);
+            state->markReleasedByThread();
+        }
         else
         {
             // state is good
@@ -132,6 +138,13 @@ void CNetworkThread::tick(void)
     // we're active, take priority
     setPriority(static_cast<ThreadPriority>(g_Cfg._iNetworkThreadPriority));
 
+    if (isActive() == false)
+        checkStatesDataQuota();	// otherwise called by the main thread
+}
+
+void CNetworkThread::checkStatesDataQuota(void)
+{
+    ADDTOCALLSTACK("CNetworkThread::checkStatesDataQuota");
     static constexpr int64 kiStateDataCheckPeriodMilli = 10 * 1000; // 10 seconds, expressed in milliseconds
     const int64 iTimeCur = CSTime::GetMonotonicSysTimeMilli();
     if (iTimeCur - _iTimeLastStateDataCheck > kiStateDataCheckPeriodMilli)
@@ -139,7 +152,8 @@ void CNetworkThread::tick(void)
         _iTimeLastStateDataCheck = iTimeCur;
 
 
-		for (CNetState* pCurState : m_states)
+		NetworkThreadStateIterator states(this);
+		while (CNetState* pCurState = states.next())
 		{
 			if ((g_Cfg._iMaxSizeClientOut != 0) || (g_Cfg._iMaxSizeClientIn != 0))
 			{
@@ -178,14 +192,15 @@ void CNetworkThread::tick(void)
 							pCurState->id(),
 							pCurState->m_socket.GetPeerName().GetAddrStr(), (pAccount ? pAccount->GetName() : "NA"),
 							((uiKick == 2) ? "input" : "output"),
-							((uiKick == 2) ? pCurState->_iInByteCounter : pCurState->_iOutByteCounter),
-							((uiKick == 2) ? g_Cfg._iMaxSizeClientIn : g_Cfg._iMaxSizeClientOut)
+							iBytes, iQuota
 						);
 					}
 				}
 			}
 
-			pCurState->_iInByteCounter = pCurState->_iOutByteCounter = 0;
+			// written by the network thread, checked and reset by the main thread when threaded
+			pCurState->_iInByteCounter = 0;
+			pCurState->_iOutByteCounter = 0;
 		}
 	}
 }
