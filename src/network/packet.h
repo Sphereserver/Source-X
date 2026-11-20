@@ -94,6 +94,7 @@ public:
 	void writeStringFixedNETUTF16(const char* value, uint size, bool terminate = false); // write fixed-length unicode string, network order
 	void writeStringFixedNETUTF16(const wchar* value, uint size, bool terminate = false); // write fixed-length unicode string, network order
 	void writeData(const byte* buffer, uint size); // write block of data
+	void appendData(const byte* buffer, uint size); // add block of data after the end of the packet, keeping the current position
 	void fill(void); // zeroes remaining buffer
 	uint sync(void);
 	void trim(void); // trim packet length down to current position

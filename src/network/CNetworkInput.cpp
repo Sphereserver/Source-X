@@ -195,10 +195,7 @@ void CNetworkInput::processData()
             else
             {
                 // append to buffer
-                uint pos = state->m_incoming.rawBuffer->getPosition();
-                state->m_incoming.rawBuffer->seek(state->m_incoming.rawBuffer->getLength());
-                state->m_incoming.rawBuffer->writeData(packet->getData(), packet->getLength());
-                state->m_incoming.rawBuffer->seek(pos);
+                state->m_incoming.rawBuffer->appendData(packet->getData(), packet->getLength());
             }
 
             delete packet;
@@ -319,10 +316,7 @@ bool CNetworkInput::processGameClientData(CNetState* state, Packet* buffer)
     else
     {
         // append to buffer
-        uint pos = state->m_incoming.buffer->getPosition();
-        state->m_incoming.buffer->seek(state->m_incoming.buffer->getLength());
-        state->m_incoming.buffer->writeData(m_decryptBuffer, buffer->getRemainingLength());
-        state->m_incoming.buffer->seek(pos);
+        state->m_incoming.buffer->appendData(m_decryptBuffer, buffer->getRemainingLength());
     }
 
     Packet* packet = state->m_incoming.buffer;

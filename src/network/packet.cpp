@@ -283,6 +283,23 @@ void Packet::writeData(const byte* buffer, uint size)
 	m_position += size;
 }
 
+void Packet::appendData(const byte* buffer, uint size)
+{
+	if (size == 0)
+		return;
+
+	const uint uiPosition = m_position;
+	const uint uiLength = m_length;
+	seek(uiLength);
+	writeData(buffer, size);
+
+	// writeData may grow the buffer by more than the size requested (PACKET_BUFFERGROWTH), and the length then covers
+	//  the whole buffer, including those unwritten bytes. Set the exact length, otherwise the unwritten bytes would be read
+	//  as received data and the next append would be placed after them.
+	resize(uiLength + size);
+	seek(uiPosition);
+}
+
 void Packet::writeInt16(const word value)
 {
 	if ((m_position + sizeof(word)) > m_bufferSize)
