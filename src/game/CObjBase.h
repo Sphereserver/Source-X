@@ -70,6 +70,7 @@ public:
 
 # define SF_DELETING         0x01
 # define SF_TOPLEVEL         0x02
+# define SF_DESTRUCTING      0x04    // the class destructor is running: Delete() must not delete it again
     uchar _uiInternalStateFlags;
 
     CVarDefMap m_TagDefs;		// attach extra tags here.
@@ -116,6 +117,10 @@ public:
     inline bool _IsBeingDeleted() const noexcept
     {
         return HAS_FLAGS_ANY(_uiInternalStateFlags, SF_DELETING);
+    }
+    inline bool _IsBeingDestructed() const noexcept
+    {
+        return HAS_FLAGS_ANY(_uiInternalStateFlags, SF_DESTRUCTING);
     }
 
 protected:  virtual bool _IsIdle() const;

@@ -343,6 +343,10 @@ CChar::~CChar()
 	ADDTOCALLSTACK("CChar::~CChar");
     EXC_TRY("Cleanup in destructor");
 
+    // Deleting the contents can call Delete() on this char (e.g. removing the SPELL_Summon effect when a sector
+    //  closes at shutdown). Mark it first, so that Delete() doesn't delete it a second time.
+    _uiInternalStateFlags |= SF_DESTRUCTING;
+
 	CChar::DeletePrepare();
 	CChar::DeleteCleanup(true);
 
@@ -454,6 +458,12 @@ bool CChar::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CChar::Delete");
     EXC_TRY("Cleanup in Delete method");
+
+    if (_IsBeingDestructed())
+    {
+        // Our destructor is running and is already deleting us: don't fire @Destroy or delete again.
+        return true;
+    }
 
 	if ((NotifyDelete(fForce) == false) && !fForce)
 		return false;
