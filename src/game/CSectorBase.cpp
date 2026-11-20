@@ -21,7 +21,9 @@ void CCharsDisconnectList::AddCharDisconnected( CChar * pChar )
     ADDTOCALLSTACK("CCharsDisconnectList::AddCharDisconnected");
 
     pChar->SetUIDContainerFlags(UID_O_DISCONNECT);
-    CSObjCont::InsertContentTail(pChar);
+    // Removing a char from its old list (sector, new or delete list) doesn't fire any script trigger, so the insertion can't fail.
+    [[maybe_unused]] const bool fInserted = CSObjCont::InsertContentTail(pChar);
+    DEBUG_ASSERT(fInserted);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -61,7 +63,9 @@ void CCharsActiveList::AddCharActive( CChar * pChar )
 	CSObjCont* pParent = pChar->GetParent();
 	if (pParent != this)
 	{
-		CSObjCont::InsertContentTail(pChar); // this also removes the Char from the old sector
+		// This also removes the Char from the old sector. That doesn't fire any script trigger, so the insertion can't fail.
+		[[maybe_unused]] const bool fInserted = CSObjCont::InsertContentTail(pChar);
+		DEBUG_ASSERT(fInserted);
 		if (pChar->IsClientActive())
 		{
 			++m_iClients;
