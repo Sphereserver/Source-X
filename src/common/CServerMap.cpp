@@ -292,6 +292,19 @@ bool CServerMapBlockingState::CheckTile_Terrain( uint64 uiItemBlockFlags, int8 z
                     m_Top = {uiItemBlockFlags, dwID, z, 0};
 					return true;
 				}
+                // Land above my head (e.g. hidden terrain over a cave floor) must not replace the blocking item, or i'd walk through it.
+                //  Without a floor item below, the land is the ground (e.g. an item buried in a slope).
+                const bool fBlockingItemInWay = (m_Bottom.m_dwTile > TERRAIN_QTY) && (m_Bottom.m_uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR));
+                const bool fFloorItemBelow    = (m_Lowest.m_dwTile > TERRAIN_QTY) && (m_Lowest.m_uiBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB));
+                const bool fLandAboveHead     = (z >= m_Lowest.m_z + PLAYER_HEIGHT/2);
+                if ( fBlockingItemInWay && fFloorItemBelow && fLandAboveHead )
+                {
+                    if ( z < m_Top.m_z )    // the land tile is the ceiling
+                    {
+                        m_Top = {uiItemBlockFlags, dwID, z, 0};
+                    }
+                    return true;
+                }
 			}
 			else if ( z == m_z )
 			{
