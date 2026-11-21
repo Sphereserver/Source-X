@@ -4201,8 +4201,59 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Added: UseAxis setting in sphere.ini (default 1). With UseAxis=0 the Axis connection requests on the game port (staff login with a clear-text password, then Axis.db is sent) are refused and logged.
 - Fixed: Animate Dead raised the corpse even when the summoned creature died while being placed (on a damaging field or a trap), using a dead or deleted char. Spell_Summon_Place also checks if the summon was deleted on placement.
 - Fixed: in @SpellEffect and @Effect the explode flag of the spell effect was set as LOCAL.Explode but read back as LOCAL.EffectExplode, so the explosion was always lost. It's now LOCAL.EffectExplode in both places.
+- Fixed: the weather made the light darker with clear weather and not with rain: WEATHER_DRY (0xFF) and WEATHER_DEFAULT (0xFE) aren't 0, WEATHER_RAIN is. Now rain, storm and snow are 2 light levels darker at night and 4 during the day, clouds 1 and 2: a fixed amount, the random one changed on every tick. The light is also updated when the weather changes, in the sector tick (it was calculated before the change) and with SetWeather (DRY/RAIN/SNOW, RAINCHANCE, COLDCHANCE).
 
-26-10-2026, Mulambo
+30-10-2026, DavideRei
+- Added: MountHeight=2 in sphere.ini: like MountHeight=1 (can't enter under a roof while mounted) but for players only, mounted NPCs can walk into the buildings.
+    The same rule applies to the other MountHeight checks (teleport, summon, mount, FIX).
+- Fixed: a random choice in REAP of a REGIONRESOURCE ({i_ore_iron 1 i_ore_gold 1}) was evaluated only once, when the script was loaded: every gather gave the same item until the next resync. It's now evaluated again on every gather.
+- Fixed: BREAK (or CONTINUE on the last iteration) inside an IF in a script loop (FOR, WHILE, FORCHARS, FORITEMS, FORCONT*, FORCHARLAYER, FORCHARMEMORYTYPE...): the rest of the loop block was skipped from the middle, so the first ENDIF met was taken as the end of the block and the following lines were executed in the wrong place.
+- Fixed: BREAK in FOROBJS stopped only the items pass, the chars pass was executed anyway.
+- Changed: .LAST and .SELF don't log an error anymore when there is no target cursor open (they are often used in client macros).
+
+05-11-2026, DavideRei
+- Fixed: CURFOLLOWER.n of a follower that doesn't exist anymore returned an error instead of 0, and CURFOLLOWER.n.<property> didn't skip the separator before the property name.
+- Fixed: removing a follower with FOLLOWERSLOTS=0 (with OF_PetSlots) was handled as an addition, because the removal was requested passing the negative slots (-0 == 0). CChar::FollowersUpdate has now a fRemove argument. @FollowersUpdate arguments are unchanged (ARGN1 = 1 when removing, ARGN2 = slots).
+- Fixed: "Timer expired without DECAY flag" errors on lights: the burning timer wasn't cleared when a light was doused (usually a light put in a backpack while lit) or when an NPC put its light away in the morning.
+- Fixed: buffer over-reads and off-by-one writes reported by GCC (CLanguageID::Set, CScript::WriteKeyStr, text of unicode speech and language packets, Str_CopyLimitNull).
+- Changed: with EF_FollowerList, the followers that don't exist anymore or that have another owner are removed from the list when it's updated.
+
+05-11-2026, canerksk
+- Added: NAME.PREFIX and NAME.SUFFIX support for items in addItemName, matching existing addCharName behaviour.
+
+06-11-2026, DavideRei
+- Fixed: ISNEARTYPE (with .P, on points and in every hardcoded search using it, like forge, anvil and fire) could miss the statics in the last map block of the search area: the 8x8 blocks were walked in steps of 8 from the edge of the area instead of from the start of a block. At x=3224, a static at the same x with distance 1 was found only with distance 4.
+- Fixed: ISNEARTYPE ignored the arguments after the distance when they were separated by a comma (<ISNEARTYPE t_forge,3,1>), only spaces worked. Scripts passing the 3rd argument with a comma will now really search in the multis.
+- Fixed: the 4th argument of ISNEARTYPE was used only by ISNEARTYPE.P and only with the 3rd argument set. It now works in every form and on its own. It keeps only what has exactly the same Z of the caller, for items, terrain, statics and multi components, not only for the multis.
+- Fixed: ISNEARTYPETOP with a distance searched the statics only in the 8x8 map block of the point, now in all the blocks touched by the search area. The statics of the neighbouring blocks now compete for the top too.
+- Fixed: ISNEARTYPETOP calculated the position of the multi components from the searched point instead of from the multi.
+- Fixed: advanced LOS: the fix for the stacked items blocking the view never worked for the statics, the offset of the static in its 8x8 map block (0-7) was compared with the world coordinates of the target. It now works like for the dynamic items: the statics on the target tile, between the feet and the eyes of the char, don't block the LOS.
+- Fixed: advanced LOS: the minimum Z of the 3x3 tiles around the terrain tile was calculated only inside the 8x8 map block, ignoring the tiles of the neighbouring blocks.
+
+12-11-2026, Mulambo
+- Fixed: "://" part of a string is not treated as comment. Strings like https://www.something.com where stripped to 'https:', because anything after "//" was treated as a comment.
+
+13-11-2026, Mulambo
+- Changed (security): `weblink` protocol is now HTTPS by default. Every url sent to `weblink` (ip address, no protocol, http://, ftp:// or any other protocol) now starts with https:// to prevent malicious intents (#1454).
+- Changed: Sphere now accepts passwords with length up to 30 characters (was 16). WARNING: most clients still has a cap of 16 characters, be carefull with longer passwords.
+
+13-11-2026, DavideRei
+- Fixed: tooltips were sent for objects waiting for the deferred deletion: @ClientTooltip scripts failed on them (ACT, REFx can't find them by UID anymore).
+
+16-11-2026, nightNR
+- Fixed: blocked accounts were unblocked after a server restart: BLOCK=1 read from the account file was ignored while loading, and the next save dropped it (#1616). The f_onaccount_block and f_onaccount_unblock functions are still not called while loading.
+
+19-11-2026, nightNR
+- Fixed: crash at shutdown when a summoned NPC (a spell summon or a guard called by CallGuards) was in the world: closing its sector destroyed the NPC, removing its summon effect called Delete() on it again, and the NPC was freed a second time while its destructor was still running.
+- Fixed: multis deleted without a region (never placed in the world, and every multi addon) were not removed from the world multis list. SERV.MULTIS then read deleted objects: wrong count, the same multi listed more times, possible crash.
+- Fixed: deleted guild and town stones were not removed from the world stones list. SERV.GUILDSTONES and SERV.TOWNSTONES then read deleted objects (wrong count, the same stone listed more times, possible crash), and the server could crash on shutdown or on a failed world load, deleting them a second time. The list doesn't own the stones anymore: they are deleted by the world like every other item.
+- Changed: clearing TAGs, VARs and other variable lists (CLEARTAGS, CLEARVARS, a new DB/LDB/MDB query clearing the previous result, ...) is now done in a single pass. It used to take quadratic time: clearing an 8000 row, 4 column query result (64000 values) took about 0.45 s, CLEARTAGS with a mask on 32000 TAGs up to 23 s.
+
+20-11-2026, nightNR
+- Fixed: a player could walk through a blocking item (e.g. an energy field) when the terrain on that tile is above the head of the char, like the hidden terrain over a cave floor (e.g. 2558,500 at the Minoc cave entrance): the terrain replaced the item as the tile to stand on. With the item removed on the client (e.g. by a client command or plugin), the server accepted the step.
+- Fixed: chars deleted during their location effects (eg: a summon dispelled by a field @STEP, an NPC killed by a fire field or a trap) could stay in the world as orphans, alive and without the summon memory. The "run away from the threat" step that followed moved the char into a sector and took it out of the deletion queue. Deleted chars are not processed or moved anymore.
+
+21-11-2026, Mulambo
 - Fixed: issue when web client sent a web identity packet and Sphere didn't let him log in
 - Added: Classic UO Web Identity packet validation support (#1357): 2 new sphere.ini settings: `WebIdentity` and `WebIdentityForce`:
   - If you add `WebIdentity` value from your Classic UO Web Management, received WebIdentity will be checked and validated

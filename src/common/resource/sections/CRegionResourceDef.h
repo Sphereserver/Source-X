@@ -41,6 +41,7 @@ public:
     static lpctstr const sm_szTrigName[RRTRIG_QTY+1];
 
     ITEMID_TYPE m_ReapItem;         // What item do we get when we try to mine this. ITEMID_ORE_1 most likely
+    CSString m_sReapExpr;           // REAP with a random choice ({item 1 item 2 ...}): evaluated again on every gather, see GetReapItem()
     CValueCurveDef m_vcReapAmount;    // How much can we reap at one time (based on skill)
 
     CValueCurveDef m_vcAmount;        // How is here total
@@ -56,6 +57,9 @@ private:
     CRegionResourceDef& operator=(const CRegionResourceDef& other);
 
 public:
+    // Item to reap now: m_ReapItem, or a new random pick if REAP has a random choice.
+    ITEMID_TYPE GetReapItem() const;
+
     virtual bool r_LoadVal( CScript & s ) override;
     virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
     virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc ) override;

@@ -116,10 +116,10 @@ enum SOUND_CODE
 	SOUND_FLAMESTRIKE	= 0x208,
 	SOUND_FLAME5		= 0x227,
     SOUND_GHOST_1		= 382,
-    SOUND_GHOST_2,
-    SOUND_GHOST_3,
-    SOUND_GHOST_4,
-    SOUND_GHOST_5,
+    SOUND_GHOST_2       = 383,
+    SOUND_GHOST_3       = 384,
+    SOUND_GHOST_4       = 385,
+    SOUND_GHOST_5       = 386,
     SOUND_SWORD_1		= 0x23b,
     SOUND_SWORD_7		= 0x23c,
     SOUND_SNIP			= 0x248,
@@ -134,7 +134,7 @@ enum SOUND_CODE
 	// Special sounds: they are internally converted to the right sound.
 	//	These are used because some creatures do not have sound IDs sequentially ordered in the sound file
 	//	(or they do not have a sound, so we mix different sounds).
-	SOUND_SPECIAL_HUMAN			= 0x900
+	SOUND_SPECIAL_HUMAN	= 0x900
 };
 
 
@@ -196,12 +196,12 @@ enum ANIM_TYPE	// not all creatures animate the same for some reason.
     ANIM_MON_ATTACK3		= 0x06,
     ANIM_MON_AttackBow		= 0x07, // air/fire elem = flail arms.
     ANIM_MON_AttackXBow		= 0x08,	// Misc Roll over,
-    ANIM_MON_AttackThrow,
+    ANIM_MON_AttackThrow    = 0x09,
     ANIM_MON_GETHIT 		= 0x0a,
     ANIM_MON_PILLAGE		= 0x0b,	// 11 = Misc, Stomp, slap ground, lich conjure.
     ANIM_MON_Stomp			= 0x0c,	// Misc Cast, breath fire, elem creation.
     ANIM_MON_Cast2			= 0x0d,	// 13 = Trolls don't have this.
-    ANIM_MON_Cast3,
+    ANIM_MON_Cast3          = 0x0e,
     ANIM_MON_BlockRight		= 0x0f,
     ANIM_MON_BlockLeft		= 0x10,
     ANIM_MON_FIDGET1		= 0x11,	// 17=Idle
@@ -217,7 +217,7 @@ enum ANIM_TYPE	// not all creatures animate the same for some reason.
     ANIM_ANI_RUN			= 0x01,
     ANIM_ANI_STAND			= 0x02,
     ANIM_ANI_EAT			= 0x03,
-    ANIM_ANI_ALERT,			// not all have this.
+    ANIM_ANI_ALERT			= 0x04, // not all have this.
     ANIM_ANI_ATTACK1		= 0x05,
     ANIM_ANI_ATTACK2		= 0x06,
     ANIM_ANI_GETHIT 		= 0x07,
@@ -383,13 +383,13 @@ enum ANIM_TYPE_FLAGS
 
 enum CRESND_TYPE	// Placeholders (not real sound IDs): the SoundChar method chooses the best sound for each creature
 {
-	CRESND_RAND		= -1,	// pick up randomly CRESND_IDLE or CRESND_NOTICE
-    CRESND_IDLE		= 0,	// just random noise. or default "no" response
-    CRESND_NOTICE,			// just random noise. or default "yes" response
+	CRESND_RAND = -1,	// pick up randomly CRESND_IDLE or CRESND_NOTICE
+    CRESND_IDLE = 0,	// just random noise. or default "no" response
+    CRESND_NOTICE = 1,			// just random noise. or default "yes" response
 
-	CRESND_HIT,
-    CRESND_GETHIT,
-    CRESND_DIE
+	CRESND_HIT = 2,
+    CRESND_GETHIT = 3,
+    CRESND_DIE = 4
 };
 
 
@@ -422,14 +422,14 @@ enum DIR_TYPE	// Walking directions. m_dir
     DIR_INVALID = -1,
 
     DIR_N = 0,
-    DIR_NE,
-    DIR_E,
-    DIR_SE,
-    DIR_S,
-    DIR_SW,
-    DIR_W,
-    DIR_NW,
-    DIR_QTY,		// Also means "Center"
+    DIR_NE = 1,
+    DIR_E = 2,
+    DIR_SE = 3,
+    DIR_S = 4,
+    DIR_SW = 5,
+    DIR_W = 6,
+    DIR_NW = 7,
+    DIR_QTY = 8,		// Also means "Center"
 
     DIR_ANIM_QTY = 5,	// Seems we only need 5 pics for an anim, assume ALL bi-symetrical creatures
     DIR_MASK_RUNNING = 0x80
@@ -445,9 +445,9 @@ enum STAT_TYPE
 {
     STAT_NONE = -1,
     STAT_STR = 0,
-    STAT_INT,
-    STAT_DEX,
-    STAT_BASE_QTY,
+    STAT_INT = 1,
+    STAT_DEX = 2,
+    STAT_BASE_QTY = 3,
     STAT_FOOD = 3,      // just used as a regen rate. (as karma does not decay)
     STAT_QTY
     // MaxHits  (4)
@@ -460,93 +460,93 @@ enum SKILL_TYPE	: int // List of skill numbers (things that can be done at a giv
 {
     SKILL_NONE = -1,
 
-    SKILL_ALCHEMY,
-    SKILL_ANATOMY,
-    SKILL_ANIMALLORE,
-    SKILL_ITEMID,
-    SKILL_ARMSLORE,
-    SKILL_PARRYING,
-    SKILL_BEGGING,
-    SKILL_BLACKSMITHING,
-    SKILL_BOWCRAFT,
-    SKILL_PEACEMAKING,
-    SKILL_CAMPING,
-    SKILL_CARPENTRY,
-    SKILL_CARTOGRAPHY,
-    SKILL_COOKING,
-    SKILL_DETECTINGHIDDEN,
-    SKILL_ENTICEMENT,
-    SKILL_EVALINT,
-    SKILL_HEALING,
-    SKILL_FISHING,
-    SKILL_FORENSICS,
-    SKILL_HERDING,
-    SKILL_HIDING,
-    SKILL_PROVOCATION,
-    SKILL_INSCRIPTION,
-    SKILL_LOCKPICKING,
-    SKILL_MAGERY,
-    SKILL_MAGICRESISTANCE,
-    SKILL_TACTICS,
-    SKILL_SNOOPING,
-    SKILL_MUSICIANSHIP,
-    SKILL_POISONING,
-    SKILL_ARCHERY,
-    SKILL_SPIRITSPEAK,
-    SKILL_STEALING,
-    SKILL_TAILORING,
-    SKILL_TAMING,
-    SKILL_TASTEID,
-    SKILL_TINKERING,
-    SKILL_TRACKING,
-    SKILL_VETERINARY,
-    SKILL_SWORDSMANSHIP,
-    SKILL_MACEFIGHTING,
-    SKILL_FENCING,
-    SKILL_WRESTLING,
-    SKILL_LUMBERJACKING,
-    SKILL_MINING,
-    SKILL_MEDITATION,
-    SKILL_STEALTH,
-    SKILL_REMOVETRAP,
+    SKILL_ALCHEMY = 0,
+    SKILL_ANATOMY = 1,
+    SKILL_ANIMALLORE = 2,
+    SKILL_ITEMID = 3,
+    SKILL_ARMSLORE = 4,
+    SKILL_PARRYING = 5,
+    SKILL_BEGGING = 6,
+    SKILL_BLACKSMITHING = 7,
+    SKILL_BOWCRAFT = 8,
+    SKILL_PEACEMAKING = 9,
+    SKILL_CAMPING = 10,
+    SKILL_CARPENTRY = 11,
+    SKILL_CARTOGRAPHY = 12,
+    SKILL_COOKING = 13,
+    SKILL_DETECTINGHIDDEN = 14,
+    SKILL_ENTICEMENT = 15,
+    SKILL_EVALINT = 16,
+    SKILL_HEALING = 17,
+    SKILL_FISHING = 18,
+    SKILL_FORENSICS = 19,
+    SKILL_HERDING = 20,
+    SKILL_HIDING = 21,
+    SKILL_PROVOCATION = 22,
+    SKILL_INSCRIPTION = 23,
+    SKILL_LOCKPICKING = 24,
+    SKILL_MAGERY = 25,
+    SKILL_MAGICRESISTANCE = 26,
+    SKILL_TACTICS = 27,
+    SKILL_SNOOPING = 28,
+    SKILL_MUSICIANSHIP = 29,
+    SKILL_POISONING = 30,
+    SKILL_ARCHERY = 31,
+    SKILL_SPIRITSPEAK = 32,
+    SKILL_STEALING = 33,
+    SKILL_TAILORING = 34,
+    SKILL_TAMING = 35,
+    SKILL_TASTEID = 36,
+    SKILL_TINKERING = 37,
+    SKILL_TRACKING = 38,
+    SKILL_VETERINARY = 39,
+    SKILL_SWORDSMANSHIP = 40,
+    SKILL_MACEFIGHTING = 41,
+    SKILL_FENCING = 42,
+    SKILL_WRESTLING = 43,
+    SKILL_LUMBERJACKING = 44,
+    SKILL_MINING = 45,
+    SKILL_MEDITATION = 46,
+    SKILL_STEALTH = 47,
+    SKILL_REMOVETRAP = 48,
     //AOS
-    SKILL_NECROMANCY,
-    SKILL_FOCUS,
-    SKILL_CHIVALRY,
+    SKILL_NECROMANCY = 49,
+    SKILL_FOCUS = 50,
+    SKILL_CHIVALRY = 51,
     //SE
-    SKILL_BUSHIDO,
-    SKILL_NINJITSU,
+    SKILL_BUSHIDO = 52,
+    SKILL_NINJITSU = 53,
     //ML
-    SKILL_SPELLWEAVING,
+    SKILL_SPELLWEAVING = 54,
     //SA
-    SKILL_MYSTICISM,
-    SKILL_IMBUING,
-    SKILL_THROWING,
+    SKILL_MYSTICISM = 55,
+    SKILL_IMBUING = 56,
+    SKILL_THROWING = 57,
 
     /**
-     * Skill level limit. Should not used directly, most cases are covered by g_Cfg.m_iMaxSkill instead
+     * Skill level limit. Should not be used directly, most cases are covered by g_Cfg.m_iMaxSkill instead
     */
     SKILL_QTY = 99,
 
     // Actions a npc will perform. (no need to track skill level for these)
-    NPCACT_FOLLOW_TARG = 100,	// 100 = following a char.
-    NPCACT_STAY,				// 101
-    NPCACT_GOTO,				// 102 = Go to a location x,y. Pet command
-    NPCACT_WANDER,				// 103 = Wander aimlessly.
-    NPCACT_LOOKING,				// 104 = just look around intently (UNUSED?).
-    NPCACT_FLEE,				// 105 = Run away from target. m_Act_UID
-    NPCACT_TALK,				// 106 = Talking to my target. m_Act_UID
-    NPCACT_TALK_FOLLOW,			// 107 = m_Act_UID / m_Fight_Targ_UID.
-    NPCACT_GUARD_TARG,			// 108 = Guard a targetted object. m_Act_UID
-    NPCACT_GO_HOME,				// 109 =
-    NPCACT_BREATH,				// 110 = Using breath weapon. on m_Fight_Targ_UID.
-    NPCACT_RIDDEN,				// 111 = Being ridden or shrunk as figurine.
-    NPCACT_THROWING,			// 112 = Throwing a stone at m_Fight_Targ_UID.
-    NPCACT_TRAINING,			// 113 = using a training dummy etc.
-    NPCACT_NAPPING,				// 114 = just snoozong a little bit, but not sleeping.
-    NPCACT_FOOD,				// 115 = Searching for food
-    NPCACT_RUNTO,				// 116 = Run to a location x,y.
-    NPCACT_QTY
+    NPCACT_FOLLOW_TARG = 100,	// following a char.
+    NPCACT_STAY = 101,
+    NPCACT_GOTO = 102,			// Go to a location x,y. Pet command
+    NPCACT_WANDER = 103,		// Wander aimlessly.
+    NPCACT_LOOKING = 104,		// just look around intently (UNUSED?).
+    NPCACT_FLEE = 105,			// Run away from target. m_Act_UID
+    NPCACT_TALK = 106,			// Talking to my target. m_Act_UID
+    NPCACT_TALK_FOLLOW = 107,	// m_Act_UID / m_Fight_Targ_UID.
+    NPCACT_GUARD_TARG = 108,	// Guard a targetted object. m_Act_UID
+    NPCACT_GO_HOME = 109,
+    NPCACT_BREATH = 110,		// Using breath weapon. on m_Fight_Targ_UID.
+    NPCACT_RIDDEN = 111,		// Being ridden or shrunk as figurine.
+    NPCACT_THROWING = 112,		// Throwing a stone at m_Fight_Targ_UID.
+    NPCACT_TRAINING = 113,		// using a training dummy etc.
+    NPCACT_NAPPING = 114,		// just snoozong a little bit, but not sleeping.
+    NPCACT_FOOD = 115,			// Searching for food
+    NPCACT_RUNTO = 116,			// Run to a location x,y.
+    NPCACT_QTY = 117
 };
 
 
@@ -668,244 +668,244 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
 
     // Magery
     SPELL_Clumsy = 1,		// 1st circle
-    SPELL_Create_Food,
-    SPELL_Feeblemind,
-    SPELL_Heal,
-    SPELL_Magic_Arrow,
-    SPELL_Night_Sight,
-    SPELL_Reactive_Armor,
-    SPELL_Weaken,
-    SPELL_Agility,			// 2nd circle
-    SPELL_Cunning,
-    SPELL_Cure,
-    SPELL_Harm,
-    SPELL_Magic_Trap,
-    SPELL_Magic_Untrap,
-    SPELL_Protection,
-    SPELL_Strength,
-    SPELL_Bless,			// 3rd circle
-    SPELL_Fireball,
-    SPELL_Magic_Lock,
-    SPELL_Poison,
-    SPELL_Telekin,
-    SPELL_Teleport,
-    SPELL_Unlock,
-    SPELL_Wall_of_Stone,
-    SPELL_Arch_Cure,		// 4th circle
-    SPELL_Arch_Prot,
-    SPELL_Curse,
-    SPELL_Fire_Field,
-    SPELL_Great_Heal,
-    SPELL_Lightning,
-    SPELL_Mana_Drain,
-    SPELL_Recall,
-    SPELL_Blade_Spirit,		// 5th circle
-    SPELL_Dispel_Field,
-    SPELL_Incognito,
-    SPELL_Magic_Reflect,
-    SPELL_Mind_Blast,
-    SPELL_Paralyze,
-    SPELL_Poison_Field,
-    SPELL_Summon,
-    SPELL_Dispel,			// 6th circle
-    SPELL_Energy_Bolt,
-    SPELL_Explosion,
-    SPELL_Invis,
-    SPELL_Mark,
-    SPELL_Mass_Curse,
-    SPELL_Paralyze_Field,
-    SPELL_Reveal,
-    SPELL_Chain_Lightning,	// 7th circle
-    SPELL_Energy_Field,
-    SPELL_Flame_Strike,
-    SPELL_Gate_Travel,
-    SPELL_Mana_Vamp,
-    SPELL_Mass_Dispel,
-    SPELL_Meteor_Swarm,
-    SPELL_Polymorph,
-    SPELL_Earthquake,		// 8th circle
-    SPELL_Vortex,
-    SPELL_Resurrection,
-    SPELL_Air_Elem,
-    SPELL_Daemon,
-    SPELL_Earth_Elem,
-    SPELL_Fire_Elem,
-    SPELL_Water_Elem,
+    SPELL_Create_Food = 2,
+    SPELL_Feeblemind = 3,
+    SPELL_Heal = 4,
+    SPELL_Magic_Arrow = 5,
+    SPELL_Night_Sight = 6,
+    SPELL_Reactive_Armor = 7,
+    SPELL_Weaken = 8,
+    SPELL_Agility = 9,			// 2nd circle
+    SPELL_Cunning = 10,
+    SPELL_Cure = 11,
+    SPELL_Harm = 12,
+    SPELL_Magic_Trap = 13,
+    SPELL_Magic_Untrap = 14,
+    SPELL_Protection = 15,
+    SPELL_Strength = 16,
+    SPELL_Bless = 17,			// 3rd circle
+    SPELL_Fireball = 18,
+    SPELL_Magic_Lock = 19,
+    SPELL_Poison = 20,
+    SPELL_Telekin = 21,
+    SPELL_Teleport = 22,
+    SPELL_Unlock = 23,
+    SPELL_Wall_of_Stone = 24,
+    SPELL_Arch_Cure = 25,		// 4th circle
+    SPELL_Arch_Prot = 26,
+    SPELL_Curse = 27,
+    SPELL_Fire_Field = 28,
+    SPELL_Great_Heal = 29,
+    SPELL_Lightning = 30,
+    SPELL_Mana_Drain = 31,
+    SPELL_Recall = 32,
+    SPELL_Blade_Spirit = 33,		// 5th circle
+    SPELL_Dispel_Field = 34,
+    SPELL_Incognito = 35,
+    SPELL_Magic_Reflect = 36,
+    SPELL_Mind_Blast = 37,
+    SPELL_Paralyze = 38,
+    SPELL_Poison_Field = 39,
+    SPELL_Summon = 40,
+    SPELL_Dispel = 41,			// 6th circle
+    SPELL_Energy_Bolt = 42,
+    SPELL_Explosion = 43,
+    SPELL_Invis = 44,
+    SPELL_Mark = 45,
+    SPELL_Mass_Curse = 46,
+    SPELL_Paralyze_Field = 47,
+    SPELL_Reveal = 48,
+    SPELL_Chain_Lightning = 49,	// 7th circle
+    SPELL_Energy_Field = 50,
+    SPELL_Flame_Strike = 51,
+    SPELL_Gate_Travel = 52,
+    SPELL_Mana_Vamp = 53,
+    SPELL_Mass_Dispel = 54,
+    SPELL_Meteor_Swarm = 55,
+    SPELL_Polymorph = 56,
+    SPELL_Earthquake = 57,		// 8th circle
+    SPELL_Vortex = 58,
+    SPELL_Resurrection = 59,
+    SPELL_Air_Elem = 60,
+    SPELL_Daemon = 61,
+    SPELL_Earth_Elem = 62,
+    SPELL_Fire_Elem = 63,
+    SPELL_Water_Elem = 64,
     SPELL_MAGERY_QTY = SPELL_Water_Elem,
 
     // Necromancy (AOS)
     SPELL_Animate_Dead_AOS = 101,
-    SPELL_Blood_Oath,
-    SPELL_Corpse_Skin,
-    SPELL_Curse_Weapon,
-    SPELL_Evil_Omen,
-    SPELL_Horrific_Beast,
-    SPELL_Lich_Form,
-    SPELL_Mind_Rot,
-    SPELL_Pain_Spike,
-    SPELL_Poison_Strike,
-    SPELL_Strangle,
-    SPELL_Summon_Familiar,
-    SPELL_Vampiric_Embrace,
-    SPELL_Vengeful_Spirit,
-    SPELL_Wither,
-    SPELL_Wraith_Form,
-    SPELL_Exorcism,
+    SPELL_Blood_Oath = 102,
+    SPELL_Corpse_Skin = 103,
+    SPELL_Curse_Weapon = 104,
+    SPELL_Evil_Omen = 105,
+    SPELL_Horrific_Beast = 106,
+    SPELL_Lich_Form = 107,
+    SPELL_Mind_Rot = 108,
+    SPELL_Pain_Spike = 109,
+    SPELL_Poison_Strike = 110,
+    SPELL_Strangle = 111,
+    SPELL_Summon_Familiar = 112,
+    SPELL_Vampiric_Embrace = 113,
+    SPELL_Vengeful_Spirit = 114,
+    SPELL_Wither = 115,
+    SPELL_Wraith_Form = 116,
+    SPELL_Exorcism = 117,
     SPELL_NECROMANCY_QTY = SPELL_Exorcism,
 
     // Chivalry (AOS)
     SPELL_Cleanse_by_Fire = 201,
-    SPELL_Close_Wounds,
-    SPELL_Consecrate_Weapon,
-    SPELL_Dispel_Evil,
-    SPELL_Divine_Fury,
-    SPELL_Enemy_of_One,
-    SPELL_Holy_Light,
-    SPELL_Noble_Sacrifice,
-    SPELL_Remove_Curse,
-    SPELL_Sacred_Journey,
+    SPELL_Close_Wounds = 202,
+    SPELL_Consecrate_Weapon = 203,
+    SPELL_Dispel_Evil = 204,
+    SPELL_Divine_Fury = 205,
+    SPELL_Enemy_of_One = 206,
+    SPELL_Holy_Light = 207,
+    SPELL_Noble_Sacrifice = 208,
+    SPELL_Remove_Curse = 209,
+    SPELL_Sacred_Journey = 210,
     SPELL_CHIVALRY_QTY = SPELL_Sacred_Journey,
 
     // Bushido (SE)
     SPELL_Honorable_Execution = 401,
-    SPELL_Confidence,
-    SPELL_Evasion,
-    SPELL_Counter_Attack,
-    SPELL_Lightning_Strike,
-    SPELL_Momentum_Strike,
+    SPELL_Confidence = 402,
+    SPELL_Evasion = 403,
+    SPELL_Counter_Attack = 404,
+    SPELL_Lightning_Strike = 405,
+    SPELL_Momentum_Strike = 406,
     SPELL_BUSHIDO_QTY = SPELL_Momentum_Strike,
 
     // Ninjitsu (SE)
     SPELL_Focus_Attack = 501,
-    SPELL_Death_Strike,
-    SPELL_Animal_Form,
-    SPELL_Ki_Attack,
-    SPELL_Surprise_Attack,
-    SPELL_Backstab,
-    SPELL_Shadowjump,
-    SPELL_Mirror_Image,
+    SPELL_Death_Strike = 502,
+    SPELL_Animal_Form = 503,
+    SPELL_Ki_Attack = 504,
+    SPELL_Surprise_Attack = 505,
+    SPELL_Backstab = 506,
+    SPELL_Shadowjump = 507,
+    SPELL_Mirror_Image = 508,
     SPELL_NINJITSU_QTY = SPELL_Mirror_Image,
 
     // Spellweaving (ML)
     SPELL_Arcane_Circle = 601,
-    SPELL_Gift_of_Renewal,
-    SPELL_Immolating_Weapon,
-    SPELL_Attunement,
-    SPELL_Thunderstorm,
-    SPELL_Natures_Fury,
-    SPELL_Summon_Fey,
-    SPELL_Summon_Fiend,
-    SPELL_Reaper_Form,
-    SPELL_Wildfire,
-    SPELL_Essence_of_Wind,
-    SPELL_Dryad_Allure,
-    SPELL_Ethereal_Voyage,
-    SPELL_Word_of_Death,
-    SPELL_Gift_of_Life,
-    SPELL_Arcane_Empowerment,
+    SPELL_Gift_of_Renewal = 602,
+    SPELL_Immolating_Weapon = 603,
+    SPELL_Attunement = 604,
+    SPELL_Thunderstorm = 605,
+    SPELL_Natures_Fury = 606,
+    SPELL_Summon_Fey = 607,
+    SPELL_Summon_Fiend = 608,
+    SPELL_Reaper_Form = 609,
+    SPELL_Wildfire = 610,
+    SPELL_Essence_of_Wind = 611,
+    SPELL_Dryad_Allure = 612,
+    SPELL_Ethereal_Voyage = 613,
+    SPELL_Word_of_Death = 614,
+    SPELL_Gift_of_Life = 615,
+    SPELL_Arcane_Empowerment = 616,
     SPELL_SPELLWEAVING_QTY = SPELL_Arcane_Empowerment,
 
     // Mysticism (SA)
     SPELL_Nether_Bolt = 678,
-    SPELL_Healing_Stone,
-    SPELL_Purge_Magic,
-    SPELL_Enchant_Weapon,
-    SPELL_Sleep,
-    SPELL_Eagle_Strike,
-    SPELL_Animated_Weapon,
-    SPELL_Stone_Form,
-    SPELL_Spell_Trigger,
-    SPELL_Mass_Sleep,
-    SPELL_Cleansing_Winds,
-    SPELL_Bombard,
-    SPELL_Spell_Plague,
-    SPELL_Hail_Storm,
-    SPELL_Nether_Cyclone,
-    SPELL_Rising_Colossus,
+    SPELL_Healing_Stone = 679,
+    SPELL_Purge_Magic = 680,
+    SPELL_Enchant_Weapon = 681,
+    SPELL_Sleep = 682,
+    SPELL_Eagle_Strike = 683,
+    SPELL_Animated_Weapon = 684,
+    SPELL_Stone_Form = 685,
+    SPELL_Spell_Trigger = 686,
+    SPELL_Mass_Sleep = 687,
+    SPELL_Cleansing_Winds = 688,
+    SPELL_Bombard = 689,
+    SPELL_Spell_Plague = 690,
+    SPELL_Hail_Storm = 691,
+    SPELL_Nether_Cyclone = 692,
+    SPELL_Rising_Colossus = 693,
     SPELL_MYSTICISM_QTY = SPELL_Rising_Colossus,
 
     // Bard Masteries (SA)
     SPELL_Inspire = 701,
-    SPELL_Invigorate,
-    SPELL_Resilience,
-    SPELL_Perseverance,
-    SPELL_Tribulation,
-    SPELL_Despair,
+    SPELL_Invigorate = 702,
+    SPELL_Resilience = 703,
+    SPELL_Perseverance = 704,
+    SPELL_Tribulation = 705,
+    SPELL_Despair = 706,
     SPELL_BARDMASTERIES_QTY = SPELL_Despair,
 
     // Skill Masteries (TOL)
 	SPELL_Death_Ray = 707,
-	SPELL_Ethereal_Burst,
-	SPELL_Nether_Blast,
-	SPELL_Mystic_Weapon,
-	SPELL_Command_Undead,
-	SPELL_Conduit,
-	SPELL_Mana_Shield,
-	SPELL_Summon_Reaper,
-	SPELL_Enchanted_Summoning,	// Passive
-	SPELL_Anticipate_Hit,		// Passive
-	SPELL_Warcry,
-	SPELL_Intuition,			// Passive
-	SPELL_Rejuvinate,
-	SPELL_Holy_Fist,
-	SPELL_Shadow,
-	SPELL_White_Tiger_Form,
-	SPELL_Flaming_Shot,
-	SPELL_Playing_The_Odds,
-	SPELL_Thrust,
-	SPELL_Pierce,
-	SPELL_Stagger,
-	SPELL_Toughness,
-	SPELL_Onslaught,
-	SPELL_Focused_Eye,
-	SPELL_Elemental_Fury,
-	SPELL_Called_Shot,
-    SPELL_Warriors_Gifts,		// Passive (previously known as Saving Throw)
-	SPELL_Shield_Bash,
-	SPELL_Body_Guard,
-	SPELL_Heightened_Senses,
-	SPELL_Tolerance,
-	SPELL_Injected_Strike,
-	SPELL_Potency,				// Passive
-	SPELL_Rampage,
-	SPELL_Fists_Of_Fury,
-	SPELL_Knockout,				// Passive
-	SPELL_Whispering,
-	SPELL_Combat_Training,
-	SPELL_Boarding,				// Passive
+	SPELL_Ethereal_Burst = 708,
+	SPELL_Nether_Blast = 709,
+	SPELL_Mystic_Weapon = 710,
+	SPELL_Command_Undead = 711,
+	SPELL_Conduit = 712,
+	SPELL_Mana_Shield = 713,
+	SPELL_Summon_Reaper = 714,
+	SPELL_Enchanted_Summoning = 715,	// Passive
+	SPELL_Anticipate_Hit = 716,		// Passive
+	SPELL_Warcry = 717,
+	SPELL_Intuition = 718,			// Passive
+	SPELL_Rejuvinate = 719,
+	SPELL_Holy_Fist = 720,
+	SPELL_Shadow = 721,
+	SPELL_White_Tiger_Form = 722,
+	SPELL_Flaming_Shot = 723,
+	SPELL_Playing_The_Odds = 724,
+	SPELL_Thrust = 725,
+	SPELL_Pierce = 726,
+	SPELL_Stagger = 727,
+	SPELL_Toughness = 728,
+	SPELL_Onslaught = 729,
+	SPELL_Focused_Eye = 730,
+	SPELL_Elemental_Fury = 731,
+	SPELL_Called_Shot = 732,
+    SPELL_Warriors_Gifts = 733,		// Passive (previously known as Saving Throw)
+	SPELL_Shield_Bash = 734,
+	SPELL_Body_Guard = 735,
+	SPELL_Heightened_Senses = 736,
+	SPELL_Tolerance = 737,
+	SPELL_Injected_Strike = 738,
+	SPELL_Potency = 739,				// Passive
+	SPELL_Rampage = 740,
+	SPELL_Fists_Of_Fury = 741,
+	SPELL_Knockout = 742,				// Passive
+	SPELL_Whispering = 743,
+	SPELL_Combat_Training = 744,
+	SPELL_Boarding = 745,				// Passive
 	SPELL_SKILLMASTERIES_QTY = SPELL_Boarding,
 
     // Custom Sphere spells (used by some monsters)
     SPELL_Summon_Undead = 1000,
-    SPELL_Animate_Dead,
-    SPELL_Bone_Armor,
-    SPELL_Light,
-    SPELL_Fire_Bolt,
-    SPELL_Hallucination,
+    SPELL_Animate_Dead = 1001,
+    SPELL_Bone_Armor = 1002,
+    SPELL_Light = 1003,
+    SPELL_Fire_Bolt = 1004,
+    SPELL_Hallucination = 1005,
     SPELL_CUSTOM_QTY = SPELL_Hallucination,
 
     // Custom extra special spells (can be used as potion effects as well). Commented value = old index.
-    SPELL_Stone,			// 71 = Turn to stone (permanent).
-    SPELL_Shrink,			// 72 = turn pet into icon.
-    SPELL_Refresh,			// 73 = stamina
-    SPELL_Restore,			// 74 = This potion increases both your hit points and your stamina.
-    SPELL_Mana,				// 75 = restone mana
-    SPELL_Sustenance,		// 76 = serves to fill you up. (Remember, healing rate depends on how well fed you are!)
-    SPELL_Chameleon,		// 77 = makes your skin match the colors of whatever is behind you.
-    SPELL_BeastForm,		// 78 = polymorphs you into an animal for a while.
-    SPELL_Monster_Form,		// 79 = polymorphs you into a monster for a while.
-    SPELL_Gender_Swap,		// 81 = permanently changes your gender.
-    SPELL_Trance,			// 82 = temporarily increases your meditation skill.
-    SPELL_Particle_Form,	// 83 = turns you into an immobile, but untargetable particle system for a while.
-    SPELL_Shield,			// 84 = erects a temporary force field around you. Nobody approaching will be able to get within 1 tile of you, though you can move close to them if you wish.
-    SPELL_Steelskin,		// 85 = turns your skin into steel, giving a boost to your AR.
-    SPELL_Stoneskin,		// 86 = turns your skin into stone, giving a boost to your AR.
-    SPELL_Regenerate,		// 87 = regen hitpoints at a fast rate.
-    SPELL_Enchant,			// 88 = Enchant an item (weapon or armor)
-    SPELL_Forget,			// 89 = only existed in sphere_spells.scp before
-    SPELL_Ale,				// 90 = drunkeness ?
-    SPELL_Wine,				// 91 = mild drunkeness ?
-    SPELL_Liquor,			// 92 = extreme drunkeness ?
+    SPELL_Stone = 1006,			// 71 = Turn to stone (permanent).
+    SPELL_Shrink = 1007,		// 72 = turn pet into icon.
+    SPELL_Refresh = 1008,		// 73 = stamina
+    SPELL_Restore = 1009,		// 74 = This potion increases both your hit points and your stamina.
+    SPELL_Mana = 1010,			// 75 = restone mana
+    SPELL_Sustenance = 1011,	// 76 = serves to fill you up. (Remember, healing rate depends on how well fed you are!)
+    SPELL_Chameleon = 1012,		// 77 = makes your skin match the colors of whatever is behind you.
+    SPELL_BeastForm = 1013,		// 78 = polymorphs you into an animal for a while.
+    SPELL_Monster_Form = 1014,	// 79 = polymorphs you into a monster for a while.
+    SPELL_Gender_Swap = 1015,	// 81 = permanently changes your gender.
+    SPELL_Trance = 1016,		// 82 = temporarily increases your meditation skill.
+    SPELL_Particle_Form = 1017,	// 83 = turns you into an immobile, but untargetable particle system for a while.
+    SPELL_Shield = 1018,		// 84 = erects a temporary force field around you. Nobody approaching will be able to get within 1 tile of you, though you can move close to them if you wish.
+    SPELL_Steelskin = 1019,		// 85 = turns your skin into steel, giving a boost to your AR.
+    SPELL_Stoneskin = 1020,		// 86 = turns your skin into stone, giving a boost to your AR.
+    SPELL_Regenerate = 1021,	// 87 = regen hit points at a fast rate.
+    SPELL_Enchant = 1022,		// 88 = Enchant an item (weapon or armor)
+    SPELL_Forget = 1023,		// 89 = only existed in sphere_spells.scp before
+    SPELL_Ale = 1024,			// 90 = drunkenness ?
+    SPELL_Wine = 1025,			// 91 = mild drunkenness ?
+    SPELL_Liquor = 1026,		// 92 = extreme drunkenness ?
     SPELL_QTY = SPELL_Liquor
 };
 

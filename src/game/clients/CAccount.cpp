@@ -394,28 +394,32 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 
 void CAccount::SetBlockStatus(bool fNewStatus)
 {
+    if (IsPriv(PRIV_BLOCKED) == fNewStatus)
+    {
+        return;
+    }
+
+    // The block state is stored in the account file only as the BLOCK key (PRIV is saved with PRIV_BLOCKED masked out),
+    //  so the flag must be applied while loading too. Only the script triggers are skipped while loading.
     if (!g_Serv.IsLoadingGeneric())
     {
-        if (IsPriv(PRIV_BLOCKED) && fNewStatus == false) {
-
-            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-            pScriptArgs->Init(GetName());
-            TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
-            g_Serv.r_Call("f_onaccount_unblock", pScriptArgs, &g_Serv, nullptr, &iRet);
-            if (iRet == TRIGRET_RET_TRUE)
-                return;
-            ClearPrivFlags(PRIV_BLOCKED);
-        }
-        else if (!IsPriv(PRIV_BLOCKED) && fNewStatus == true)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(GetName());
+        TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
+        g_Serv.r_Call(fNewStatus ? "f_onaccount_block" : "f_onaccount_unblock", pScriptArgs, &g_Serv, nullptr, &iRet);
+        if (iRet == TRIGRET_RET_TRUE)
         {
-            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-            pScriptArgs->Init(GetName());
-            TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
-            g_Serv.r_Call("f_onaccount_block", pScriptArgs, &g_Serv, nullptr, &iRet);
-            if (iRet == TRIGRET_RET_TRUE)
-                return;
-            SetPrivFlags(PRIV_BLOCKED);
+            return;
         }
+    }
+
+    if (fNewStatus)
+    {
+        SetPrivFlags(PRIV_BLOCKED);
+    }
+    else
+    {
+        ClearPrivFlags(PRIV_BLOCKED);
     }
 }
 
@@ -1015,7 +1019,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 		return true;
 	}
 
-	size_t actualPasswordBufferSize = minimum(MAX_ACCOUNT_PASSWORD_ENTER, enteredPasswordLength) + 1;
+	size_t actualPasswordBufferSize = minimum(MAX_ACCOUNT_PASSWORD_SIZE, enteredPasswordLength) + 1;
 	char * actualPassword = new char[actualPasswordBufferSize];
 	Str_CopyLimitNull(actualPassword, pszPassword, actualPasswordBufferSize);
 
@@ -1066,10 +1070,10 @@ void CAccount::SetNewPassword( lpctstr pszPassword )
         static constexpr tchar passwdChars[] = "ABCDEFGHJKLMNPQRTUVWXYZ2346789";
 		int len = (int)strlen(passwdChars);
 		int charsCnt = g_Rand.GetVal(4) + 6;	// 6 - 10 chars
-		if ( charsCnt > (MAX_ACCOUNT_PASSWORD_ENTER - 1) )
-			charsCnt = MAX_ACCOUNT_PASSWORD_ENTER - 1;
+		if ( charsCnt > (MAX_ACCOUNT_PASSWORD_SIZE - 1) )
+			charsCnt = MAX_ACCOUNT_PASSWORD_SIZE - 1;
 
-		tchar szTmp[MAX_ACCOUNT_PASSWORD_ENTER + 1];
+		tchar szTmp[MAX_ACCOUNT_PASSWORD_SIZE + 1];
 		for ( int i = 0; i < charsCnt; ++i )
 			szTmp[i] = passwdChars[g_Rand.GetVal(len)];
 
@@ -1079,8 +1083,8 @@ void CAccount::SetNewPassword( lpctstr pszPassword )
 	}
 
 	m_sNewPassword = pszPassword;
-	if ( m_sNewPassword.GetLength() > MAX_ACCOUNT_PASSWORD_ENTER )
-		m_sNewPassword.Resize(MAX_ACCOUNT_PASSWORD_ENTER);
+	if ( m_sNewPassword.GetLength() > MAX_ACCOUNT_PASSWORD_SIZE )
+		m_sNewPassword.Resize(MAX_ACCOUNT_PASSWORD_SIZE);
 }
 
 bool CAccount::SetResDisp(RESDISPLAY_VERSION what)
@@ -1463,7 +1467,7 @@ bool CAccount::r_LoadVal( CScript & s )
             _iMaxHouses = s.GetArgUCVal();
             break;
 		case AC_MAXSHIPS:
-			_iMaxHouses = s.GetArgUCVal();
+			_iMaxShips = s.GetArgUCVal();
 			break;
 		case AC_MD5PASSWORD:
 			SetPassword( s.GetArgStr(), true);

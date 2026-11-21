@@ -51,8 +51,8 @@ enum WAR_SWING_TYPE	: int // m_Act_War_Swing_State
 {
     WAR_SWING_INVALID = -1,
     WAR_SWING_EQUIPPING = 0,	// we are recoiling our weapon.
-    WAR_SWING_READY,			// we can swing at any time.
-    WAR_SWING_SWINGING,			// we are swinging our weapon.
+    WAR_SWING_READY = 1,		// we can swing at any time.
+    WAR_SWING_SWINGING = 2,		// we are swinging our weapon.
     //--
     WAR_SWING_EQUIPPING_NOWAIT = 10 // Special return value for CChar::Fight_Hit, DON'T USE IT IN SCRIPTS!
 };
@@ -497,6 +497,7 @@ private:
 	void FixClimbHeight();
 	bool MoveToRoom( CRegion * pNewRoom, bool fAllowReject);
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
+	bool IsMountHeightRestricted() const;
 
 public:
     [[nodiscard]] RETURNS_NOTNULL
@@ -1193,7 +1194,7 @@ public:
 	CChar * Use_Figurine( CItem * pItem, bool fCheckFollowerSlots = true );
     CItem * Make_Figurine( const CUID uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
-    bool FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots = 0, bool fCheckOnly = false );
+    bool FollowersUpdate(CChar *pCharPet, short iPetFollowerSlots = 0, bool fCheckOnly = false, bool fRemove = false );
     short GetFollowerSlots() const;
     short GetCurFollowers() const;
 

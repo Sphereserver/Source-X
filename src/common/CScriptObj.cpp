@@ -1986,6 +1986,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CScriptTrig
 		{
 			CObjBaseTemplate* pObjTop = pObj->GetTopLevelObj();
 			CPointMap pt = pObjTop->GetTopPoint();
+			bool fLoopBroken = false;
 			if (iType & 1)		// FORITEM, FOROBJ
 			{
 				auto AreaItems = CWorldSearchHolder::GetInstance(pt, iDist);
@@ -2002,6 +2003,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CScriptTrig
 					if (iRet == TRIGRET_BREAK)
 					{
 						EndContext = StartContext;
+						fLoopBroken = true;
 						break;
 					}
 					if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
@@ -2013,7 +2015,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CScriptTrig
 					s.SeekContext(StartContext);
 				}
 			}
-			if (iType & 2)		// FORCHAR, FOROBJ
+			if ((iType & 2) && !fLoopBroken)		// FORCHAR, FOROBJ
 			{
 				auto AreaChars = CWorldSearchHolder::GetInstance(pt, iDist);
 				AreaChars->SetAllShow((iType & 0x20) ? true : false);
@@ -2159,6 +2161,9 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CScriptTrig
 
 	if (EndContext.m_iOffset <= StartContext.m_iOffset)
 	{
+		// The script can be positioned in the middle of the block (BREAK, or CONTINUE on the last iteration, maybe from inside
+		//  an IF): go back to the start of the block before skipping it, otherwise the first ENDIF met is taken as its end.
+		s.SeekContext(StartContext);
 		// just skip to the end.
         TRIGRET_TYPE iRet = OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult);
 		if (iRet != TRIGRET_ENDIF)

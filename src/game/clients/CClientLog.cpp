@@ -192,15 +192,31 @@ void CClient::addSysMessage(lpctstr pszMsg) // System message (In lower left cor
 	addBarkParse(pszMsg, nullptr, HUE_TEXT_DEF, TALKMODE_SAY);
 }
 
-
-void CClient::addWebLaunch( lpctstr pPage )
-{
+void CClient::addWebLaunch(const lpctstr pUrl) const {
 	ADDTOCALLSTACK("CClient::addWebLaunch");
-	// Direct client to a web page
-	if ( !pPage || !pPage[0] )
+	// Missing address.
+	if (!pUrl || !pUrl[0]) {
 		return;
+	}
+
+	tchar szUrl[SCRIPT_MAX_LINE_LEN];
+
+    // Https is present.
+	if (!strnicmp(pUrl, "https://", 8)) {
+		snprintf(szUrl, sizeof(szUrl), "%s", pUrl);
+	}
+    // Replace http with https.
+	else if (!strnicmp(pUrl, "http://", 7)) {
+		snprintf(szUrl, sizeof(szUrl), "https://%s", pUrl + 7);
+	}
+    // Prepend https.
+	else {
+		snprintf(szUrl, sizeof(szUrl), "https://%s", pUrl);
+	}
+
+    // Send it to the client.
 	SysMessageDefault(DEFMSG_WEB_BROWSER_START);
-	new PacketWebPage(this, pPage);
+	new PacketWebPage(this, szUrl);
 }
 
 ///////////////////////////////////////////////////////////////

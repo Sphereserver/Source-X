@@ -1244,14 +1244,14 @@ void CChar::NPC_Act_Wander()
     uint uiLookAroundChance = pTagOverride
                                           ? (uint)pTagOverride->GetValNum()
                                           : g_Cfg.m_iNPCWanderLookAroundChance;
-    uiLookAroundChance = maximum(uiLookAroundChance, 100);
+    uiLookAroundChance = minimum(uiLookAroundChance, 100);
 
     //if ( !(uiRand % (2u + TICKS_PER_SEC/2)) )
-    if (uiRand >= uiLookAroundChance)
+    if (uiRand < uiLookAroundChance)
     {
 		// NPC_LookAround() is very expensive, so since NPC_Act_Wander is called every tick for every char with ACTION == NPCACT_WANDER,
 		//	don't look around every time.
-		if ( NPC_LookAround() )
+		if (NPC_LookAround())
 			iStopWandering = 2;		// I'm stopping to wander because I have seen something interesting.
 	}
 
@@ -1580,6 +1580,10 @@ void CChar::NPC_LootMemory( CItem * pItem )
 	// I have already looked at it.
 
 	CItem * pMemory = Memory_AddObjTypes( pItem, MEMORY_SPEAK );
+    if (!pMemory) {
+      return;
+    }
+
 	pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_IGNORE;
 
 	// If the item is set to decay.
@@ -2736,7 +2740,11 @@ void CChar::NPC_ExtraAI()
 	{
 		CItem *pLightSource = LayerFind(LAYER_HAND2);
 		if ( pLightSource && (pLightSource->IsType(IT_LIGHT_OUT) || pLightSource->IsType(IT_LIGHT_LIT)) )
+		{
+			// Clear the timer used to burn the light: in the pack it would expire without the DECAY flag.
+			pLightSource->SetTimeout(-1);
 			ItemBounce(pLightSource, g_Cfg.m_iBounceMessage);
+		}
 	}
 
 	EXC_CATCH;

@@ -2535,7 +2535,7 @@ bool CItem::LoadSetContainer(const CUID& uidCont, LAYER_TYPE layer )
 	if ( IsTypeSpellbook() && pObjCont->GetTopLevelObj()->IsChar())	// Intercepting the spell's addition here for NPCs, they store the spells on vector <Spells>m_spells for better access from their AI.
 	{
 		CChar * pChar = static_cast <CChar*>(pObjCont->GetTopLevelObj());
-		if (pChar->m_pNPC)
+		if (pChar && pChar->m_pNPC)
 			pChar->NPC_AddSpellsFromBook(this);
 	}
 	if ( pObjCont->IsItem() )
@@ -2822,7 +2822,7 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 		case IC_CONTP:
 			{
 				const CObjBase * pContainer = GetContainer();
-				if ( IsItem() && IsItemInContainer() && pContainer->IsValidUID() && pContainer->IsContainer() && pContainer->IsItem() )
+				if (pContainer && IsItem() && IsItemInContainer() && pContainer->IsValidUID() && pContainer->IsContainer() && pContainer->IsItem() )
 					sVal = GetContainedPoint().WriteUsed();
 				else
 					return false;
@@ -3320,7 +3320,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 					}
 				}
 				CObjBase * pContainer = GetContainer();
-				if ( IsItem() && IsItemInContainer() && pContainer->IsValidUID() && pContainer->IsContainer() && pContainer->IsItem() )
+				if (pContainer && IsItem() && IsItemInContainer() && pContainer->IsValidUID() && pContainer->IsContainer() && pContainer->IsItem() )
 				{
 					CItemContainer * pCont = dynamic_cast <CItemContainer *> ( pContainer );
 					pCont->ContentAdd( this, pt );
@@ -4158,7 +4158,7 @@ const CItem* CItem::GetTopContainer() const
 		if (pCont->IsChar())
 			break;
 		ASSERT(pCont->IsItem());
-		pItem = static_cast<const CItem *>(pItem->GetContainer());
+		pItem = static_cast<const CItem *>(pCont);
 	}
 	return (pItem == this) ? nullptr : pItem;
 }
@@ -4172,7 +4172,7 @@ CItem* CItem::GetTopContainer()
 		if (pCont->IsChar())
 			break;
 		ASSERT(pCont->IsItem());
-		pItem = static_cast<CItem*>(pItem->GetContainer());
+		pItem = static_cast<CItem*>(pCont);
 	}
 	return (pItem == this) ? nullptr : pItem;
 }
@@ -5373,6 +5373,10 @@ bool CItem::Use_Light()
 	else if ( IsType(IT_LIGHT_OUT) )
 	{
 		Sound(m_itLight.m_burned ? 0x4b8 : 0x3be);
+		// Clear the timer used to burn the light while it was lit: otherwise SetDecayTime does nothing (it doesn't
+		//  override a non-decay timer) and that timer expires later on a doused light
+		//  ("Timer expired without DECAY flag", usually on lights put in a backpack while lit).
+		_SetTimeout(-1);
 		SetDecayTime(0);
 	}
 

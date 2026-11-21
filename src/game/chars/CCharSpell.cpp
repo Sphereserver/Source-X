@@ -118,7 +118,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
 
     if (!IsPriv(PRIV_GM))
     {
-        if ( g_Cfg.m_iMountHeight )
+        if ( IsMountHeightRestricted() )
         {
             if ( !IsVerticalSpace(ptNew, false) )
             {
@@ -527,7 +527,9 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool fNo
     if (IsClientActive())
     {
         CClient *pClient = GetClientActive();
-        pClient->addSeason(GetTopSector()->GetSeason());
+        if (pClient) {
+          pClient->addSeason(GetTopSector()->GetSeason());
+        }
     }
 	return true;
 }
@@ -2712,7 +2714,7 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE u
 			}
 		}
 
-		if (g_Cfg.m_iMountHeight && !pChar->IsVerticalSpace(GetTopPoint(), false))
+		if (pChar->IsMountHeightRestricted() && !pChar->IsVerticalSpace(GetTopPoint(), false))
 		{
 			SysMessageDefault(DEFMSG_MSG_SUMMON_CEILING);
 			pChar->Delete();
@@ -2838,7 +2840,7 @@ bool CChar::Spell_TargCheck()
 		SPELL_TYPE spell = m_atMagery.m_iSpell;
 		if (spell == SPELL_Teleport && !IsPriv(PRIV_GM))
 		{
-			if (g_Cfg.m_iMountHeight)
+			if (IsMountHeightRestricted())
 			{
 				if (!IsVerticalSpace(m_Act_p, false))
 				{
@@ -3328,7 +3330,9 @@ bool CChar::Spell_CastDone()
 					if (!g_Rand.GetVal(2 + iGet))
 						break;
 					CItem *pItem = CItem::CreateScript(sm_Item_Bone[i], this);
-					pItem->MoveToCheck(m_Act_p, this);
+				    if (pItem) {
+					  pItem->MoveToCheck(m_Act_p, this);
+				    }
 					++ iGet;
 				}
 				if (!iGet)

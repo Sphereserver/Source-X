@@ -176,7 +176,7 @@ public:
 	CUID m_uidNew;			// for script access - auxiliary obj
 
 	sl::unique_ptr_vector<CGMPage>			m_GMPages;	// Owns current outstanding GM pages. (CGMPage)
-	sl::unique_ptr_vector<CItemStone>		m_Stones;		// Owns guild/town stones. (not saved array)
+	sl::raw_ptr_view_vector<CItemStone>		m_Stones;		// Guild/town stones (owned by the world, like any item). (not saved array)
 	sl::unique_ptr_vector<CPartyDef>		m_Parties;	// Owns all active parties.
 	sl::raw_ptr_view_vector<CItemMulti>		m_Multis;		// World multis?
 	sl::smart_ptr_view_vector<CResourceDef> m_TileTypes;	// Links to CItemTypeDef items owned by g_Cfg.m_ResHash

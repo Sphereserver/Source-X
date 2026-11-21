@@ -56,8 +56,13 @@ bool CLanguageID::Set(lpctstr pszLang) noexcept
     // needs not be terminated!
     if (pszLang != nullptr)
     {
-        memcpy(m_codes, pszLang, 3);
-        m_codes[3] = 0;
+        // Up to 3 chars, stopping at the terminator if there's one: the source can be shorter (like ""),
+        //  a blind 3 bytes memcpy would read past its end.
+        size_t i = 0;
+        for (; (i < 3) && (pszLang[i] != '\0'); ++i)
+            m_codes[i] = pszLang[i];
+        for (; i < 4; ++i)
+            m_codes[i] = 0;
         if (iswalnum(m_codes[0]))
             return true;
         // not valid !

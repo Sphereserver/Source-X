@@ -324,11 +324,13 @@ bool CItemContainer::Trade_Delete()
         pScriptArgsPlayer1->Init(pChar);
 
         CChar *pChar2 = dynamic_cast<CChar *>(pPartner->GetParent());
-        CScriptTriggerArgsPtr pScriptArgsPlayer2 = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-        pScriptArgsPlayer2->Init(pChar2);
+	    if (pChar2) {
+            CScriptTriggerArgsPtr pScriptArgsPlayer2 = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgsPlayer2->Init(pChar2);
 
-        pChar->OnTrigger(CTRIG_TradeClose, pScriptArgsPlayer1,  pChar);
-        pChar2->OnTrigger(CTRIG_TradeClose, pScriptArgsPlayer2, pChar);
+            pChar->OnTrigger(CTRIG_TradeClose, pScriptArgsPlayer1,  pChar);
+            pChar2->OnTrigger(CTRIG_TradeClose, pScriptArgsPlayer2, pChar);
+	    }
 	}
 
 	m_uidLink.InitUID();	// unlink.

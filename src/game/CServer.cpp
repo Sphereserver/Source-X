@@ -48,13 +48,13 @@ static void dword_q_sort(dword *numbers, dword left, dword right)
     pivot = numbers[left];
     while (left < right)
     {
-        while ((numbers[right] >= pivot) && (left < right)) right--;
+        while ((left < right) && (numbers[right] >= pivot)) right--;
         if (left != right)
         {
             numbers[left] = numbers[right];
             left++;
         }
-        while ((numbers[left] <= pivot) && (left < right)) left++;
+        while ((left < right) && (numbers[left] <= pivot)) left++;
         if (left != right)
         {
             numbers[right] = numbers[left];
@@ -327,8 +327,8 @@ static void defragSphere(char *path)
                     ASSERT(strlen(str_ptr_2) < sizeof(path_buf));
                     Str_CopyLimitNull(path_buf, str_ptr_2, sizeof(path_buf));  // here we don't need anymore the old values of path_buf, so i can reuse it here
                     snprintf(path_buf_2, sizeof(path_buf_2), "0%" PRIx32, dwIdxUID);
-                    strcat(file_buf, path_buf_2);
-                    strcat(file_buf, path_buf);
+                    Str_ConcatLimitNull(file_buf, path_buf_2, sizeof(file_buf));
+                    Str_ConcatLimitNull(file_buf, path_buf, sizeof(file_buf));
                 }
             }
             //	output the resulting line

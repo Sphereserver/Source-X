@@ -246,6 +246,12 @@ bool CObjBase::Delete(bool fForce)
 	ADDTOCALLSTACK("CObjBase::Delete");
     EXC_TRY("Cleanup in Delete method");
 
+    if (_IsBeingDestructed())
+    {
+        // Called (directly or through a virtual) while our destructor runs: the destructor is already deleting us.
+        return true;
+    }
+
     bool fScheduleDeletion = true;
     if (g_Serv.IsDestroyingWorld())
     {
@@ -1399,7 +1405,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					int iType = g_Cfg.ResourceGetIndexType( RES_TYPEDEF, ptcKey );
 					int iDistance;
 					bool fCheckMulti;
-					bool fCheckMultiZ = false;
+					bool fLimitZ = false;
 
 					SKIP_IDENTIFIERSTRING( ptcKey );
 					SKIP_SEPARATORS( ptcKey );
@@ -1409,18 +1415,20 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 						iDistance	= 0;
 					else
 						iDistance	= Exp_GetVal( ptcKey );
+					SKIP_ARGSEP( ptcKey );	// Exp_GetVal doesn't go past a comma
 
 					if ( !*ptcKey )
 						fCheckMulti = false;
 					else
 						fCheckMulti = Exp_GetVal( ptcKey ) != 0;
+					SKIP_ARGSEP( ptcKey );
 
-					if (fCheckMulti && *ptcKey)
-						fCheckMultiZ = Exp_GetVal(ptcKey) != 0;
+					if ( *ptcKey )
+						fLimitZ = Exp_GetVal( ptcKey ) != 0;
 
 					if ( fP )
 					{
-						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::FindTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::FindItemTypeNearby(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti, fCheckMultiZ) );
+						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::FindTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::FindItemTypeNearby(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti, fLimitZ) );
 
 						if ( !pt.IsValidPoint() )
 							sVal.FormatVal( 0 );
@@ -1428,7 +1436,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 							sVal = pt.WriteUsed();
 					}
 					else
-						sVal.FormatVal( ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::IsTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::IsItemTypeNear(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti ) ) );
+						sVal.FormatVal( ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::IsTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::IsItemTypeNear(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti, fLimitZ ) ) );
 				}
 			}
 			break;

@@ -30,6 +30,16 @@ CPartyDef::CPartyDef( CChar *pCharInvite, CChar *pCharAccept)
     //UpdateWaypointAll(pCharInvite, PartyMember);
 }
 
+CPartyDef::~CPartyDef() {
+  // Silent detach characters to make sure no CChar is left pointing at this (about to be freed) party.
+  for (size_t i = m_Chars.GetCharCount(); i > 0; --i) {
+    CChar *pChar = m_Chars.GetChar(i - 1).CharFind();
+    if (pChar && (pChar->m_pParty == this)) {
+      pChar->m_pParty = nullptr;
+    }
+  }
+}
+
 // ---------------------------------------------------------
 size_t CPartyDef::AttachChar( CChar *pChar )
 {
@@ -120,7 +130,9 @@ void CPartyDef::SysMessageAll( lpctstr pText )
 	for ( size_t i = 0; i < iQty; i++ )
 	{
 		CChar *pChar = m_Chars.GetChar(i).CharFind();
-		pChar->SysMessage(pText);
+	    if (pChar) {
+		  pChar->SysMessage(pText);
+	    }
 	}
 }
 
@@ -410,7 +422,8 @@ bool CPartyDef::Disband( CUID uidMaster )
 		DetachChar(pChar);
 	}
 
-	delete this;	// should remove itself from the world list.
+    // Remove pointer to this party from the world list.
+    g_World.m_Parties.erase_element(this);
 	return true;
 }
 
@@ -885,7 +898,9 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 			if ( toSysmessage.IsValidUID() )
 			{
 				CChar *pSend = toSysmessage.CharFind();
-				pSend->SysMessage(ptcArg);
+			    if (pSend) {
+				  pSend->SysMessage(ptcArg);
+			    }
 			}
 			else
 				SysMessageAll(ptcArg);

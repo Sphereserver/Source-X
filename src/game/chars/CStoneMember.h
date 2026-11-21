@@ -17,12 +17,12 @@ class CItemStone;
 enum STONEPRIV_TYPE // Priv level for this char
 {
 	STONEPRIV_CANDIDATE = 0,
-	STONEPRIV_MEMBER,
-	STONEPRIV_MASTER,
-	STONEPRIV_UNUSED,
-	STONEPRIV_ACCEPTED,		// The candidate has been accepted. But they have not dclicked on the stone yet.
+	STONEPRIV_MEMBER = 1,
+	STONEPRIV_MASTER = 2,
+	STONEPRIV_UNUSED = 3,
+	STONEPRIV_ACCEPTED = 4,	// The candidate has been accepted. But they have not dclicked on the stone yet.
 	STONEPRIV_ENEMY = 100,	// This is an enemy town/guild.
-	STONEPRIV_ALLY			// This is an ally town/guild.
+	STONEPRIV_ALLY = 101	// This is an ally town/guild.
 };
 
 class CStoneMember : public CSObjListRec, public CScriptObj	// Members for various stones, and links to stones at war with

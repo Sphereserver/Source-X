@@ -237,6 +237,9 @@ TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CScriptTriggerArgsPtr co
 	}
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
+		// The script can be positioned in the middle of the block (BREAK, or CONTINUE on the last iteration, maybe from inside
+		//  an IF): go back to the start of the block before skipping it, otherwise the first ENDIF met is taken as its end.
+		s.SeekContext(StartContext);
 		// just skip to the end.
         TRIGRET_TYPE iRet = OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult);
 		if ( iRet != TRIGRET_ENDIF )
@@ -1785,6 +1788,12 @@ bool CChar::IsMountCapable() const
 	return false;
 }
 
+bool CChar::IsMountHeightRestricted() const
+{
+	// MountHeight: 0 = no restriction, 1 = everyone, 2 = players only (mounted NPCs can enter the buildings).
+	return g_Cfg.m_iMountHeight && !((g_Cfg.m_iMountHeight == 2) && m_pNPC);
+}
+
 bool CChar::IsVerticalSpace( const CPointMap& ptDest, bool fForceMount ) const
 {
 	ADDTOCALLSTACK("CChar::IsVerticalSpace");
@@ -1958,7 +1967,7 @@ bool CChar::CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovem
     if (!fPathfinding && (g_Cfg.m_iDebugFlags & DEBUGF_WALK) && IsPlayer())
         g_Log.EventWarn("GetHeightMount() %hhu, block.m_Top.m_z %hhd, ptDest.m_z %hhd.\n", uiMyHeight, blockingState->m_Top.m_z, ptDest->m_z);
 
-    if (IsStatFlag(STATF_ONHORSE) && (uiMyHeight + ptDest->m_z >= blockingState->m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE))
+    if (IsStatFlag(STATF_ONHORSE) && (uiMyHeight + ptDest->m_z >= blockingState->m_Top.m_z) && IsMountHeightRestricted() && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE))
     {
         if (!fPathfinding)
             SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);

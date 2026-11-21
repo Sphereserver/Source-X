@@ -898,22 +898,22 @@ public:
 
 		// the error codes below are not sent to or understood by the client,
 		// and should be translated into one of the codes above
-		BadVersion,     // version not permitted
-		BadCharacter,   // invalid character selected
-		BadAuthID,      // incorrect auth id
-		BadAccount,     // bad account name (length, characters)
-		BadPassword,    // bad password (length, characters)
-		BadEncLength,   // bad message length
-		EncUnknown,     // unknown encryption
-		EncCrypt,       // crypted client not allowed
-		EncNoCrypt,     // non-crypted client not allowed
-		CharIdle,       // character is already ingame
-		TooManyChars,   // account has too many characters
-		CreationBlocked,// character creation is blocked in this moments.
-		BlockedIP,      // ip is blocked
-		MaxClients,     // max clients reached
-		MaxGuests,      // max guests reached
-		MaxPassTries,   // max password tries reached
+		BadVersion = 0x05,     // version not permitted
+		BadCharacter = 0x06,   // invalid character selected
+		BadAuthID = 0x07,      // incorrect auth id
+		BadAccount = 0x08,     // bad account name (length, characters)
+		BadPassword = 0x09,    // bad password (length, characters)
+		BadEncLength = 0x0a,   // bad message length
+		EncUnknown = 0x0b,     // unknown encryption
+		EncCrypt = 0x0c,       // crypted client not allowed
+		EncNoCrypt = 0x0d,     // non-crypted client not allowed
+		CharIdle = 0x0e,       // character is already ingame
+		TooManyChars = 0x0f,   // account has too many characters
+		CreationBlocked = 0x10,// character creation is blocked at this moment.
+		BlockedIP = 0x11,      // ip is blocked
+		MaxClients = 0x12,     // max clients reached
+		MaxGuests = 0x13,      // max guests reached
+		MaxPassTries = 0x14,   // max password tries reached
 
 
 		Success = 0xFF  // no error
