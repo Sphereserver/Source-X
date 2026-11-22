@@ -422,7 +422,7 @@ bool CItemBase::IsTypeEquippable() const noexcept
 bool CItemBase::IsID_Multi( ITEMID_TYPE id ) noexcept // static
 {
 	// NOTE: Ships are also multi's
-	return ( id >= ITEMID_MULTI && id < ITEMID_MULTI_MAX );
+	return ( id >= ITEMID_MULTI && id <= ITEMID_MULTI_MAX );
 }
 
 bool CItemBase::IsID_House(ITEMID_TYPE id) noexcept
@@ -2337,7 +2337,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 bool CItemBase::IsValidDispID( ITEMID_TYPE id ) noexcept // static
 {
     // Is this id in the base artwork set ? tile or multi.
-    return ( id > ITEMID_NOTHING && id < ITEMID_MULTI_MAX );
+    return ( id > ITEMID_NOTHING && id <= ITEMID_MULTI_MAX );
 }
 
 //**************************************************
