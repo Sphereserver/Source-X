@@ -4243,6 +4243,16 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 16-11-2026, nightNR
 - Fixed: blocked accounts were unblocked after a server restart: BLOCK=1 read from the account file was ignored while loading, and the next save dropped it (#1616). The f_onaccount_block and f_onaccount_unblock functions are still not called while loading.
 
-18-11-2026, nightNR
+19-11-2026, nightNR
+- Fixed: crash at shutdown when a summoned NPC (a spell summon or a guard called by CallGuards) was in the world: closing its sector destroyed the NPC, removing its summon effect called Delete() on it again, and the NPC was freed a second time while its destructor was still running.
+- Fixed: multis deleted without a region (never placed in the world, and every multi addon) were not removed from the world multis list. SERV.MULTIS then read deleted objects: wrong count, the same multi listed more times, possible crash.
+- Fixed: deleted guild and town stones were not removed from the world stones list. SERV.GUILDSTONES and SERV.TOWNSTONES then read deleted objects (wrong count, the same stone listed more times, possible crash), and the server could crash on shutdown or on a failed world load, deleting them a second time. The list doesn't own the stones anymore: they are deleted by the world like every other item.
+- Changed: clearing TAGs, VARs and other variable lists (CLEARTAGS, CLEARVARS, a new DB/LDB/MDB query clearing the previous result, ...) is now done in a single pass. It used to take quadratic time: clearing an 8000 row, 4 column query result (64000 values) took about 0.45 s, CLEARTAGS with a mask on 32000 TAGs up to 23 s.
+
+20-11-2026, nightNR
+- Fixed: a player could walk through a blocking item (e.g. an energy field) when the terrain on that tile is above the head of the char, like the hidden terrain over a cave floor (e.g. 2558,500 at the Minoc cave entrance): the terrain replaced the item as the tile to stand on. With the item removed on the client (e.g. by a client command or plugin), the server accepted the step.
+- Fixed: chars deleted during their location effects (eg: a summon dispelled by a field @STEP, an NPC killed by a fire field or a trap) could stay in the world as orphans, alive and without the summon memory. The "run away from the threat" step that followed moved the char into a sector and took it out of the deletion queue. Deleted chars are not processed or moved anymore.
+
+22-11-2026, nightNR
 - Changed: the world timers (TIMER of the objects and the periodic ticks of the characters) are scheduled by a timing wheel. Adding, removing or rescheduling a timer takes constant time and doesn't allocate, each tick only visits the slots elapsed since the previous one. Timers expiring in the same tick still fire ordered by expiration time, then by the order they were set.
 - Added: sphere.ini setting TimerWheelSlots, the number of 25 ms slots of the timing wheel (default 131072, ~55 minutes). Timers set later than that wait in an overflow list.

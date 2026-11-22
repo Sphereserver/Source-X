@@ -1467,7 +1467,7 @@ bool CAccount::r_LoadVal( CScript & s )
             _iMaxHouses = s.GetArgUCVal();
             break;
 		case AC_MAXSHIPS:
-			_iMaxHouses = s.GetArgUCVal();
+			_iMaxShips = s.GetArgUCVal();
 			break;
 		case AC_MD5PASSWORD:
 			SetPassword( s.GetArgStr(), true);
