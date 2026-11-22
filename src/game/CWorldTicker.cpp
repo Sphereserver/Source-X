@@ -633,6 +633,11 @@ void CWorldTicker::ProcessTimedObjects()
 
         // Checked here and not while collecting, so that the wheel doesn't need to read the objects, and the state is the
         //  current one (the tick of a previous object may have changed it).
+        // Registered again: the tick of an object processed before this one, in this same loop, set a new timer on this
+        //  object (or woke it up). The new timer replaced the expired one, which doesn't fire, as if each timer fired at its
+        //  own time; the new one fires when it expires.
+        if (pTimedObj->_IsTimeoutTickingActive())
+            continue;
         // Their entry was removed: a sleeping object is registered again by _GoAwake, if its timer is still set;
         //  an object being deleted doesn't need it anymore.
         if (!pTimedObj->_IsTimerSet() || pTimedObj->_IsSleeping())
@@ -645,13 +650,6 @@ void CWorldTicker::ProcessTimedObjects()
         EXC_TRYSUB("Tick");
         EXC_SETSUB_BLOCK("Elapsed");
 
-        // The tick of an object processed before this one, in this same loop, may have set a new timer on this object:
-        //  the timer is cleared here, so its new entry has to go too, otherwise it would stay registered without a timer.
-        if (pTimedObj->_IsTimeoutTickingActive())
-        {
-            const bool fRemoved = _EraseTimedObject(pTimedObj);
-            UnreferencedParameter(fRemoved);
-        }
         pTimedObj->_ClearTimeoutRaw();
 
 #if MT_ENGINES
