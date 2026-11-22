@@ -841,7 +841,7 @@ void AbstractThread::attachToCurrentThread(const char* osThreadName) noexcept
         g_Log.Event(LOGL_CRIT,
             "[THREADING] attachToCurrentThread rejected: current OS thread already bound to '%s'; wanted '%s'.\n",
             sg_tlsCurrentSphereThread->getName(), ptcThreadName);
-        RaiseImmediateAbort(30);
+        RaiseImmediateAbort(33);
         return;
     }
 
