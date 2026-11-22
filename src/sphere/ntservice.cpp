@@ -460,6 +460,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 {
 	UnreferencedParameter(hPrevInstance);
+#ifdef UNIT_TESTING
+    // The unit tests need neither the .ini nor the window. The CRT has the command line split as main() gets it.
+    return Sphere_MainEntryPoint(__argc, __argv);
+#endif
     AbstractThread::setThreadName("T_SphereStartup");
     Sphere_AttachBootstrapContext(); // bind bootstrap OS thread to StartupMonitor context
 
