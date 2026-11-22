@@ -5930,9 +5930,12 @@ bool CChar::IsTickableEvenIfDisconnected() const
             const dword dwUidFigurine = m_atRidden.m_uidFigurine.GetObjUID();
             g_Log.EventError("Char name='%s' UID=0%" PRIx32 " (Owner UID=0%" PRIx32 ") is ridden but not linked to any mount item or figurine (ACTARG1=0%" PRIx32 ").\n",
                              GetName(), dwUidMine, dwUidOwner, dwUidFigurine);
+
+            // Nothing else to validate without the linked item. Keep it tickable anyway.
+            return true;
         }
 
-        const CChar *pRider = !pLinkedItem ? nullptr : pLinkedItem->m_uidLink.CharFind();
+        const CChar *pRider = pLinkedItem->m_uidLink.CharFind();
         if (pRider && pLinkedItem->IsType(IT_EQ_HORSE))
         {
             // The linked item is a mount item.
