@@ -8,9 +8,6 @@
 
 #include "../CScriptContexts.h"
 #include "CResourceDef.h"
-#include <functional>
-
-class CScriptKey;
 
 class CResourceScript;
 
@@ -54,9 +51,8 @@ public:
     int GetLinkOffset() const;
     void SetLink( CResourceScript * pScript );
     void CopyTransfer( CResourceLink * pLink );
-    // Read the linked section for DEFNAME and the triggers.
-    // fnOnKey (optional): called with every key read, so that the caller can look for what it needs.
-    void ScanSection( RES_TYPE restype, const std::function<void(const CScriptKey&)>& fnOnKey = {} );
+    // pfMultiRegion (optional): set to whether the section has a MULTIREGION key.
+    void ScanSection( RES_TYPE restype, bool *pfMultiRegion = nullptr );
     void ClearTriggers();
     void SetTrigger( int i );
     bool HasTrigger( int i ) const;
