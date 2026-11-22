@@ -73,6 +73,13 @@ std::array<byte, N> decode(std::string_view hex)
     return result;
 }
 
+// The length of a buffer, as the crypto functions take it.
+template<size_t N>
+constexpr uint len(const std::array<byte, N>&) noexcept
+{
+    return static_cast<uint>(N);
+}
+
 struct RotationKeys
 {
     std::vector<CCryptoClientKey> saved;
@@ -130,21 +137,21 @@ TEST_CASE("Early rotation cipher detects login and preserves the stream across r
                 REQUIRE(crypto.Decrypt(login.data() + kRestOffset, encrypted.data() + kRestOffset, kLoginLength - kRestOffset, kLoginLength - kRestOffset));
             }
             else
-                REQUIRE(crypto.Decrypt(login.data(), encrypted.data(), login.size(), login.size()));
+                REQUIRE(crypto.Decrypt(login.data(), encrypted.data(), len(login), len(login)));
             CHECK(login == loginPlain);
 
             std::array<byte, kSelectLength> select{};
-            REQUIRE(crypto.Decrypt(select.data(), encrypted.data() + kLoginLength, select.size(), select.size()));
+            REQUIRE(crypto.Decrypt(select.data(), encrypted.data() + kLoginLength, len(select), len(select)));
             CHECK(select == selectPlain);
 
             // A retained socket keeps its rotation masks despite the relay seed changing.
             crypto.InitFast(kRelaySeed, CONNECT_GAME);
             std::array<byte, kGameLength> game{};
-            REQUIRE(crypto.Decrypt(game.data(), encrypted.data() + kLoginLength + kSelectLength, game.size(), game.size()));
+            REQUIRE(crypto.Decrypt(game.data(), encrypted.data() + kLoginLength + kSelectLength, len(game), len(game)));
             CHECK(game == gamePlain);
             CHECK(crypto.GetConnectType() == CONNECT_GAME);
             std::array<byte, kFollowLength> follow{};
-            REQUIRE(crypto.Decrypt(follow.data(), encrypted.data() + kLoginLength + kSelectLength + kGameLength, follow.size(), follow.size()));
+            REQUIRE(crypto.Decrypt(follow.data(), encrypted.data() + kLoginLength + kSelectLength + kGameLength, len(follow), len(follow)));
             CHECK(follow == followPlain);
         }
     }
@@ -173,7 +180,7 @@ TEST_CASE("Early rotation cipher detects a fresh game connection and accepts in-
         // Sending server data must leave the independent client-to-server rotation masks untouched.
         const std::array<byte, kFollowLength> serverData{0x73, 0x42};
         std::array<byte, kFollowLength> serverOutput{};
-        REQUIRE(crypto.Encrypt(serverOutput.data(), serverData.data(), serverOutput.size(), serverData.size()));
+        REQUIRE(crypto.Encrypt(serverOutput.data(), serverData.data(), len(serverOutput), len(serverData)));
         CHECK(serverOutput == serverData);
         REQUIRE(crypto.Decrypt(encrypted.data() + kGameLength, encrypted.data() + kGameLength, kFollowLength, kFollowLength));
         CHECK(std::memcmp(encrypted.data() + kGameLength, followPlain.data(), kFollowLength) == 0);
@@ -186,9 +193,9 @@ TEST_CASE("Plaintext login accepts an output buffer of exactly the input size")
     const auto login = decode<kLoginLength>(kLoginPlain);
     std::array<byte, kLoginLength> output{};
     CCrypto crypto;
-    REQUIRE(crypto.Init(kSeed, login.data(), login.size()));
+    REQUIRE(crypto.Init(kSeed, login.data(), len(login)));
     REQUIRE(crypto.GetEncryptionType() == ENC_NONE);
-    REQUIRE(crypto.Decrypt(output.data(), login.data(), output.size(), login.size()));
+    REQUIRE(crypto.Decrypt(output.data(), login.data(), len(output), len(login)));
     CHECK(output == login);
 }
 
@@ -198,14 +205,14 @@ TEST_CASE("Plaintext game detects a fresh connection and accepts in-place follow
     const auto game = decode<kGameLength>(kGamePlain);
     auto output = game;
     CCrypto crypto;
-    REQUIRE(crypto.Init(kSeed, game.data(), game.size()));
+    REQUIRE(crypto.Init(kSeed, game.data(), len(game)));
     REQUIRE(crypto.GetEncryptionType() == ENC_NONE);
     CHECK(crypto.GetConnectType() == CONNECT_GAME);
-    REQUIRE(crypto.Decrypt(output.data(), output.data(), output.size(), output.size()));
+    REQUIRE(crypto.Decrypt(output.data(), output.data(), len(output), len(output)));
     CHECK(output == game);
 
     auto follow = decode<kFollowLength>(kFollowPlain);
     const auto originalFollow = follow;
-    REQUIRE(crypto.Decrypt(follow.data(), follow.data(), follow.size(), follow.size()));
+    REQUIRE(crypto.Decrypt(follow.data(), follow.data(), len(follow), len(follow)));
     CHECK(follow == originalFollow);
 }

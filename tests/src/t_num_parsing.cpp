@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
 #include "../../src/common/CExpression.h"
+#include <ostream>   // To stream a std::string_view in the doctest messages.
 #include <string>
 #include <string_view>
 #include <cctype> // toupper

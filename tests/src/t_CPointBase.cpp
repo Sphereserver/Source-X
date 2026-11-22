@@ -73,9 +73,10 @@ TEST_CASE("CPointBase::GetDir")\
     CPointBase ptOther;
     //DIR_TYPE def = DIR_N;
 
-    for (short x : {-20, -5, 0, 5, 20})
+    constexpr short kOffsets[] = {-20, -5, 0, 5, 20};
+    for (short x : kOffsets)
     {
-        for (short y : {-20, -5, 0, 5, 20})
+        for (short y : kOffsets)
         {
             ptOther = pt;
             ptOther.m_x += x;

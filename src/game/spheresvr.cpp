@@ -34,7 +34,14 @@
 
 #ifdef UNIT_TESTING
 #   define DOCTEST_CONFIG_IMPLEMENT
+#   if NON_MSVC_COMPILER
+#       pragma GCC diagnostic push
+#       pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"   // In its MacOS code.
+#   endif
 #   include <doctest/doctest.h>
+#   if NON_MSVC_COMPILER
+#       pragma GCC diagnostic pop
+#   endif
 #endif
 
 /* Start global declarations */
