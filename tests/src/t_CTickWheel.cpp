@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <climits>
 #include <map>
+#include <new>
 #include <random>
 #include <vector>
 
@@ -739,4 +740,95 @@ TEST_CASE("CTickWheel cleared (shutdown, resync) and used again")
     }
     CHECK(vFired.size() == vObjs.size());
     CHECK(std::is_sorted(vFired.begin(), vFired.end()));
+}
+
+TEST_CASE("CTickWheel a collection that throws removes nothing")
+{
+    // The owners are given to the caller before the entries are removed: if that throws (out of memory), the wheel
+    //  keeps them and the next call gives them again, in the same order. Two wheels get the same operations; the
+    //  collections of the first one throw once, then are done again.
+    struct Output
+    {
+        bool fThrow = false;
+        std::vector<int> vIds;
+    };
+    auto fnOutput = [](void* pContext, void* const* ppOwners, size_t uiCount)
+    {
+        auto& out = *static_cast<Output*>(pContext);
+        if (out.fThrow)
+            throw std::bad_alloc();
+        for (size_t i = 0; i < uiCount; ++i)
+            out.vIds.emplace_back(static_cast<const TestObj*>(ppOwners[i])->id);
+    };
+
+    std::mt19937_64 rng(4242);
+    auto rand = [&rng](int64 iMin, int64 iMax) -> int64
+    {
+        return std::uniform_int_distribution<int64>(iMin, iMax)(rng);
+    };
+
+    CTickWheelCore failing, plain;
+    std::vector<TestObj> vObjs(400);
+    std::vector<CTickWheelCore::Handle> vhFailing(vObjs.size(), CTickWheelCore::kNone), vhPlain(vObjs.size(), CTickWheelCore::kNone);
+    std::vector<int64> viTime(vObjs.size(), 0);
+    for (int i = 0; i < (int)vObjs.size(); ++i)
+        vObjs[(size_t)i].id = i;
+
+    int64 iNow = 0;
+    int iThrown = 0;
+    for (int iStep = 0; iStep < 400; ++iStep)
+    {
+        for (int iOp = (int)rand(0, 10); iOp > 0; --iOp)
+        {
+            const size_t i = (size_t)rand(0, (int64)vObjs.size() - 1);
+            const int64 iTime = iNow + rand(-5, (int64)1 << rand(0, 30));    // Every level, and expired ones.
+            viTime[i] = iTime;
+            if (vhFailing[i] == CTickWheelCore::kNone)
+            {
+                vhFailing[i] = failing.Insert(&vObjs[i], iTime);
+                vhPlain[i] = plain.Insert(&vObjs[i], iTime);
+            }
+            else
+            {
+                REQUIRE(failing.Reschedule(vhFailing[i], &vObjs[i], iTime));
+                REQUIRE(plain.Reschedule(vhPlain[i], &vObjs[i], iTime));
+            }
+        }
+        iNow += rand(0, (int64)1 << rand(0, 26));
+
+        Output outFailing, outPlain;
+        outFailing.fThrow = true;
+        const size_t uiSize = failing.size();
+        bool fThrown = false;
+        try
+        {
+            failing.CollectExpired(iNow, fnOutput, &outFailing);
+        }
+        catch (const std::bad_alloc&)
+        {
+            fThrown = true;
+        }
+        // Not thrown: nothing expired, the output wasn't called.
+        REQUIRE(failing.size() == uiSize);
+        for (size_t i = 0; i < vObjs.size(); ++i)
+        {
+            if (vhFailing[i] != CTickWheelCore::kNone)
+                REQUIRE(failing.GetTime(vhFailing[i], &vObjs[i]) == viTime[i]);
+        }
+        if (fThrown)
+        {
+            ++iThrown;
+            outFailing.fThrow = false;
+            failing.CollectExpired(iNow, fnOutput, &outFailing);
+        }
+        plain.CollectExpired(iNow, fnOutput, &outPlain);
+        REQUIRE(outFailing.vIds == outPlain.vIds);
+        CHECK(failing.size() == plain.size());
+        for (int id : outPlain.vIds)
+        {
+            vhFailing[(size_t)id] = CTickWheelCore::kNone;
+            vhPlain[(size_t)id] = CTickWheelCore::kNone;
+        }
+    }
+    CHECK(iThrown > 100);
 }

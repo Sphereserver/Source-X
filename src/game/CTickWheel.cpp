@@ -43,6 +43,7 @@ struct CTickWheelCore::Collected
     int64   iTime;
     uint64  uiSeq;
     void*   pOwner;
+    Handle  h;              // Still allocated, unlinked: freed when the owners were delivered.
 };
 
 
@@ -53,7 +54,7 @@ CTickWheelCore::CTickWheelCore() :
 {
     static_assert((kL0Bits == ::kL0Bits) && (kUpperLevels == ::kUpperLevels));
     static_assert((sizeof(void*) != 8) || (sizeof(Node) == 32));
-    _vChunks.emplace_back(new Node[kChunkNodes]());
+    _vChunks.emplace_back(std::make_unique<Node[]>(kChunkNodes));
 }
 
 CTickWheelCore::~CTickWheelCore() = default;
@@ -116,7 +117,7 @@ int64 CTickWheelCore::GetTime(Handle h, const void* pOwner) const noexcept
     return _IsOwnedBy(h, pOwner) ? _N(h).iTime : 0;
 }
 
-void CTickWheelCore::CollectExpired(const int64 iNow, std::vector<void*>& vOut)
+void CTickWheelCore::CollectExpired(const int64 iNow, OutputFn fnOutput, void* pContext)
 {
     if (_uiCount == 0)
     {
@@ -125,48 +126,70 @@ void CTickWheelCore::CollectExpired(const int64 iNow, std::vector<void*>& vOut)
         return;
     }
 
+    // The expired entries are unlinked, but their nodes are freed only after the owners were delivered:
+    //  if anything throws until then, they are placed again (_Restore).
     _vCollectBuffer.clear();
-    if (iNow <= _iElapsed)
+    _vKeepBuffer.clear();
+    try
     {
-        // Time didn't move or went back: only the current slot can hold expired entries
-        //  (entries already expired when placed go to the current slot).
-        _ScanInPlace((uint32)(_iElapsed & (kL0Slots - 1)), iNow);
-    }
-    else
-    {
-        uint32 uiSlot;
-        int64  iSlotStart;
-        while (_FindNextSlot(&uiSlot, &iSlotStart))
+        if (iNow <= _iElapsed)
         {
-            if (uiSlot < kL0Slots)
-            {
-                if (iSlotStart >= iNow)
-                    break;
-                _TakeL0(uiSlot, iNow);
-            }
-            else
-            {
-                if (iSlotStart > iNow)
-                    break;
-                _iElapsed = iSlotStart;
-                _Cascade(uiSlot);
-            }
+            // Time didn't move or went back: only the current slot can hold expired entries
+            //  (entries already expired when placed go to the current slot).
+            _ScanInPlace((uint32)(_iElapsed & (kL0Slots - 1)), iNow);
         }
-        _iElapsed = iNow;
-        for (const Handle h : _vKeepBuffer)
-            _Place(h);
-        _vKeepBuffer.clear();
+        else
+        {
+            uint32 uiSlot;
+            int64  iSlotStart;
+            while (_FindNextSlot(&uiSlot, &iSlotStart))
+            {
+                if (uiSlot < kL0Slots)
+                {
+                    if (iSlotStart >= iNow)
+                        break;
+                    _TakeL0(uiSlot, iNow);
+                }
+                else
+                {
+                    if (iSlotStart > iNow)
+                        break;
+                    _iElapsed = iSlotStart;
+                    _Cascade(uiSlot);
+                }
+            }
+            _iElapsed = iNow;
+            for (const Handle h : _vKeepBuffer)
+                _Place(h);
+            _vKeepBuffer.clear();
+        }
+
+        if (_vCollectBuffer.empty())
+            return;
+
+        std::sort(_vCollectBuffer.begin(), _vCollectBuffer.end(),
+            [](const Collected& a, const Collected& b) noexcept
+            {
+                return (a.iTime != b.iTime) ? (a.iTime < b.iTime) : (a.uiSeq < b.uiSeq);
+            });
+        _vOwners.clear();
+        _vOwners.reserve(_vCollectBuffer.size());
+        for (const Collected& entry : _vCollectBuffer)
+            _vOwners.emplace_back(entry.pOwner);
+        fnOutput(pContext, _vOwners.data(), _vOwners.size());
+    }
+    catch (...)
+    {
+        _Restore();
+        throw;
     }
 
-    std::sort(_vCollectBuffer.begin(), _vCollectBuffer.end(),
-        [](const Collected& a, const Collected& b) noexcept
-        {
-            return (a.iTime != b.iTime) ? (a.iTime < b.iTime) : (a.uiSeq < b.uiSeq);
-        });
-    vOut.reserve(vOut.size() + _vCollectBuffer.size());
+    // Delivered: nothing can fail from here.
     for (const Collected& entry : _vCollectBuffer)
-        vOut.emplace_back(entry.pOwner);
+        _Free(entry.h);
+    _uiCount -= _vCollectBuffer.size();
     _vCollectBuffer.clear();
+    _vOwners.clear();
 }
 
 void CTickWheelCore::Clear(VisitFn fnVisit, void* pContext)
@@ -205,7 +228,11 @@ CTickWheelCore::Handle CTickWheelCore::_Alloc()
         return h;
     }
     if ((_uiPoolSize & (kChunkNodes - 1)) == 0)
-        _vChunks.emplace_back(new Node[kChunkNodes]());     // The nodes never move: no reallocation, no copy.
+    {
+        // The nodes never move: no reallocation, no copy. Allocated before growing the vector, so that it's released
+        //  if that throws.
+        _vChunks.emplace_back(std::make_unique<Node[]>(kChunkNodes));
+    }
     return _uiPoolSize++;   // Handle 0 is never given: it's the first node of the first block, never used.
 }
 
@@ -358,30 +385,26 @@ CTickWheelCore::Handle CTickWheelCore::_Detach(uint32 uiSlot) noexcept
 
 // Collecting
 
-void CTickWheelCore::_Collect(const Node& node)
+// Every step that can throw (adding to a buffer) is done before changing the wheel: if it throws, the entry is still
+//  linked, and the ones already taken are in the buffers, for _Restore.
+
+void CTickWheelCore::_Collect(Handle h, const Node& node)
 {
     // The caller is going to read the owner soon: start loading it while the other entries are collected.
     TICKWHEEL_PREFETCH(node.pOwner);
-    _vCollectBuffer.push_back({ node.iTime, node.uiSeq, node.pOwner });
+    _vCollectBuffer.push_back({ node.iTime, node.uiSeq, node.pOwner, h });
 }
 
 void CTickWheelCore::_TakeL0(uint32 uiSlot, int64 iNow)
 {
-    for (Handle h = _Detach(uiSlot); h != kNone; )
+    for (Handle h = _vHeads[uiSlot]; h != kNone; h = _vHeads[uiSlot])
     {
-        Node& node = _N(h);
-        const Handle hNext = node.uiNext;
+        const Node& node = _N(h);
         if (node.iTime < iNow)
-        {
-            _Collect(node);
-            _Free(h);
-            --_uiCount;
-        }
+            _Collect(h, node);
         else
-        {
             _vKeepBuffer.emplace_back(h);   // Parked far entry: placed again once the current time is updated.
-        }
-        h = hNext;
+        _Unlink(h);
     }
 }
 
@@ -399,15 +422,26 @@ void CTickWheelCore::_ScanInPlace(uint32 uiSlot, int64 iNow)
 {
     for (Handle h = _vHeads[uiSlot]; h != kNone; )
     {
-        Node& node = _N(h);
+        const Node& node = _N(h);
         const Handle hNext = node.uiNext;
         if (node.iTime < iNow)
         {
-            _Collect(node);
+            _Collect(h, node);
             _Unlink(h);
-            _Free(h);
-            --_uiCount;
         }
         h = hNext;
     }
+}
+
+// The entries taken by a CollectExpired that didn't complete go back in the wheel, placed for its current time
+//  (which may have moved forward): nothing is lost, the next call finds them.
+void CTickWheelCore::_Restore() noexcept
+{
+    for (const Handle h : _vKeepBuffer)
+        _Place(h);
+    for (const Collected& entry : _vCollectBuffer)
+        _Place(entry.h);
+    _vKeepBuffer.clear();
+    _vCollectBuffer.clear();
+    _vOwners.clear();
 }
