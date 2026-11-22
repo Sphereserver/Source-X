@@ -49,7 +49,7 @@ void reserved_stdout_log(lpctstr ptcFormat, ...) noexcept // SPHERE_PRINTFARGS(1
 {
     va_list vargs;
     va_start(vargs, ptcFormat);
-    fprintf(stdout, ptcFormat, vargs);
+    vfprintf(stdout, ptcFormat, vargs);
     va_end(vargs);
 
     fflush(stdout);
@@ -59,7 +59,7 @@ void reserved_stderr_log(lpctstr ptcFormat, ...) noexcept // SPHERE_PRINTFARGS(1
 {
     va_list vargs;
     va_start(vargs, ptcFormat);
-    fprintf(stderr, ptcFormat, vargs);
+    vfprintf(stderr, ptcFormat, vargs);
     va_end(vargs);
 
     fflush(stderr);
