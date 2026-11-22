@@ -309,6 +309,14 @@ static void Signal_Hangup(int sig = 0) noexcept // If shutdown is initialized
     g_Serv.SetExitFlag(SIGHUP);
 }
 
+static void Signal_Stop(int sig = 0) noexcept // Stop request (SIGTERM, e.g. by a service manager)
+{
+    // Orderly shutdown, like the SHUTDOWN command or a Windows service stop: the threads end on their own when they see
+    //  the exit flag, then Sphere_ExitServer runs (f_onserver_exit, sockets and world closing).
+    // Do just this here: logging or ending threads from a signal handler isn't safe. The reason is logged at the exit.
+    g_Serv.SetExitFlag(sig ? sig : SIGTERM);
+}
+
 static void Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
 {
 
@@ -447,7 +455,7 @@ void SetUnixSignals( bool fSet )    // Signal handlers are installed only in sec
     if (!fDebugger && !fSan)
     {
         signal( SIGHUP,  fSet ? &Signal_Hangup : SIG_DFL );
-        signal( SIGTERM, fSet ? &Signal_Terminate : SIG_DFL );
+        signal( SIGTERM, fSet ? &Signal_Stop : SIG_DFL );
         signal( SIGQUIT, fSet ? &Signal_Terminate : SIG_DFL );
         signal( SIGABRT, fSet ? &Signal_Terminate : SIG_DFL );
         signal( SIGILL,  fSet ? &Signal_Terminate : SIG_DFL );
