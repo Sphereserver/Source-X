@@ -2331,6 +2331,14 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 		pBase->r_LoadVal( s );
 	}
 
+	// Every multi type needs a CItemBaseMulti, which is created only by MULTIREGION (in a MULTIDEF or in an ITEMDEF section).
+	// Report it once here, when the definition is loaded, and not only at each creation of an item from it (see CItem::CreateBase).
+	if (IsTypeMulti(pBase->GetType()) && (nullptr == dynamic_cast<const CItemBaseMulti*>(pBase)))
+	{
+		g_Log.EventError("Item definition '%s' has a multi TYPE but isn't a multi (no MULTIREGION, or MULTIREGION before TYPE): items created from it will be DEFAULTITEM.\n",
+			pBase->GetResourceName());
+	}
+
 	return pBase;
 }
 

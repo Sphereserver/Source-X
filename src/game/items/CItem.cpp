@@ -311,20 +311,21 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
     if (type == IT_INVALID)
         type = pItemDef->GetType();
 
-    // Every multi type is a CItemMulti, which needs a CItemBaseMulti.
-    // This workaround is needed because for now we do not have a RES_MULTIDEF, but only RES_ITEMDEF, so we cannot
-    //  differentiate between multis and regular items at a earlier stage
-    // (like CItemBase::r_LoadVal -> IBC_ID, CItemBase::r_LoadVal -> IC_TYPE).
+    // Every multi type is a CItemMulti, which needs a CItemBaseMulti: a definition with MULTIREGION.
+    // A definition with a multi TYPE and without MULTIREGION is already reported when loaded (CItemBase::FindItemBase),
+    //  but the type can also be requested by the caller.
     if (CItemBase::IsTypeMulti(type) && (nullptr == dynamic_cast<const CItemBaseMulti*>(pItemDef)))
     {
         if (!fDefaultItem)
         {
-            g_Log.EventError("Trying to create invalid Multi item, defined with ITEMDEF and not MULTIDEF. Fix it.\n");
+            g_Log.EventError("Can't create '%s' as a multi: its definition has no MULTIREGION. Creating DEFAULTITEM instead.\n",
+                pItemDef->GetResourceName());
             goto default_item;
         }
 
         // DEFAULTITEM is invalid too: create it as a plain item instead of falling back to it again (endless loop).
-        g_Log.EventError("DEFAULTITEM is an invalid Multi item, defined with ITEMDEF and not MULTIDEF. Creating it as a plain item. Fix it.\n");
+        g_Log.EventError("DEFAULTITEM '%s' has a multi TYPE but no MULTIREGION: creating it as a plain item.\n",
+            pItemDef->GetResourceName());
         type = IT_NORMAL;
     }
 	switch (type)
@@ -3953,7 +3954,7 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
         // Pre-assignment checks
         if (type == IT_MULTI_CUSTOM)
         {
-            g_Log.EventError("Can't dynamically assign type 't_multi_custom' to an item. This type can only be specified in the TYPEDEF.\n");
+            g_Log.EventError("Can't assign type 't_multi_custom' to an existing item: it can only be set in the item definition.\n");
             return false;
         }
         else if (CItemBase::IsTypeMulti(type) && (nullptr == dynamic_cast<const CItemMulti*>(this)))
@@ -3971,7 +3972,8 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
                     ptcType = "t_multi_addon";
                     break;
             }
-            g_Log.EventError("Can't dynamically assign type '%s' to an item. The item has to be declared with MULTIDEF, not ITEMDEF.\n", ptcType);
+            g_Log.EventError("Can't assign type '%s' to item '%s': it isn't a multi. Only items created from a definition with MULTIREGION are multis.\n",
+                ptcType, GetResourceName());
             return false;
         }
     }
