@@ -413,9 +413,10 @@ static void os_set_thread_name_portable(const char* name_trimmed) noexcept
 #if defined(_WIN32)
     // Prefer SetThreadDescription (Windows 10+) if available
     using SetThreadDescription_t = HRESULT (WINAPI *)(HANDLE, PCWSTR);
+    // Through void (*)(), which GCC accepts as any function type (-Wcast-function-type).
     static SetThreadDescription_t pSetThreadDescription =
-        reinterpret_cast<SetThreadDescription_t>(
-            GetProcAddress(GetModuleHandleW(L"Kernel32.dll"), "SetThreadDescription"));
+        reinterpret_cast<SetThreadDescription_t>(reinterpret_cast<void (*)()>(
+            GetProcAddress(GetModuleHandleW(L"Kernel32.dll"), "SetThreadDescription")));
     if (pSetThreadDescription)
     {
         wchar_t wname[64];

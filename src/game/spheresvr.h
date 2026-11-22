@@ -7,6 +7,8 @@
 #define _INC_SPHERESVR_H
 
 #include "../common/sphere_library/CSAssoc.h"
+#include <atomic>
+#include <string>
 
 /* Globals */
 // Generic. Simple data types.
