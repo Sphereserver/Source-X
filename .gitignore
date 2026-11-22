@@ -70,3 +70,6 @@ CMakeCache.txt
 /sphereserver*.buildinfo
 /sphereserver*.changes
 /sphereserver*.deb
+
+# Qt Creator local settings
+.qtcreator/

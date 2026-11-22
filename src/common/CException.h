@@ -44,9 +44,6 @@ void SetWindowsStructuredExceptionTranslator();
 
 void NotifyDebugger();
 
-void SetAbortImmediate(bool on) noexcept;
-[[noreturn]]
-void RaiseRecoverableAbort();
 [[noreturn]]
 void RaiseImmediateAbort(int iErrCode);
 

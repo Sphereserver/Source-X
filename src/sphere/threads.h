@@ -77,7 +77,7 @@ protected:
 
     bool m_fKeepAliveAtShutdown{false};
     bool m_fThreadSelfTerminateAfterThisTick{false};
-    bool m_fTerminateRequested{false};
+    std::atomic_bool m_fTerminateRequested{false};    // Written also by other threads (waitForClose, checkStuck).
 
     enum class eRunningState : uchar {
         NeverStarted,

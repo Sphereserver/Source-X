@@ -42,6 +42,7 @@ public:
     static const char* m_sClassName;
     std::atomic<ServMode> m_iModeCode;      // Query the server state.
     std::atomic_int m_iExitFlag;			// identifies who caused the exit. <0 = error
+    std::atomic_bool _fSaveAndExitRequested{false};   // Set by a signal handler (SIGHUP): CServer::_OnTick saves, then exits.
     bool m_fResyncPause;		            // Server is temporarily halted so files can be updated. TODO: don't we already have m_iModeCode and ServMode::ResyncPause?
     CTextConsole* m_fResyncRequested;		// A resync pause has been requested by this source.
 
@@ -91,6 +92,7 @@ public:
 
     int GetExitFlag() const noexcept;
     void SetExitFlag(int iFlag) noexcept;
+    void RequestSaveAndExit() noexcept;
     void Shutdown( int64 iMinutes );
 	void SetSignals( bool fMsg = true );
     bool SetProcessPriority(int iPriorityLevel);
