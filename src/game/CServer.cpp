@@ -1389,17 +1389,13 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 	if ( !pSrc )
 		return;
 
-	CSFileText * ftDump = nullptr;
+	// A local object, not allocated with new: deleting it through its virtual destructor makes GCC 16 (with the optimizations)
+	//  inline also the destructor of CScript, the derived class, and warn about it (-Warray-bounds).
+	CSFileText fileDump;
+	CSFileText * ftDump = nullptr;	// &fileDump, if the dump is open.
 
-	if ( bDump )
-	{
-		ftDump = new CSFileText();
-		if ( ! ftDump->Open("profiler_dump.txt", OF_CREATE|OF_TEXT) )
-		{
-			delete ftDump;
-			ftDump = nullptr;
-		}
-	}
+	if ( bDump && fileDump.Open("profiler_dump.txt", OF_CREATE|OF_TEXT) )
+		ftDump = &fileDump;
 
     if (pSrc != this)
     {
@@ -1585,10 +1581,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
     }
 
 	if ( ftDump != nullptr )
-	{
 		ftDump->Close();
-		delete ftDump;
-	}
 }
 
 // ---------------------------------------------------------------------

@@ -2,6 +2,7 @@
 #define _INC_SOBJPOOL_H
 
 #include <array>
+#include <atomic>
 #include <cstddef>
 #include <mutex>
 #include <memory>
