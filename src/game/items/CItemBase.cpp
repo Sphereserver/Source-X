@@ -1660,15 +1660,17 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 		case IBC_ID:
 			{
-                //const CResourceIDBase& ridMe = GetResourceID();
-                //const RES_TYPE iTypeMe = ridMe.GetResType();
-                //const ITEMID_TYPE uiIDMe = (ITEMID_TYPE)ridMe.GetResIndex();
-                const ITEMID_TYPE uiIDMe = GetDispID();
+                // Named ITEMDEFs and MULTIDEFs have no artwork of their own: their display ID comes from this ID= line.
+                // Their resource index is allocated beyond ITEMID_MULTI, so it can't tell whether they are multis.
+                const ITEMID_TYPE idMe = GetID();
+                const bool fNamedDef = !IsValidDispID(idMe);
+                if (!fNamedDef && !IsID_Multi(idMe))
+                {
+                    g_Log.EventError( "Setting new ID for base type %s not allowed\n", GetResourceName());
+                    return false;
+                }
 
-                const CResourceIDBase& ridNew = g_Cfg.ResourceGetIDType( RES_ITEMDEF, s.GetArgStr());
-                //const RES_TYPE iTypeNew = ridNew.GetResType();
-                ITEMID_TYPE uiIDNew = (ITEMID_TYPE)ridNew.GetResIndex();
-
+                ITEMID_TYPE uiIDNew = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
                 const CItemBase * pItemDef = FindItemBase( uiIDNew );	// make sure the base is loaded.
                 if ( ! pItemDef )
                 {
@@ -1676,15 +1678,12 @@ bool CItemBase::r_LoadVal( CScript &s )
                     return false;
 				}
 
-                uiIDNew = pItemDef->GetDispID();
-                const bool fMultiMe = (uiIDMe >= ITEMID_MULTI);
-                const bool fMultiNew = (uiIDNew >= ITEMID_MULTI);
-                const bool fMultiIDMismatch = fMultiMe ^ fMultiNew; // Bitwise XOR
-                //const bool fTypeMismatch = (iTypeMe != iTypeNew);
-
-                if (fMultiIDMismatch)
+                // A numeric MULTIDEF can only take the ID of another multi.
+                // Named ITEMDEFs and MULTIDEFs can't be told apart here (both are RES_ITEMDEF): for them, a multi declared
+                //  with ITEMDEF is caught by CItem::CreateBase and CItem::SetType.
+                if (!fNamedDef && !IsID_Multi(pItemDef->GetDispID()))
                 {
-                    g_Log.EventError( "Setting new ID for base type %s not allowed\n", GetResourceName());
+                    g_Log.EventError( "Base type %s is a multi: it can't be assigned the ID of a non-multi item.\n", GetResourceName());
                     return false;
                 }
 
