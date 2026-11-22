@@ -104,8 +104,10 @@ void RaiseImmediateAbort(int iErrCode)
     EXC_NOTIFY_DEBUGGER;
     SetAbortImmediate(true);
 
-//#if !defined(_WIN32)
-//    pthread_exit(EXIT_FAILURE);
+#if !defined(_WIN32)
+    // The trap raises SIGILL: don't let Signal_Terminate handle it as a shutdown request, just dump the core here.
+    signal(SIGILL, SIG_DFL);
+#endif
 #if defined(__GNUC__) || defined(__clang__)
     __builtin_trap();
 #else
@@ -329,12 +331,22 @@ static void Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
             reserved_stderr_log("FATAL: Immediate abort requested.");
 
 #if defined(__GNUC__) || defined(__clang__)
+            signal(SIGILL, SIG_DFL);    // Otherwise the trap (SIGILL) gets back to this handler.
             __builtin_trap();
 #else
             signal(SIGABRT, SIG_DFL);
             raise(SIGABRT);
 #endif
 
+            return;
+        }
+
+        if (sig == SIGILL)
+        {
+            // An illegal instruction executed by this thread: returning would execute it again, and this thread can't be
+            //  ended safely from here (see AbstractThread::terminate). Let the default action end the process with a core dump.
+            signal(SIGILL, SIG_DFL);
+            raise(SIGILL);
             return;
         }
 

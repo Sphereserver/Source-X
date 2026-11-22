@@ -565,6 +565,16 @@ void AbstractThread::terminate(bool ended) noexcept
 
     const bool wasCurrentThread = isCurrentThread();
 
+    if ((ended == false) && wasCurrentThread)
+    {
+        // A thread can't kill itself safely: pthread_exit (and pthread_cancel) end the thread with a forced stack unwind,
+        //  which calls std::terminate when it crosses a noexcept function (like this one, or a signal handler) or
+        //  a catch (...) that doesn't rethrow (like the one in run()). _endthreadex instead skips every destructor.
+        // Ask the thread to stop: run() returns at its next shouldExit() check, then runner() calls terminate(true).
+        m_fTerminateRequested = true;
+        return;
+    }
+
     if (ended == false)
     {
         if (!wasCurrentThread)
@@ -588,15 +598,6 @@ void AbstractThread::terminate(bool ended) noexcept
     detachFromCurrentThread();
     m_handle = std::nullopt;
     m_terminateEvent->set();
-
-    if (ended == false && wasCurrentThread)
-    {
-#ifdef _WIN32
-        _endthreadex(EXIT_SUCCESS);
-#else
-        pthread_exit(nullptr);
-#endif
-    }
 }
 
 void AbstractThread::run()
@@ -1022,34 +1023,37 @@ static TemporaryStringsThreadSafeStateHolder::TemporaryStringStorage*
 getThreadRawStringBuffer() CANTHROW
 {
     auto& tsholder = TemporaryStringsThreadSafeStateHolder::get();
-    SimpleThreadLock stlBuffer(tsholder.g_tmpTemporaryStringMutex);
-
-    const int initialPosition = static_cast<int>(tsholder.g_tmpTemporaryStringIndex.load(std::memory_order_relaxed));
-    int index = initialPosition;
-
-    for (;;)
     {
-        index = static_cast<int>(++tsholder.g_tmpTemporaryStringIndex);
-        if (index >= (int)THREAD_TEMPSTRING_OBJ_STORAGE)
-        {
-            index %= THREAD_TEMPSTRING_OBJ_STORAGE;
-            tsholder.g_tmpTemporaryStringIndex.store(index, std::memory_order_relaxed);
-        }
+        SimpleThreadLock stlBuffer(tsholder.g_tmpTemporaryStringMutex);
 
-        auto* store = &(tsholder.g_tmpTemporaryStringStorage[index]);
-        if (store->m_state == 0)
-        {
-            store->m_state = 1;
-            store->m_buffer[0] = '\0';
-            return store;
-        }
+        const int initialPosition = static_cast<int>(tsholder.g_tmpTemporaryStringIndex.load(std::memory_order_relaxed));
+        int index = initialPosition;
 
-        if (index == initialPosition)
+        for (;;)
         {
-            g_Log.EventError("Thread temporary string buffer is full.\n");
-            throw CSError(LOGL_FATAL, 0, "Thread temporary string buffer is full");
+            index = static_cast<int>(++tsholder.g_tmpTemporaryStringIndex);
+            if (index >= (int)THREAD_TEMPSTRING_OBJ_STORAGE)
+            {
+                index %= THREAD_TEMPSTRING_OBJ_STORAGE;
+                tsholder.g_tmpTemporaryStringIndex.store(index, std::memory_order_relaxed);
+            }
+
+            auto* store = &(tsholder.g_tmpTemporaryStringStorage[index]);
+            if (store->m_state == 0)
+            {
+                store->m_state = 1;
+                store->m_buffer[0] = '\0';
+                return store;
+            }
+
+            if (index == initialPosition)
+                break;
         }
     }
+
+    // Log without holding the lock: the logger may need temporary strings too.
+    g_Log.EventError("Thread temporary string buffer is full.\n");
+    throw CSError(LOGL_FATAL, 0, "Thread temporary string buffer is full");
 }
 
 char* AbstractSphereThread::Strings::allocateBuffer() noexcept
