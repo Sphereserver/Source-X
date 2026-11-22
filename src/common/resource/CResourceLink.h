@@ -51,7 +51,8 @@ public:
     int GetLinkOffset() const;
     void SetLink( CResourceScript * pScript );
     void CopyTransfer( CResourceLink * pLink );
-    void ScanSection( RES_TYPE restype );
+    // pfMultiRegion (optional): set to whether the section has a MULTIREGION key.
+    void ScanSection( RES_TYPE restype, bool *pfMultiRegion = nullptr );
     void ClearTriggers();
     void SetTrigger( int i );
     bool HasTrigger( int i ) const;
