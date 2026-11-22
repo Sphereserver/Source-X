@@ -504,7 +504,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         GetModuleFileName(nullptr, szPath, sizeof(szPath));
         // Extract and change directory from this application.
         ExtractPath(szPath);
-        if (0 == _chdir(szPath))
+        if (0 != _chdir(szPath))
         {
             printf("Can't change current directory.\n");
             TerminateProcess(GetCurrentProcess(), 1);
