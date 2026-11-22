@@ -31,6 +31,10 @@ CWorldTicker::CWorldTicker(CWorldClock *pClock) :
     _pWorldClock(nullptr),
     _iCurTickStartTime(0), _iLastTickDone(0)
 {
+    // The objects store the handles as plain integers, to avoid including the wheel everywhere.
+    static_assert(std::is_same_v<decltype(CTimedObject::_hWorldTickWheel), CTickWheelCore::Handle>);
+    static_assert(std::is_same_v<decltype(CChar::_hPeriodicTickWheel), CTickWheelCore::Handle>);
+
     ASSERT(pClock);
     _pWorldClock = pClock;
 
@@ -43,16 +47,6 @@ CWorldTicker::CWorldTicker(CWorldClock *pClock) :
     _vObjStatusUpdatesTickBuffer.reserve(25);
 }
 
-// The slots are allocated on first use, after sphere.ini has been read.
-template <typename TOwner>
-static void InitTickWheel(CTickWheel<TOwner>& wheel)
-{
-    if (wheel.IsInitialized())
-        return;
-    wheel.Init(g_Cfg._iTimerWheelSlots);
-}
-
-
 // CTimedObject TIMERs
 
 auto CWorldTicker::IsTimeoutRegistered(const CTimedObject* pTimedObject) -> std::optional<std::pair<int64, CTimedObject*>>
@@ -63,11 +57,10 @@ auto CWorldTicker::IsTimeoutRegistered(const CTimedObject* pTimedObject) -> std:
 #if MT_ENGINES
     std::shared_lock<std::shared_mutex> lock(_wheelTimedObjs.MT_CMUTEX);
 #endif
-    if (!pTimedObject->_fIsInWorldTickList)
+    if (pTimedObject->_hWorldTickWheel == CTickWheelCore::kNone)
         return std::nullopt;
 
-    DEBUG_ASSERT(CTickWheel<CTimedObject>::IsLinked(pTimedObject->_hookWorldTickWheel));
-    return std::make_pair(pTimedObject->_hookWorldTickWheel.iTime, const_cast<CTimedObject*>(pTimedObject));
+    return std::make_pair(_wheelTimedObjs.GetTime(pTimedObject->_hWorldTickWheel, pTimedObject), const_cast<CTimedObject*>(pTimedObject));
 }
 
 bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimedObject)
@@ -79,17 +72,13 @@ bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
     std::unique_lock<std::shared_mutex> lock(_wheelTimedObjs.MT_CMUTEX);
 #endif
 
-    if (pTimedObject->_fIsInWorldTickList)
+    if (pTimedObject->_hWorldTickWheel != CTickWheelCore::kNone)
     {
-        // Adding an object already in the list, without having removed it before: not legit.
-        ASSERT(false);
-        return false;
+        // Already registered: move it to the new time.
+        return _wheelTimedObjs.Reschedule(pTimedObject->_hWorldTickWheel, pTimedObject, iTimeout);
     }
 
-    InitTickWheel(_wheelTimedObjs);
-    _wheelTimedObjs.Insert(pTimedObject->_hookWorldTickWheel, pTimedObject, iTimeout);
-    pTimedObject->_fIsInWorldTickList = true;
-
+    pTimedObject->_hWorldTickWheel = _wheelTimedObjs.Insert(pTimedObject, iTimeout);
     return true;
 }
 
@@ -101,16 +90,16 @@ bool CWorldTicker::_EraseTimedObject(CTimedObject* pTimedObject)
     std::unique_lock<std::shared_mutex> lock(_wheelTimedObjs.MT_CMUTEX);
 #endif
 
-    if (!pTimedObject->_fIsInWorldTickList)
+    if (pTimedObject->_hWorldTickWheel == CTickWheelCore::kNone)
     {
         // It isn't in the ticking list.
         ASSERT(false);  // Not legit.
         return false;
     }
 
-    _wheelTimedObjs.Erase(pTimedObject->_hookWorldTickWheel);
-    pTimedObject->_fIsInWorldTickList = false;
-    return true;
+    const bool fRet = _wheelTimedObjs.Erase(pTimedObject->_hWorldTickWheel, pTimedObject);
+    pTimedObject->_hWorldTickWheel = CTickWheelCore::kNone;
+    return fRet;
 }
 
 bool CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObject, bool fForce)
@@ -124,18 +113,7 @@ bool CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
     ASSERT(pTimedObject);
     const ProfileTask timersTask(PROFILE_TIMERS);
 
-    EXC_SET_BLOCK("Already ticking?");
-    if (pTimedObject->_fIsInWorldTickList)
-    {
-        // Setting a new timeout without deleting the previous one: reschedule it.
-        // I can have iTickOld != 0 but not be in the list in some cases, like when duping an obj with an active timer.
-        EXC_SET_BLOCK("Remove");
-
-        const bool fRemoved = _EraseTimedObject(pTimedObject);
-        ASSERT(fRemoved);
-        UnreferencedParameter(fRemoved);
-    }
-
+    // If it's already registered (a new timeout set without deleting the previous one), it's rescheduled.
     EXC_SET_BLOCK("Insert");
     const bool fRet = _InsertTimedObject(iTimeout, pTimedObject);
     ASSERT(fRet);
@@ -175,8 +153,7 @@ auto CWorldTicker::IsCharPeriodicTickRegistered(const CChar* pChar) -> std::opti
     if (!pChar->IsPeriodicTickPending())
         return std::nullopt;
 
-    DEBUG_ASSERT(CTickWheel<CChar>::IsLinked(pChar->_hookPeriodicTickWheel));
-    return std::make_pair(pChar->_hookPeriodicTickWheel.iTime, const_cast<CChar*>(pChar));
+    return std::make_pair(_wheelPeriodicChars.GetTime(pChar->_hPeriodicTickWheel, pChar), const_cast<CChar*>(pChar));
 }
 
 bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
@@ -189,8 +166,13 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
     std::unique_lock<std::shared_mutex> lock(_wheelPeriodicChars.MT_CMUTEX);
 #endif
 
-    InitTickWheel(_wheelPeriodicChars);
-    _wheelPeriodicChars.Insert(pChar->_hookPeriodicTickWheel, pChar, iTickNext);
+    if (pChar->_hPeriodicTickWheel != CTickWheelCore::kNone)
+    {
+        // Already registered: move it to the new time.
+        return _wheelPeriodicChars.Reschedule(pChar->_hPeriodicTickWheel, pChar, iTickNext);
+    }
+
+    pChar->_hPeriodicTickWheel = _wheelPeriodicChars.Insert(pChar, iTickNext);
     return true;
 }
 
@@ -203,8 +185,9 @@ bool CWorldTicker::_EraseCharTicking(CChar* pChar)
     std::unique_lock<std::shared_mutex> lock(_wheelPeriodicChars.MT_CMUTEX);
 #endif
 
-    _wheelPeriodicChars.Erase(pChar->_hookPeriodicTickWheel);
-    return true;
+    const bool fRet = _wheelPeriodicChars.Erase(pChar->_hPeriodicTickWheel, pChar);
+    pChar->_hPeriodicTickWheel = CTickWheelCore::kNone;
+    return fRet;
 }
 
 bool CWorldTicker::AddCharTicking(CChar* pChar, bool fNeedsLock)
@@ -215,7 +198,6 @@ bool CWorldTicker::AddCharTicking(CChar* pChar, bool fNeedsLock)
     const ProfileTask timersTask(PROFILE_TIMERS);
 
     int64 iTickNext, iTickOld;
-    bool fTickPending;
     UnreferencedParameter(fNeedsLock);
 #if MT_ENGINES
     if (fNeedsLock)
@@ -223,14 +205,12 @@ bool CWorldTicker::AddCharTicking(CChar* pChar, bool fNeedsLock)
         std::unique_lock<std::shared_mutex> lock(pChar->MT_CMUTEX);
         iTickNext = pChar->_iTimeNextRegen;
         iTickOld = pChar->_iTimePeriodicTick;
-        fTickPending = pChar->IsPeriodicTickPending();
     }
     else
 #endif
     {
         iTickNext = pChar->_iTimeNextRegen;
         iTickOld = pChar->_iTimePeriodicTick;
-        fTickPending = pChar->IsPeriodicTickPending();
     }
 
     ASSERT(iTickNext != 0);
@@ -246,15 +226,7 @@ bool CWorldTicker::AddCharTicking(CChar* pChar, bool fNeedsLock)
     //if (iTickNext < CWorldGameTime::GetCurrentTime().GetTimeRaw())
     //    return;
 
-    if (fTickPending)
-    {
-        // Adding an object already on the list? Reschedule it.
-        EXC_SET_BLOCK("Remove");
-        const bool fRemoved = _EraseCharTicking(pChar);
-        ASSERT(fRemoved);
-        UnreferencedParameter(fRemoved);
-    }
-
+    // If it's already registered, it's rescheduled.
     EXC_SET_BLOCK("Insert");
     const bool fRet = _InsertCharTicking(iTickNext, pChar);
     ASSERT(fRet);
@@ -609,21 +581,10 @@ void CWorldTicker::ProcessTimedObjects()
 #endif
         _vTimedObjsTimeoutsBuffer.clear();
         EXC_TRYSUB("Selection");
-        _wheelTimedObjs.CollectExpired(_iCurTickStartTime,
-            [](CTimedObject* pTimedObj) -> bool
-            {
-                if (!pTimedObj->_IsTimerSet() || pTimedObj->_IsSleeping())
-                    return false;
-                if (auto pObjBase = dynamic_cast<const CObjBase*>(pTimedObj))
-                {
-                    if (pObjBase->_IsBeingDeleted())
-                        return false;
-                }
-                return true;
-            },
-            _vTimedObjsTimeoutsBuffer);
+        _wheelTimedObjs.CollectExpired(_iCurTickStartTime, _vTimedObjsTimeoutsBuffer);
+        // Their entries were removed from the wheel: the handles aren't valid anymore.
         for (CTimedObject* pTimedObj : _vTimedObjsTimeoutsBuffer)
-            pTimedObj->_fIsInWorldTickList = false;
+            pTimedObj->_hWorldTickWheel = CTickWheelCore::kNone;
         EXC_CATCHSUB("");
 
 #ifdef TIMEDOBJS_COUNTER
@@ -643,11 +604,27 @@ void CWorldTicker::ProcessTimedObjects()
     lpctstr ptcSubDesc;
     for (CTimedObject* pTimedObj : _vTimedObjsTimeoutsBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
     {
+        // Checked here and not while collecting, so that the wheel doesn't need to read the objects, and the state is the
+        //  current one (the tick of a previous object may have changed it).
+        // Their entry was removed: a sleeping object is registered again by _GoAwake, if its timer is still set;
+        //  an object being deleted doesn't need it anymore.
+        if (!pTimedObj->_IsTimerSet() || pTimedObj->_IsSleeping())
+            continue;
+        if (auto pObjBase = dynamic_cast<const CObjBase*>(pTimedObj); pObjBase && pObjBase->_IsBeingDeleted())
+            continue;
+
         ptcSubDesc = "Generic";
 
         EXC_TRYSUB("Tick");
         EXC_SETSUB_BLOCK("Elapsed");
 
+        // The tick of an object processed before this one, in this same loop, may have set a new timer on this object:
+        //  the timer is cleared here, so its new entry has to go too, otherwise it would stay registered without a timer.
+        if (pTimedObj->_IsTimeoutTickingActive())
+        {
+            const bool fRemoved = _EraseTimedObject(pTimedObj);
+            UnreferencedParameter(fRemoved);
+        }
         pTimedObj->_ClearTimeoutRaw();
 
 #if MT_ENGINES
@@ -770,14 +747,13 @@ void CWorldTicker::ProcessCharPeriodicTicks()
 #endif
         _vPeriodicCharsTicksBuffer.clear();
         EXC_TRYSUB("Selection");
-        _wheelPeriodicChars.CollectExpired(_iCurTickStartTime,
-            [](CChar* pChar) -> bool
-            {
-                return !(pChar->_IsSleeping() || pChar->_IsBeingDeleted());
-            },
-            _vPeriodicCharsTicksBuffer);
+        _wheelPeriodicChars.CollectExpired(_iCurTickStartTime, _vPeriodicCharsTicksBuffer);
+        // Their entries were removed from the wheel: the handles aren't valid anymore.
         for (CChar* pChar : _vPeriodicCharsTicksBuffer)
+        {
             pChar->_iTimePeriodicTick = 0;
+            pChar->_hPeriodicTickWheel = CTickWheelCore::kNone;
+        }
         EXC_CATCHSUB("");
 
         // Done working with _wheelPeriodicChars, we don't need the lock from now on.
@@ -787,6 +763,7 @@ void CWorldTicker::ProcessCharPeriodicTicks()
         EXC_TRYSUB("Char Periodic Ticks Loop");
         for (CChar* pChar : _vPeriodicCharsTicksBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
         {
+            // Their entry was removed: a sleeping char is registered again by _GoAwake, one being deleted doesn't need it.
             if (pChar->_IsBeingDeleted() || pChar->_IsSleeping())
             {
                 continue;

@@ -8,7 +8,7 @@
 
 CTimedObject::CTimedObject(PROFILE_TYPE profile) noexcept :
     _iTimeout(0), _profileType(profile), _fIsSleeping(true),
-    _fIsInWorldTickList(false)
+    _hWorldTickWheel(0)
 {
 }
 
@@ -21,6 +21,8 @@ CTimedObject::~CTimedObject()
     {
         CWorldTickingList::DelObjSingle(this);
     }
+    // Otherwise the wheel would keep an entry pointing to a destroyed object.
+    DEBUG_ASSERT(!_IsTimeoutTickingActive());
 
     EXC_CATCH;
 }

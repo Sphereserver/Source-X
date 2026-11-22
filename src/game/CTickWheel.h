@@ -1,317 +1,187 @@
 /**
 * @file CTickWheel.h
-* @brief Timing wheel scheduler of the world timers (CWorldTicker). Its size is set by TimerWheelSlots in sphere.ini.
+* @brief Hierarchical timing wheel scheduling the world timers (CWorldTicker).
 */
 
 #ifndef _INC_CTICKWHEEL_H
 #define _INC_CTICKWHEEL_H
 
-#include "../common/assertion.h"
 #include "../common/datatypes.h"
-#include <algorithm>
+#include <memory>
 #include <vector>
 
 
-// Intrusive link of an object in a CTickWheel: lives inside the scheduled object, so the wheel never allocates.
-template <typename TOwner>
-struct TickWheelHook
-{
-    TickWheelHook* pPrev  = nullptr;
-    TickWheelHook* pNext  = nullptr;
-    TOwner*        pOwner = nullptr;
-    int64          iTime  = 0;      // When the entry expires (it's processed when iTime < now).
-    uint64         uiSeq  = 0;      // Insertion order, to process entries with the same iTime in the order they were added.
-    int32          iSlot  = -2;     // CTickWheel::kSlotNone, kSlotOverflow, or the slot index.
-};
-
 /*
-* Timing wheel with an overflow bucket.
-* - The wheel has N slots of kSlotMs each: it covers a window of N * kSlotMs from the current slot
-*   (default 131072 slots, ~55 minutes).
-* - Entries expiring inside the window are linked to their slot, later ones to the overflow bucket. Both are O(1),
-*   insertion and removal never allocate (the link lives inside the object).
-* - Each call to CollectExpired processes only the slots elapsed since the previous call, plus the current one.
-* - The overflow bucket is scanned incrementally, so that it's fully visited at least every quarter of a wheel revolution:
-*   entries entering the window are moved to their slot, way before they expire.
-* - The entries collected by a call are returned ordered by expiration time, then by insertion order,
-*   which is the same order given by an ordered container.
+* Hierarchical timing wheel with 1 ms resolution. The implementation is in CTickWheel.cpp.
+*
+* Layout
+* - Level 0: 4096 slots of 1 ms (one revolution is ~4.1 s). Levels 1 to 5: 64 slots each, every level 64 times coarser
+*   than the previous one. Together they cover 2^42 ms (~139 years); farther entries are parked at the end of that range
+*   and placed again from there.
+* - An entry goes to the level of the highest group of bits where its time differs from the current time of the wheel.
+*   So every entry of a level expires after every entry of the lower levels, and an entry of an upper level is moved
+*   down ("cascaded") when the current time reaches the start of its slot: at most once per level in its life,
+*   never if it expires within the current level 0 revolution.
+* - One bit per slot tells if the slot holds entries: the next occupied slot is found with a few bit scans,
+*   whatever the elapsed time.
+*
+* Entries
+* - The entries are 32 byte nodes in a pool made of blocks of 4096 nodes: the blocks are never moved,
+*   freed nodes are reused. The scheduled object only stores the handle of its node (0 = not registered).
+* - Insert, Erase and Reschedule take constant time. Insert allocates only when the number of pending entries
+*   reaches a new maximum (one block).
+* - A handle is valid until its entry is erased, collected or cleared: the node is then reused by other entries.
+*   Erase, Reschedule and GetTime check that the node still belongs to the given owner, so that a stale handle can't
+*   change the timer of another object.
+* - The wheel never reads the owners: they are only stored and returned.
+*
+* Collecting
+* - CollectExpired removes every expired entry (time < now) and returns them ordered by expiration time,
+*   then by insertion order (rescheduling counts as a new insertion): the same order of an ordered container.
+* - If the time didn't move or went back, nothing is cascaded: only the current level 0 slot is checked.
+*
+* Not thread safe: the caller must lock it.
+*
+* CTickWheelCore works with untyped owners; CTickWheel<TOwner> is the typed interface to use.
 */
-template <typename TOwner>
-class CTickWheel
+class CTickWheelCore
 {
 public:
-    using Hook = TickWheelHook<TOwner>;
+    using Handle = uint32;
+    static constexpr Handle kNone = 0;
 
-    static constexpr int64 kSlotMs       = 25;
-    static constexpr int64 kDefaultSlots = 1ll << 17;
-    static constexpr int64 kMinSlots     = 1ll << 8;
-    static constexpr int64 kMaxSlots     = 1ll << 22;
-    static constexpr int32 kSlotNone     = -2;
-    static constexpr int32 kSlotOverflow = -1;
+    using VisitFn = void (*)(void* pContext, void* pOwner);
 
-    CTickWheel() :
-        _pOverflowHead(nullptr), _pOverflowScanCursor(nullptr),
-        _iSlots(0), _iSlotMask(0), _iCursor(0),
-        _uiCount(0), _uiOverflowCount(0), _uiSeqNext(0)
-    {
-    }
+    CTickWheelCore();
+    ~CTickWheelCore();
 
-    CTickWheel(const CTickWheel&) = delete;
-    CTickWheel& operator=(const CTickWheel&) = delete;
-
-    // Clamp to [kMinSlots, kMaxSlots] and round up to a power of 2.
-    static int64 NormalizeSlotCount(int64 iSlots) noexcept
-    {
-        if (iSlots < kMinSlots)
-            iSlots = kMinSlots;
-        else if (iSlots > kMaxSlots)
-            iSlots = kMaxSlots;
-        int64 iPow2 = kMinSlots;
-        while (iPow2 < iSlots)
-            iPow2 <<= 1;
-        return iPow2;
-    }
-
-    // Allocate the slots. Must be called once, before inserting anything.
-    void Init(int64 iSlots)
-    {
-        ASSERT(_uiCount == 0);
-        _iSlots = NormalizeSlotCount(iSlots);
-        _iSlotMask = _iSlots - 1;
-        _vSlots.assign((size_t)_iSlots, nullptr);
-    }
-
-    bool IsInitialized() const noexcept
-    {
-        return !_vSlots.empty();
-    }
-    int64 GetSlotCount() const noexcept
-    {
-        return _iSlots;
-    }
-
-    static bool IsLinked(const Hook& hook) noexcept
-    {
-        return hook.iSlot != kSlotNone;
-    }
+    CTickWheelCore(const CTickWheelCore&) = delete;
+    CTickWheelCore& operator=(const CTickWheelCore&) = delete;
 
     size_t size() const noexcept
     {
         return _uiCount;
     }
-    size_t overflow_size() const noexcept
+
+    // Register pOwner, expiring at iTime. Store the returned handle in the owner.
+    [[nodiscard]]
+    Handle Insert(void* pOwner, int64 iTime);
+
+    // Unregister. The handle is invalid afterwards. Returns false (doing nothing) if the handle isn't of pOwner.
+    bool Erase(Handle h, const void* pOwner) noexcept;
+
+    // Change the expiration time, keeping the handle. Returns false (doing nothing) if the handle isn't of pOwner.
+    bool Reschedule(Handle h, const void* pOwner, int64 iTime) noexcept;
+
+    // Expiration time of the entry, or 0 if the handle isn't of pOwner.
+    int64 GetTime(Handle h, const void* pOwner) const noexcept;
+
+    // Remove the expired entries (iTime < iNow) and append their owners to vOut, ordered by iTime,
+    //  then by insertion order. Their handles are invalid afterwards.
+    void CollectExpired(int64 iNow, std::vector<void*>& vOut);
+
+    // Call fnVisit(pContext, pOwner) for every entry, then unregister all of them: every handle is invalid afterwards.
+    void Clear(VisitFn fnVisit, void* pContext);
+
+private:
+    struct Node;
+    struct Collected;
+
+    static constexpr int    kL0Bits      = 12;
+    static constexpr int    kUpperLevels = 5;
+    static constexpr uint32 kL0Slots     = 1u << kL0Bits;
+
+    Node& _N(Handle h) noexcept;
+    const Node& _N(Handle h) const noexcept;
+    bool _IsOwnedBy(Handle h, const void* pOwner) const noexcept;
+    Handle _Alloc();
+    void _Free(Handle h) noexcept;
+    void _SetOccupied(uint32 uiSlot) noexcept;
+    void _SetEmpty(uint32 uiSlot) noexcept;
+    void _Link(Handle h, uint32 uiSlot) noexcept;
+    void _Unlink(Handle h) noexcept;
+    void _Place(Handle h) noexcept;
+    bool _FindNextSlot(uint32* puiSlot, int64* piSlotStart) const noexcept;
+    Handle _Detach(uint32 uiSlot) noexcept;
+    void _TakeL0(uint32 uiSlot, int64 iNow);
+    void _Cascade(uint32 uiSlot) noexcept;
+    void _ScanInPlace(uint32 uiSlot, int64 iNow);
+    void _Collect(const Node& node);
+
+    std::vector<Handle> _vHeads;                    // First entry of each slot.
+    uint64 _uiOccL0[kL0Slots / 64];                 // Occupied level 0 slots, one bit each...
+    uint64 _uiOccL0Summary;                         // ...and one bit for each non zero word of _uiOccL0.
+    uint64 _uiOccLn[kUpperLevels];                  // Occupied slots of the upper levels.
+    std::vector<std::unique_ptr<Node[]>> _vChunks;  // Node pool, in blocks. Handle 0 is never used.
+    std::vector<Handle>    _vKeepBuffer;
+    std::vector<Collected> _vCollectBuffer;
+    uint32 _uiPoolSize;
+    Handle _hFree;
+    int64  _iElapsed;                               // Current time of the wheel.
+    size_t _uiCount;
+    uint64 _uiSeqNext;
+};
+
+
+// Typed interface of CTickWheelCore.
+template <typename TOwner>
+class CTickWheel
+{
+public:
+    using Handle = CTickWheelCore::Handle;
+    static constexpr Handle kNone = CTickWheelCore::kNone;
+
+    size_t size() const noexcept
     {
-        return _uiOverflowCount;
+        return _core.size();
     }
 
-    void Insert(Hook& hook, TOwner* pOwner, int64 iTime)
+    [[nodiscard]]
+    Handle Insert(TOwner* pOwner, int64 iTime)
     {
-        ASSERT(IsInitialized());
-        ASSERT(!IsLinked(hook));
-        hook.pOwner = pOwner;
-        hook.iTime  = iTime;
-        hook.uiSeq  = _uiSeqNext++;
-        _Place(hook);
-        ++_uiCount;
+        return _core.Insert(pOwner, iTime);
     }
 
-    void Erase(Hook& hook)
+    bool Erase(Handle h, const TOwner* pOwner) noexcept
     {
-        ASSERT(IsLinked(hook));
-        _Unlink(hook);
-        --_uiCount;
+        return _core.Erase(h, pOwner);
     }
 
-    // Remove the expired entries (iTime < iNow) accepted by fnSelect(TOwner*) and append them to vOut,
-    //  ordered by iTime, then by insertion order.
-    // Rejected expired entries stay registered and will be checked again on the next call.
+    bool Reschedule(Handle h, const TOwner* pOwner, int64 iTime) noexcept
+    {
+        return _core.Reschedule(h, pOwner, iTime);
+    }
+
+    int64 GetTime(Handle h, const TOwner* pOwner) const noexcept
+    {
+        return _core.GetTime(h, pOwner);
+    }
+
+    void CollectExpired(int64 iNow, std::vector<TOwner*>& vOut)
+    {
+        _vCollected.clear();
+        _core.CollectExpired(iNow, _vCollected);
+        vOut.reserve(vOut.size() + _vCollected.size());
+        for (void* pOwner : _vCollected)
+            vOut.emplace_back(static_cast<TOwner*>(pOwner));
+        _vCollected.clear();
+    }
+
+    // fnVisit: void(TOwner*).
     template <typename TFunc>
-    void CollectExpired(const int64 iNow, TFunc&& fnSelect, std::vector<TOwner*>& vOut)
+    void Clear(TFunc&& fnVisit)
     {
-        if (!IsInitialized())
-            return;
-
-        _vCollectBuffer.clear();
-        const int64 iNowSlot = _SlotOf(iNow);
-        int64 iElapsedSlots = iNowSlot - _iCursor;
-        bool fFullScan = false;
-        if (iElapsedSlots < 0)
-            iElapsedSlots = 0;          // Time went back: don't move the cursor, the current slot is still checked entry by entry.
-        else if (iElapsedSlots >= _iSlots)
-        {
-            iElapsedSlots = _iSlots;    // More than a revolution elapsed (first tick, long pause): visit every slot once.
-            fFullScan = true;
-        }
-
-        // Slots before the current one: everything in there is expired.
-        for (int64 i = 0; i < iElapsedSlots; ++i)
-        {
-            Hook*& pHead = _vSlots[(size_t)((_iCursor + i) & _iSlotMask)];
-            for (Hook* pHook = pHead; pHook != nullptr; )
+        _core.Clear(
+            [](void* pContext, void* pOwner)
             {
-                Hook* pNext = pHook->pNext;
-                _Unlink(*pHook);
-                if ((pHook->iTime < iNow) && fnSelect(pHook->pOwner))
-                {
-                    --_uiCount;
-                    _vCollectBuffer.emplace_back(pHook);
-                }
-                else
-                {
-                    _vKeepBuffer.emplace_back(pHook);   // Placed again after moving the cursor.
-                }
-                pHook = pNext;
-            }
-        }
-        if (iNowSlot > _iCursor)
-            _iCursor = iNowSlot;
-
-        for (Hook* pHook : _vKeepBuffer)
-            _Place(*pHook);
-        _vKeepBuffer.clear();
-
-        // Move the overflow entries entering the window to their slot.
-        _ScanOverflow(fFullScan ? _uiOverflowCount : _GetOverflowScanQuota(iElapsedSlots));
-
-        // Current slot: check entry by entry, it can hold entries not yet expired.
-        for (Hook* pHook = _vSlots[(size_t)(_iCursor & _iSlotMask)]; pHook != nullptr; )
-        {
-            Hook* pNext = pHook->pNext;
-            if ((pHook->iTime < iNow) && fnSelect(pHook->pOwner))
-            {
-                _Unlink(*pHook);
-                --_uiCount;
-                _vCollectBuffer.emplace_back(pHook);
-            }
-            pHook = pNext;
-        }
-
-        // The hooks are unlinked, but iTime and uiSeq are still valid.
-        std::sort(_vCollectBuffer.begin(), _vCollectBuffer.end(),
-            [](const Hook* pA, const Hook* pB) noexcept
-            {
-                return (pA->iTime != pB->iTime) ? (pA->iTime < pB->iTime) : (pA->uiSeq < pB->uiSeq);
-            });
-        vOut.reserve(vOut.size() + _vCollectBuffer.size());
-        for (Hook* pHook : _vCollectBuffer)
-            vOut.emplace_back(pHook->pOwner);
-        _vCollectBuffer.clear();
-    }
-
-    // Call fn(TOwner*) for every entry, then unregister all of them.
-    template <typename TFunc>
-    void Clear(TFunc&& fn)
-    {
-        auto clearList = [&fn](Hook*& pHead)
-        {
-            for (Hook* pHook = pHead; pHook != nullptr; )
-            {
-                Hook* pNext = pHook->pNext;
-                pHook->pPrev = pHook->pNext = nullptr;
-                pHook->iSlot = kSlotNone;
-                fn(pHook->pOwner);
-                pHook = pNext;
-            }
-            pHead = nullptr;
-        };
-        for (Hook*& pHead : _vSlots)
-            clearList(pHead);
-        clearList(_pOverflowHead);
-        _pOverflowScanCursor = nullptr;
-        _uiCount = _uiOverflowCount = 0;
+                (*static_cast<std::remove_reference_t<TFunc>*>(pContext))(static_cast<TOwner*>(pOwner));
+            },
+            (void*)&fnVisit);
     }
 
 private:
-    static int64 _SlotOf(int64 iTime) noexcept
-    {
-        return (iTime < 0) ? 0 : (iTime / kSlotMs);
-    }
-
-    size_t _GetOverflowScanQuota(int64 iElapsedSlots) const noexcept
-    {
-        // Visit the whole overflow bucket at least every quarter revolution: an entry put there expires at least
-        //  one full revolution later, so it reaches its slot well before expiring.
-        const int64 iPassSlots = _iSlots / 4;
-        const int64 iSlots = (iElapsedSlots > 0) ? iElapsedSlots : 1;
-        return (size_t)(((int64)_uiOverflowCount * iSlots + iPassSlots - 1) / iPassSlots) + 8;
-    }
-
-    void _LinkHead(Hook& hook, Hook*& pHead, int32 iSlot) noexcept
-    {
-        hook.iSlot = iSlot;
-        hook.pPrev = nullptr;
-        hook.pNext = pHead;
-        if (pHead != nullptr)
-            pHead->pPrev = &hook;
-        pHead = &hook;
-    }
-
-    void _Place(Hook& hook) noexcept
-    {
-        int64 iAbsSlot = _SlotOf(hook.iTime);
-        if (iAbsSlot < _iCursor)
-            iAbsSlot = _iCursor;    // Already expired: current slot, processed on the next call.
-
-        if (iAbsSlot < _iCursor + _iSlots)
-        {
-            const int32 iSlot = (int32)(iAbsSlot & _iSlotMask);
-            _LinkHead(hook, _vSlots[(size_t)iSlot], iSlot);
-        }
-        else
-        {
-            _LinkHead(hook, _pOverflowHead, kSlotOverflow);
-            ++_uiOverflowCount;
-        }
-    }
-
-    void _Unlink(Hook& hook) noexcept
-    {
-        Hook*& pHead = (hook.iSlot == kSlotOverflow) ? _pOverflowHead : _vSlots[(size_t)hook.iSlot];
-        if (hook.iSlot == kSlotOverflow)
-        {
-            if (_pOverflowScanCursor == &hook)
-                _pOverflowScanCursor = hook.pNext;
-            --_uiOverflowCount;
-        }
-        if (hook.pPrev != nullptr)
-            hook.pPrev->pNext = hook.pNext;
-        else
-            pHead = hook.pNext;
-        if (hook.pNext != nullptr)
-            hook.pNext->pPrev = hook.pPrev;
-        hook.pPrev = hook.pNext = nullptr;
-        hook.iSlot = kSlotNone;
-    }
-
-    void _ScanOverflow(size_t uiQuota) noexcept
-    {
-        const int64 iWindowEnd = _iCursor + _iSlots;
-        while ((uiQuota-- > 0) && (_pOverflowHead != nullptr))
-        {
-            if (_pOverflowScanCursor == nullptr)
-                _pOverflowScanCursor = _pOverflowHead;    // Start a new pass.
-
-            Hook* pHook = _pOverflowScanCursor;
-            _pOverflowScanCursor = pHook->pNext;
-            if (_SlotOf(pHook->iTime) < iWindowEnd)
-            {
-                _Unlink(*pHook);
-                _Place(*pHook);
-            }
-        }
-    }
-
-    std::vector<Hook*> _vSlots;         // Head of the list of each slot.
-    std::vector<Hook*> _vKeepBuffer;
-    std::vector<Hook*> _vCollectBuffer;
-    Hook*  _pOverflowHead;
-    Hook*  _pOverflowScanCursor;
-    int64  _iSlots;
-    int64  _iSlotMask;
-    int64  _iCursor;                    // Absolute index (time / kSlotMs) of the current slot.
-    size_t _uiCount;
-    size_t _uiOverflowCount;
-    uint64 _uiSeqNext;
+    CTickWheelCore _core;
+    std::vector<void*> _vCollected;
 };
 
 #endif // _INC_CTICKWHEEL_H

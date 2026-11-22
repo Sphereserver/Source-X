@@ -301,7 +301,6 @@ CServerConfig::CServerConfig()
 
 	_iTimerCall			= 0;
 	_iTimerCallUnit		= 0;
-	_iTimerWheelSlots	= 131072;
 	m_fAllowLightOverride	= true;
 	m_fAllowNewbTransfer	= false;
 	m_sZeroPoint			= "1323,1624,0";
@@ -722,7 +721,6 @@ enum RC_TYPE
     RC_TIMEOUTINCOMPLETECONN,   // _iTimeoutIncompleteConnectionMs
 	RC_TIMERCALL,				// _iTimerCall
 	RC_TIMERCALLUNIT,			// _iTimerCallUnit
-	RC_TIMERWHEELSLOTS,			// _iTimerWheelSlots
 	RC_TIMEUP,
 	RC_TOOLTIPCACHE,			// m_iTooltipCache
 	RC_TOOLTIPMODE,				// m_iTooltipMode
@@ -1022,7 +1020,6 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "TIMEOUTINCOMPLETECONN",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iTimeoutIncompleteConnectionMs) } },
 	{ "TIMERCALL",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iTimerCall)				}},
 	{ "TIMERCALLUNIT",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,_iTimerCallUnit)			}},
-	{ "TIMERWHEELSLOTS",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iTimerWheelSlots)		}},
 	{ "TIMEUP",					{ ELEM_VOID,	0												}},
 	{ "TOOLTIPCACHE",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTooltipCache)			}},
 	{ "TOOLTIPMODE",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTooltipMode)			}},

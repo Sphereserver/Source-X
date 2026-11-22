@@ -6,6 +6,7 @@
 #define _INC_CWORLDTICKER_H
 
 #include "CTimedFunctionHandler.h"
+#include "CTickWheel.h"
 #include "CTimedObject.h"
 
 
@@ -24,8 +25,8 @@ private:
     friend class CWorldTickingList;
 
     // Generic Timers. Calls to OnTick.
-    // Timing wheel (see CTickWheel): each object is linked by its own hook (CTimedObject::_hookWorldTickWheel), so adding,
-    //  removing or rescheduling it never searches the container nor allocates. Each tick only visits the slots elapsed since the last one.
+    // Hierarchical timing wheel (see CTickWheel): each object stores the handle of its entry (CTimedObject::_hWorldTickWheel),
+    //  so adding, removing or rescheduling it takes constant time. Each tick only visits the entries that expired.
     using TickingTimedObjEntry = std::pair<int64, CTimedObject*>;
     struct WorldTickWheel : public CTickWheel<CTimedObject>
     {
@@ -35,7 +36,7 @@ private:
     std::vector<CTimedObject*> _vTimedObjsTimeoutsBuffer;
 
     // Calls to OnTickPeriodic. CChar regens and periodic checks.
-    //  Same as above, the char is linked by CChar::_hookPeriodicTickWheel.
+    //  Same as above, the char stores the handle of its entry in CChar::_hPeriodicTickWheel.
     using TickingPeriodicCharEntry = std::pair<int64, CChar*>;
     struct CharTickWheel : public CTickWheel<CChar>
     {

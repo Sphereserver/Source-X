@@ -294,6 +294,7 @@ CChar::CChar( CREID_TYPE baseID ) :
 	m_virtualGold = 0;
 
 	_iTimePeriodicTick = 0;
+	_hPeriodicTickWheel = 0;
     _iTimeCreate = _iTimeLastHitsUpdate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
     _iTimeNextRegen = _iTimeLastHitsUpdate + MSECS_PER_SEC;  // make it regen in one second from now, no need to instant regen.
     _iRegenTickCount = 0;

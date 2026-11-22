@@ -58,13 +58,16 @@ void CWorldTickingList::ClearTickingLists() // static
 #if MT_ENGINES
         std::unique_lock<std::shared_mutex> lock(g_World._Ticker._wheelTimedObjs.MT_CMUTEX);
 #endif
-        g_World._Ticker._wheelTimedObjs.Clear([](CTimedObject* pObj) { pObj->_fIsInWorldTickList = false; });
+        g_World._Ticker._wheelTimedObjs.Clear([](CTimedObject* pObj) { pObj->_hWorldTickWheel = CTickWheelCore::kNone; });
     }
     {
 #if MT_ENGINES
         std::unique_lock<std::shared_mutex> lock(g_World._Ticker._wheelPeriodicChars.MT_CMUTEX);
 #endif
-        g_World._Ticker._wheelPeriodicChars.Clear([](CChar* pChar) { pChar->_iTimePeriodicTick = 0; });
+        g_World._Ticker._wheelPeriodicChars.Clear([](CChar* pChar) {
+            pChar->_iTimePeriodicTick = 0;
+            pChar->_hPeriodicTickWheel = CTickWheelCore::kNone;
+        });
     }
     {
 #if MT_ENGINES
