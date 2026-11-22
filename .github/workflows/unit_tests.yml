@@ -67,7 +67,7 @@ jobs:
               -DCMAKE_CXX_FLAGS="-fpch-preprocess" \
               -S ./ -B ./build
     - name: Build
-      run: ninja -C build
+      run: ninja -C build -k 0   # report every file that fails to compile
     - name: Run the unit tests
       run: ctest --test-dir build --output-on-failure --timeout 600
 
@@ -100,7 +100,7 @@ jobs:
               -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/OSX-AppleClang-AArch64.cmake \
               -S ./ -B ./build
     - name: Build
-      run: ninja -C build
+      run: ninja -C build -k 0   # report every file that fails to compile
     - name: Run the unit tests
       run: ctest --test-dir build --output-on-failure --timeout 600
 
