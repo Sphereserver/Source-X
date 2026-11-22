@@ -1,0 +1,131 @@
+name: Linux aarch64
+
+on:
+  push:
+#    branches:
+#      - 'master'
+#      - 'main'
+#      - 'dev'
+      paths-ignore:
+        - '.gitignore'
+        - '.gitattributes'
+        - '**.txt'
+        - '**.md'
+        - '**.rc'
+  pull_request:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
+
+jobs:
+  linux-aarch64:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+    - name: Install prerequisites
+      run:  |
+            lsb_release -d
+
+            sudo add-apt-repository universe && sudo sudo apt-get -qq update
+            sudo apt-get install -yq --no-install-recommends \
+              ninja-build gcc-12 g++-12 \
+              ccache \
+              mariadb-client libmariadb-dev
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
+
+    - name: Set up ccache
+      uses: hendrikmuhs/ccache-action@v1.2.23
+      with:
+        key: ${{github.job}}
+
+    - name: Configure ccache
+      run:  ccache --set-config sloppiness="include_file_mtime, include_file_ctime, time_macros, pch_defines"
+
+    - name: Report building tools
+      run:  |
+            echo "GCC:" && gcc -v
+            echo "Default Linker:" && ld -v
+            echo && echo "CMake:" && cmake --version
+            echo && echo "Ninja:" && ninja --version
+
+    - name: CMake
+      run: |
+            mkdir -p build
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" \
+              -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-AArch64.cmake \
+              -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+              -DCMAKE_C_FLAGS="-fpch-preprocess" \
+              -DCMAKE_CXX_FLAGS="-fpch-preprocess" \
+              -S ./ -B ./build
+    - name: Ninja
+      run: ninja -C build -v
+    - name: Create package
+      run:  |
+            mkdir accounts logs save scripts
+            tar -czf SphereSvrX-linux-aarch64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C build/bin-aarch64/ SphereSvrX64_nightly -C ../../src sphere.ini sphereCrypt.ini
+
+    # Upload artifact linked to the workflow run - only if the run is for a pull request, or for selected branches
+    - name: Upload artifact
+      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v7
+      env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        name: Build-linux-aarch64
+        path: SphereSvrX-linux-aarch64-nightly.tar.gz
+        overwrite: true
+
+  upload_github_release:
+    needs: linux-aarch64
+    # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
+    if: contains(fromJson('["master", "main"]'), github.ref_name)
+    permissions:
+        contents: write
+        actions: read
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download builds
+        uses: actions/download-artifact@v8
+        with:
+          name: Build-linux-aarch64
+          merge-multiple: true
+          run-id: ${{ github.run_id }}
+
+      - name: Create release
+        uses: softprops/action-gh-release@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Nightly
+          tag_name: Nightly
+          prerelease: true
+          files: SphereSvrX-linux-aarch64-nightly.tar.gz
+
+  upload_selfhost_release:
+    needs: linux-aarch64
+    if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
+    permissions:
+      contents: write
+      actions: read
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download builds
+        uses: actions/download-artifact@v8
+        with:
+          name: Build-linux-aarch64
+          merge-multiple: true
+          run-id: ${{ github.run_id }}
+      - name: Push release
+        run: |
+          curl -sST "{SphereSvrX-linux-aarch64-nightly.tar.gz}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}
+          curl -sST "{SphereSvrX-linux-aarch64-nightly.tar.gz}" --ftp-pasv --ssl --ssl-reqd -u '${{secrets.FTP_USER}}:${{secrets.FTP_PASS}}' ${{secrets.FTP_LOC}}/release/prod/
