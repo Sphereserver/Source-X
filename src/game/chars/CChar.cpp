@@ -3841,8 +3841,9 @@ bool CChar::r_LoadVal( CScript & s )
             ptcKey += 6;
             if ( *ptcKey != '.' )
                 return false;
+            ++ptcKey;
 
-            if (   !strnicmp(ptcKey, "MAXDIST", 6) || !strnicmp(ptcKey, "DAM", 3) || !strnicmp(ptcKey, "HUE", 3)
+            if (   !strnicmp(ptcKey, "MAXDIST", 7) || !strnicmp(ptcKey, "DAM", 3) || !strnicmp(ptcKey, "HUE", 3)
                 || !strnicmp(ptcKey, "ANIM", 4) || !strnicmp(ptcKey, "TYPE", 4) || !strnicmp(ptcKey, "DAMTYPE", 7))
             {
                 SetDefNum(s.GetKey(), s.GetArgLLVal());
