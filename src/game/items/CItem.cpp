@@ -4340,7 +4340,7 @@ bool CItem::IsKeyLockFit( dword dwLockUID ) const
 
 void CItem::ConvertBoltToCloth()
 {
-	ADDTOCALLSTACK("CItem::ConvertBolttoCloth");
+	ADDTOCALLSTACK("CItem::ConvertBoltToCloth");
 	// Cutting bolts of cloth with scissors will convert it to his RESOURCES (usually cloth)
 
 	// We need to check all cloth_bolt items

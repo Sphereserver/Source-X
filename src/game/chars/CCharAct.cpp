@@ -5908,13 +5908,23 @@ bool CChar::IsTickableEvenIfDisconnected() const
     const dword dwUidMine = GetUID().GetObjUID();
 
     // Validation step.
+    const bool fLogErrors = !_fRiddenStateErrorLogged;
+    bool fStateError = false;
 
     if (fSkillRidden && !fStatfRidden)
-        g_Log.EventError("Char name='%s' UID=0%" PRIx32 " ACTION is NPCACT_RIDDEN but does not have STATF_RIDDEN flag.\n",
+    {
+        fStateError = true;
+        if (fLogErrors)
+            g_Log.EventError("Char name='%s' UID=0%" PRIx32 " ACTION is NPCACT_RIDDEN but does not have STATF_RIDDEN flag.\n",
                          GetName(), dwUidMine);
+    }
     else if (fStatfRidden && !fSkillRidden)
-        g_Log.EventError("Char name='%s' UID=0%" PRIx32 " has STATF_RIDDEN flag but ACTION is not NPCACT_RIDDEN.\n",
+    {
+        fStateError = true;
+        if (fLogErrors)
+            g_Log.EventError("Char name='%s' UID=0%" PRIx32 " has STATF_RIDDEN flag but ACTION is not NPCACT_RIDDEN.\n",
                          GetName(), dwUidMine);
+    }
 
     // Skip the following checks at startup stage, because the mount item or rider might have not been created yet.
     const bool fShouldCheck = !g_Serv.IsStartupLoadingScripts();
@@ -5928,10 +5938,12 @@ bool CChar::IsTickableEvenIfDisconnected() const
             const CChar* pOwner = GetOwner();
             const dword dwUidOwner = !pOwner ? 0 : pOwner->GetUID().GetObjUID();
             const dword dwUidFigurine = m_atRidden.m_uidFigurine.GetObjUID();
-            g_Log.EventError("Char name='%s' UID=0%" PRIx32 " (Owner UID=0%" PRIx32 ") is ridden but not linked to any mount item or figurine (ACTARG1=0%" PRIx32 ").\n",
+            if (fLogErrors)
+                g_Log.EventError("Char name='%s' UID=0%" PRIx32 " (Owner UID=0%" PRIx32 ") is ridden but not linked to any mount item or figurine (ACTARG1=0%" PRIx32 ").\n",
                              GetName(), dwUidMine, dwUidOwner, dwUidFigurine);
 
             // Nothing else to validate without the linked item. Keep it tickable anyway.
+            _fRiddenStateErrorLogged = true;
             return true;
         }
 
@@ -5946,8 +5958,12 @@ bool CChar::IsTickableEvenIfDisconnected() const
                 // GMs can ride untamed chars. They will be assigned the PET flag later on.
                 const bool fIsGm = pRider && pRider->IsPriv(PRIV_GM);
                 if (!fIsGm)
-                    g_Log.EventError("Char name='%s' UID=0%" PRIx32 " is ridden but isn't a pet?\n",
+                {
+                    fStateError = true;
+                    if (fLogErrors)
+                        g_Log.EventError("Char name='%s' UID=0%" PRIx32 " is ridden but isn't a pet?\n",
                                      GetName(), GetUID().GetObjUID());
+                }
             }
         }
         else if (pLinkedItem->IsType(IT_FIGURINE))
@@ -5964,12 +5980,15 @@ bool CChar::IsTickableEvenIfDisconnected() const
             const dword dwUidOwner = !pOwner ? 0 : pOwner->GetUID().GetObjUID();
             const dword dwUidMountItem = pLinkedItem->GetUID().GetObjUID();
 
-            g_Log.EventError("Char name='%s' UID=0%" PRIx32 " (Owner UID=0%" PRIx32 ") is ridden but linked to mount item with invalid type (UID=0%" PRIx32 ")?\n",
+            fStateError = true;
+            if (fLogErrors)
+                g_Log.EventError("Char name='%s' UID=0%" PRIx32 " (Owner UID=0%" PRIx32 ") is ridden but linked to mount item with invalid type (UID=0%" PRIx32 ")?\n",
                              GetName(), dwUidMine, dwUidOwner, dwUidMountItem);
         }
     }
 
     // End of validation.
+    _fRiddenStateErrorLogged = fStateError;
 
     return fRidden || IsStatFlag(STATF_CONJURED);
 }

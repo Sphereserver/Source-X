@@ -1410,6 +1410,11 @@ protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills
 public:
     virtual bool _CanTick(bool fParentGoingToSleep) const override final;
     bool IsTickableEvenIfDisconnected() const;
+private:
+    // IsTickableEvenIfDisconnected is called often (sector sleep/awake, timers of the char and of its equipped items):
+    //  log an inconsistent ridden state once, until it's consistent again.
+    mutable bool _fRiddenStateErrorLogged = false;
+public:
 
     bool OnTickEquip( CItem * pItem );
 	void OnTickFood( ushort uiVal, int HitsHungerLoss );
