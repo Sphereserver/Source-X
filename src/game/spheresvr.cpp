@@ -332,9 +332,11 @@ static void atexit_handler()
 }
 
 #ifdef UNIT_TESTING
-static int DocTestMain()
+static int DocTestMain(int argc, char* argv[])
 {
     doctest::Context context;
+
+    context.applyCommandLine(argc, argv);   // Options like -tc="name*" (see --help).
 
     int res = context.run(); // run
 
@@ -352,7 +354,7 @@ int main( int argc, char * argv[] )
 #endif
 {
 #ifdef UNIT_TESTING
-    return DocTestMain();
+    return DocTestMain(argc, argv);
 #endif
 
     static constexpr lpctstr m_sClassName = "main";
