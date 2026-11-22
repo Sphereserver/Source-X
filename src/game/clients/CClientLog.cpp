@@ -876,7 +876,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 	ASSERT( pEvent != nullptr );
 	ASSERT( uiLen > 0 );
 
-    // Web identity packet. Validation is handled in packet itself.
+	// Web identity packet (0xa4): already validated by PacketSystemInfo when received on the login connection.
     if (pEvent->Default.m_Cmd == XCMD_Spy && uiLen == 149)
     {
         return true;

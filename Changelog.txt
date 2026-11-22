@@ -4253,7 +4253,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Fixed: a player could walk through a blocking item (e.g. an energy field) when the terrain on that tile is above the head of the char, like the hidden terrain over a cave floor (e.g. 2558,500 at the Minoc cave entrance): the terrain replaced the item as the tile to stand on. With the item removed on the client (e.g. by a client command or plugin), the server accepted the step.
 - Fixed: chars deleted during their location effects (eg: a summon dispelled by a field @STEP, an NPC killed by a fire field or a trap) could stay in the world as orphans, alive and without the summon memory. The "run away from the threat" step that followed moved the char into a sector and took it out of the deletion queue. Deleted chars are not processed or moved anymore.
 
-21-11-2026, Mulambo
+22-11-2026, Mulambo
 - Fixed: issue when web client sent a web identity packet and Sphere didn't let him log in
 - Added: Classic UO Web Identity packet validation support (#1357): 2 new sphere.ini settings: `WebIdentity` and `WebIdentityForce`:
   - If you add `WebIdentity` value from your Classic UO Web Management, received WebIdentity will be checked and validated

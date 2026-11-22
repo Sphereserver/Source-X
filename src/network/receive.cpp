@@ -1947,21 +1947,17 @@ bool PacketServerSelect::onReceive(CNetState* net)
 
 	uint server = readInt16();
 
-    // Web Identity validation.
-    if (g_Cfg.m_sWebIdentity.IsValid() && g_Cfg.m_sWebIdentityForce)
-    {
-        CClient* client = net->getClient();
-        ASSERT(client);
+    CClient* const client = net->getClient();
+    ASSERT(client);
 
-        // We did not receive validation packet (0xa4). The packet itself is validated elsewhere.
-        if (!client->m_webIdentity.m_fReceived)
-        {
-            client->addLoginErr(PacketLoginError::BadAuthID);
-            return false;
-        }
+    // Web Identity: the 0xA4 packet itself is validated in PacketSystemInfo, here we only check that it was received.
+    if (g_Cfg.m_fWebIdentityForce && g_Cfg.m_sWebIdentity.IsValid() && !client->m_webIdentity.m_fReceived)
+    {
+        client->addLoginErr(PacketLoginError::BadAuthID);
+        return false;
     }
 
-	net->getClient()->Login_Relay(server);
+    client->Login_Relay(server);
 	return true;
 }
 
@@ -1981,82 +1977,79 @@ bool PacketSystemInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSystemInfo::onReceive");
 
+    // Payload size after the command byte (the packet is a fixed 149 bytes long).
+    constexpr uint kPayloadLen = 148;
+    // "CUOWEB" + version byte + 4 bytes timestamp.
+    constexpr uint kHeaderLen = 6 + 1 + 4;
+    // A single field can't be longer than what is left in the packet.
+    constexpr uint kMaxFieldLen = kPayloadLen - kHeaderLen;
+
     // Not using web identity.
     if (!g_Cfg.m_sWebIdentity.IsValid())
     {
-        UnreferencedParameter(net);
-
-        skip(148);
+        skip(kPayloadLen);
         return true;
     }
 
-    // Web identity check.
-    char clientType[7] = {};
-    readStringASCII(clientType, 6, false);
-    const uint8 version = readByte();
-
-    // Type or version doesn't match, might not be Web Identity.
-    if (strcmp(clientType, "CUOWEB") != 0 || version != 1) {
-        skip(141);
-
+    char magic[7];
+    readStringASCII(magic, 6, false);
+    const byte version = readByte();
+    if (memcmp(magic, "CUOWEB", 6) != 0 || version != 1)
+    {
+        // Not a web identity packet.
+        skip(kPayloadLen - 7);
         return true;
     }
-
-    // We are using web identity, and we passed the version check. Assign data we received from it.
-    CClient* client = net->getClient();
-    ASSERT(client);
-
-    // Skip timestamp.
+    // Timestamp.
     skip(4);
 
-    // Buffer for reading data from packet.
-    char dataBuffer[30];
+    CClient* const client = net->getClient();
+    ASSERT(client);
+    CClient::CWebIdentity& identity = client->m_webIdentity;
+    // Never keep stale data if this packet is received more than once.
+    identity.m_fReceived = false;
 
-    // Remaining length of Web Identity packet (so we don't eat bytes from another packet).
-    int length = 137;
-
-    // Read the received secret and compare it to our secret.
-    length -= readStringNullASCII(dataBuffer, length);
-
-    // Secret is not valid.
-    if (strcmp(dataBuffer, g_Cfg.m_sWebIdentity) != 0)
+    // Reads the next null-terminated field, never consuming more than what is left of the packet.
+    // readStringNullASCII returns the index of the terminator (not the bytes consumed) and needs maxlength + 1 bytes of buffer.
+    uint uiRemaining = kMaxFieldLen;
+    char field[kMaxFieldLen + 1];
+    const auto readField = [this, &uiRemaining, &field]() -> const char*
     {
-        skip(length);
-        client->addLoginErr(PacketLoginError::BadAuthID);
-        return false;
+        const uint uiLen = readStringNullASCII(field, uiRemaining);
+        // +1 if the null terminator was found and consumed.
+        const uint uiConsumed = (uiLen < uiRemaining) ? (uiLen + 1) : uiLen;
+        uiRemaining -= uiConsumed;
+        return field;
+    };
+
+    // The secret goes first. Compare it in constant time, to not leak it through timing.
+    {
+        const char* pszReceived = readField();
+        const char* pszSecret = g_Cfg.m_sWebIdentity.GetBuffer();
+        const size_t uiSecretLen = (size_t)g_Cfg.m_sWebIdentity.GetLength();
+        const size_t uiRecvLen = strlen(pszReceived);
+        uint diff = (uiSecretLen != uiRecvLen);
+        for (size_t j = 0; j < uiSecretLen; ++j) {
+            diff |= (uint)(byte)pszSecret[j] ^ (uint)(byte)(j < uiRecvLen ? pszReceived[j] : 0);
+        }
+
+        if (diff != 0) {
+            client->addLoginErr(PacketLoginError::BadAuthID);
+            return false;
+        }
     }
 
-    // Client is validated, we can now populate Web Identity data.
-    CClient::CWebIdentity &Identity = client->m_webIdentity;
-    Identity.m_fReceived = true;
+    // Client is validated, populate the web identity data.
+    identity.m_sUserId = readField();
+    identity.m_sConnectingIp = readField();
+    identity.m_sExternalAuthProvider = readField();
+    identity.m_sExternalAuthUsername = readField();
+    identity.m_sExternalAuthId = readField();
+    identity.m_sRole = readField();
+    identity.m_fReceived = true;
 
-    // User ID.
-    length -= readStringNullASCII(dataBuffer, length);
-    Identity.m_sUserId = dataBuffer;
-
-    // Connecting IP.
-    length -= readStringNullASCII(dataBuffer, length);
-    Identity.m_sConnectingIp = dataBuffer;
-
-    // External Auth Provider.
-    length -= readStringNullASCII(dataBuffer, length);
-    Identity.m_sExternalAuthProvider = dataBuffer;
-
-    // External Auth Username.
-    length -= readStringNullASCII(dataBuffer, length);
-    Identity.m_sExternalAuthUsername = dataBuffer;
-
-    // External Auth ID.
-    length -= readStringNullASCII(dataBuffer, length);
-    Identity.m_sExternalAuthId = dataBuffer;
-
-    // Role.
-    length -= readStringNullASCII(dataBuffer, length);
-    Identity.m_sRole = dataBuffer;
-
-    // Skip the rest of the packet.
-    skip(length);
-
+    // Skip padding.
+    skip(uiRemaining);
     return true;
 }
 

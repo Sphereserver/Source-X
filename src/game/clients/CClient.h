@@ -150,7 +150,7 @@ public:
 	int64 m_timeLastEventWalk;	    // Last time we got a walk event from client
 	int64 m_timeNextEventWalk;		// Fastwalk prevention: only allow more walk requests after this timer
 
-    // Web Identity.
+    // Classic UO Web Identity data, filled by PacketSystemInfo only if the secret matched.
     struct CWebIdentity
     {
         bool m_fReceived{false};
