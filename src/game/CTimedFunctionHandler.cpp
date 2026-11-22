@@ -38,6 +38,7 @@ void CTimedFunctionHandler::ClearUID( const CUID& uid )
 		auto tfObj = static_cast<CTimedFunction*>(obj);
 		if (tfObj->GetUID() == uid)
 		{
+			tfObj->SetTimeout(-1);	// See Stop.
 			g_World.ScheduleObjDeletion(tfObj);
 		}
 	}
@@ -51,6 +52,9 @@ void CTimedFunctionHandler::Stop(const CUID& uid, lpctstr ptcCommand)
 		auto tfObj = static_cast<CTimedFunction*>(obj);
 		if ((tfObj->GetUID() == uid) && (Str_Match(ptcCommand, tfObj->GetCommand()) == MATCH_VALID))
 		{
+			// The deletion is done later: clear the timer now, so that it doesn't run if it expired in the current tick
+			//  (it may be waiting for its turn, after the object whose tick is stopping it).
+			tfObj->SetTimeout(-1);
 			g_World.ScheduleObjDeletion(tfObj);
 		}
 	}
