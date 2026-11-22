@@ -3390,21 +3390,25 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 
                 return SetID(id);
 			}
-            else if (resType == RES_ITEMDEF)
+
+            if (resType != RES_ITEMDEF && resType != RES_QTY)
+                return false;
+
+            // Compare the kind of object, not the raw IDs: named ITEMDEFs and MULTIDEFs both have IDs beyond ITEMID_MULTI.
+            // The class of this object can't change, so a multi must stay a multi and an item must stay an item.
+            if (const CItemBase* pItemDefNew = CItemBase::FindItemBase((ITEMID_TYPE)uiResID))
             {
-                const bool fMeMulti = (GetID() >= ITEMID_MULTI);
-                const bool fTheyMulti = (uiResID >= ITEMID_MULTI);
-                const bool fMismatch = fMeMulti ^ fTheyMulti; // Bitwise XOR
-                if (fMismatch)
+                const bool fMeMulti = (nullptr != dynamic_cast<const CItemMulti*>(this));
+                const bool fTheyMulti = (nullptr != dynamic_cast<const CItemBaseMulti*>(pItemDefNew))
+                    || CItemBase::IsID_Multi(pItemDefNew->GetDispID());
+                if (fMeMulti != fTheyMulti)
                 {
                     g_Log.EventError("ITEM can't be assigned ID of a MULTI and vice-versa.\n");
                     return false;
                 }
             }
 
-            if (resType == RES_ITEMDEF || resType == RES_QTY)
-                return SetID((ITEMID_TYPE)rid.GetResIndex());
-            return false;
+            return SetID((ITEMID_TYPE)uiResID);
 		}
 		case IC_LAYER:
 			// used only during load (i'm reading the save files and placing again the items in the world in the right place).
