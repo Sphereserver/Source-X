@@ -143,6 +143,10 @@ private:
 	friend class CWorldTimedFunctions;
 	CWorldTicker _Ticker;
 
+#ifdef UNIT_TESTING
+	friend struct CWorldTestAccess;		// The unit tests drive the clock and the ticker.
+#endif
+
 	// Map cache
 	friend class CServer;
 	friend class CWorldMap;
