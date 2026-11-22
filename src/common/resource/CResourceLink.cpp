@@ -25,7 +25,7 @@ CResourceLink::CResourceLink(const CResourceID& rid, const CVarDefContNum * pDef
 
 CResourceLink::~CResourceLink() = default;
 
-void CResourceLink::ScanSection( RES_TYPE restype )
+void CResourceLink::ScanSection( RES_TYPE restype, bool *pfMultiRegion )
 {
     ADDTOCALLSTACK("CResourceLink::ScanSection");
     // Scan the section we are linking to for useful stuff.
@@ -73,10 +73,16 @@ void CResourceLink::ScanSection( RES_TYPE restype )
             break;
     }
     ClearTriggers();
+    if (pfMultiRegion)
+        *pfMultiRegion = false;
 
     while ( m_pScript->ReadKey(false) )
     {
-        if ( m_pScript->IsKeyHead( "DEFNAME", 7 ) )
+        if (pfMultiRegion && m_pScript->IsKey("MULTIREGION"))
+        {
+            *pfMultiRegion = true;
+        }
+        else if ( m_pScript->IsKeyHead( "DEFNAME", 7 ) )
         {
             m_pScript->ParseKeyLate();
             SetResourceName( m_pScript->GetArgRaw() );
