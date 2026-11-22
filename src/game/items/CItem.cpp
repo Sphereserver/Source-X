@@ -290,11 +290,13 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
 	//  If not put on ground or in container after this = Memory leak !
 
 	ITEMID_TYPE idErrorMsg = ITEMID_NOTHING;
+    bool fDefaultItem = false;
 	CItemBase * pItemDef = CItemBase::FindItemBase( id );
 	if ( pItemDef == nullptr )
 	{
     default_item:
 		idErrorMsg = id;
+        fDefaultItem = true;
         const CResourceIDBase& rid = g_Cfg.ResourceGetIDType( RES_ITEMDEF, "DEFAULTITEM" );
         id = (ITEMID_TYPE)rid.GetResIndex();
 		if ( id <= 0 )
@@ -308,6 +310,23 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
 	CItem * pItem = nullptr;
     if (type == IT_INVALID)
         type = pItemDef->GetType();
+
+    // Every multi type is a CItemMulti, which needs a CItemBaseMulti.
+    // This workaround is needed because for now we do not have a RES_MULTIDEF, but only RES_ITEMDEF, so we cannot
+    //  differentiate between multis and regular items at a earlier stage
+    // (like CItemBase::r_LoadVal -> IBC_ID, CItemBase::r_LoadVal -> IC_TYPE).
+    if (CItemBase::IsTypeMulti(type) && (nullptr == dynamic_cast<const CItemBaseMulti*>(pItemDef)))
+    {
+        if (!fDefaultItem)
+        {
+            g_Log.EventError("Trying to create invalid Multi item, defined with ITEMDEF and not MULTIDEF. Fix it.\n");
+            goto default_item;
+        }
+
+        // DEFAULTITEM is invalid too: create it as a plain item instead of falling back to it again (endless loop).
+        g_Log.EventError("DEFAULTITEM is an invalid Multi item, defined with ITEMDEF and not MULTIDEF. Creating it as a plain item. Fix it.\n");
+        type = IT_NORMAL;
+    }
 	switch (type)
 	{
 		case IT_MAP:
@@ -344,14 +363,6 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
 			break;
 		case IT_MULTI:
         case IT_MULTI_ADDON:
-            if (nullptr == dynamic_cast<CItemBaseMulti*>(pItemDef))
-            {
-                // This workaround is needed because for now we do not have a RES_MULTIDEF, but only RES_ITEMDEF, so we cannot
-                //  differentiate between multis and regular items at a earlier stage
-                // (like CItemBase::r_LoadVal -> IBC_ID, CItemBase::r_LoadVal -> IC_TYPE).
-                g_Log.EventError("Trying to create invalid Multi item, defined with ITEMDEF and not MULTIDEF. Fix it.\n");
-                goto default_item;
-            }
 			pItem = new CItemMulti( id, pItemDef );
 			break;
 		case IT_MULTI_CUSTOM:
