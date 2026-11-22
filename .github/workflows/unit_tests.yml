@@ -1,0 +1,131 @@
+name: Unit tests
+
+# A failing test fails the workflow, so the check of the commit or pull request fails.
+# To block merging a pull request when it fails, make its jobs required status checks of the target branch
+#  (repository Settings > Branches > branch protection rule).
+# The pull requests have no paths filter: a required check skipped by a filter would stay pending.
+
+on:
+  push:
+      paths-ignore:
+        - '.gitignore'
+        - '.gitattributes'
+        - '**.md'
+        - 'Changelog.txt'
+  pull_request:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
+
+permissions:
+  contents: read
+
+env:
+  # Fixed doctest version. Without the cached release info (see cmake/FetchGithubDep.cmake), CMake asks the GitHub API
+  #  for the latest release, without a token: the shared runners can find it rate limited, and the configuration fails.
+  DOCTEST_TAG: v2.4.12
+
+jobs:
+  unit-tests-linux:
+    name: Linux x86_64 (GCC)
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+    - name: Install prerequisites
+      run:  |
+            sudo add-apt-repository universe && sudo apt-get -qq update
+            sudo apt-get install -yq --no-install-recommends \
+              ninja-build gcc-12 g++-12 \
+              ccache \
+              libmariadb-dev
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
+
+    - name: Pin doctest
+      shell: bash
+      run:  |
+            mkdir -p external
+            echo "{\"tag_name\": \"$DOCTEST_TAG\"}" > external/doctest_latest.json
+
+    - name: Set up ccache
+      uses: hendrikmuhs/ccache-action@v1.2.23
+      with:
+        key: ${{github.job}}
+    - name: Configure ccache
+      run:  ccache --set-config sloppiness="include_file_mtime, include_file_ctime, time_macros, pch_defines"
+
+    - name: CMake
+      run: |
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Debug" -DUNIT_TESTING=ON \
+              -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake \
+              -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+              -DCMAKE_C_FLAGS="-fpch-preprocess" \
+              -DCMAKE_CXX_FLAGS="-fpch-preprocess" \
+              -S ./ -B ./build
+    - name: Build
+      run: ninja -C build
+    - name: Run the unit tests
+      run: ctest --test-dir build --output-on-failure --timeout 600
+
+  unit-tests-macos:
+    name: MacOS ARM (AppleClang)
+    runs-on: macos-15   # apple silicon
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+    - name: Remove untrusted Homebrew tap (pre-installed on runner)
+      run: brew untap aws/tap || true
+    - name: Install prerequisites
+      run:  |
+            export HOMEBREW_NO_AUTO_UPDATE=1
+            export HOMEBREW_NO_INSTALL_CLEANUP=1
+            brew install mariadb-connector-c
+
+    - name: Pin doctest
+      shell: bash
+      run:  |
+            mkdir -p external
+            echo "{\"tag_name\": \"$DOCTEST_TAG\"}" > external/doctest_latest.json
+
+    - name: CMake
+      run: |
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Debug" -DUNIT_TESTING=ON \
+              -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/OSX-AppleClang-AArch64.cmake \
+              -S ./ -B ./build
+    - name: Build
+      run: ninja -C build
+    - name: Run the unit tests
+      run: ctest --test-dir build --output-on-failure --timeout 600
+
+  unit-tests-windows:
+    name: Windows x86_64 (MSVC)
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - name: Pin doctest
+      shell: bash
+      run:  |
+            mkdir -p external
+            echo "{\"tag_name\": \"$DOCTEST_TAG\"}" > external/doctest_latest.json
+
+    # WIN_SPAWN_CONSOLE: a console application, so that the output of the tests reaches the log.
+    - name: CMake
+      run: cmake -G "Visual Studio 17 2022" -DUNIT_TESTING=ON -DWIN_SPAWN_CONSOLE=ON -S . -B build
+    - name: Build
+      run: cmake --build build --config Debug --parallel -- /verbosity:minimal
+    - name: Run the unit tests
+      run: |
+            $env:PATH = "$PWD\lib\_bin\x86_64\mariadb;$env:PATH"   # libmariadb.dll
+            ctest --test-dir build -C Debug --output-on-failure --timeout 600
