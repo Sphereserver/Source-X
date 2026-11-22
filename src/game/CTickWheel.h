@@ -39,6 +39,7 @@
 * - CollectExpired removes every expired entry (time < now) and returns them ordered by expiration time,
 *   then by insertion order (rescheduling counts as a new insertion): the same order of an ordered container.
 * - If the time didn't move or went back, nothing is cascaded: only the current level 0 slot is checked.
+* - If it throws (out of memory), no entry is removed: their nodes are freed only after the owners were delivered.
 *
 * Not thread safe: the caller must lock it.
 *
@@ -50,7 +51,8 @@ public:
     using Handle = uint32;
     static constexpr Handle kNone = 0;
 
-    using VisitFn = void (*)(void* pContext, void* pOwner);
+    using VisitFn  = void (*)(void* pContext, void* pOwner);
+    using OutputFn = void (*)(void* pContext, void* const* ppOwners, size_t uiCount);
 
     CTickWheelCore();
     ~CTickWheelCore();
@@ -76,9 +78,11 @@ public:
     // Expiration time of the entry, or 0 if the handle isn't of pOwner.
     int64 GetTime(Handle h, const void* pOwner) const noexcept;
 
-    // Remove the expired entries (iTime < iNow) and append their owners to vOut, ordered by iTime,
-    //  then by insertion order. Their handles are invalid afterwards.
-    void CollectExpired(int64 iNow, std::vector<void*>& vOut);
+    // Remove the expired entries (iTime < iNow) and give their owners to fnOutput(pContext, ...), ordered by iTime,
+    //  then by insertion order (not called if none expired). Their handles are invalid afterwards.
+    // If anything throws (fnOutput too), no entry is removed: the wheel can be used again normally.
+    //  fnOutput must not use the wheel.
+    void CollectExpired(int64 iNow, OutputFn fnOutput, void* pContext);
 
     // Call fnVisit(pContext, pOwner) for every entry, then unregister all of them: every handle is invalid afterwards.
     void Clear(VisitFn fnVisit, void* pContext);
@@ -106,7 +110,8 @@ private:
     void _TakeL0(uint32 uiSlot, int64 iNow);
     void _Cascade(uint32 uiSlot) noexcept;
     void _ScanInPlace(uint32 uiSlot, int64 iNow);
-    void _Collect(const Node& node);
+    void _Collect(Handle h, const Node& node);
+    void _Restore() noexcept;
 
     std::vector<Handle> _vHeads;                    // First entry of each slot.
     uint64 _uiOccL0[kL0Slots / 64];                 // Occupied level 0 slots, one bit each...
@@ -115,6 +120,7 @@ private:
     std::vector<std::unique_ptr<Node[]>> _vChunks;  // Node pool, in blocks. Handle 0 is never used.
     std::vector<Handle>    _vKeepBuffer;
     std::vector<Collected> _vCollectBuffer;
+    std::vector<void*>     _vOwners;
     uint32 _uiPoolSize;
     Handle _hFree;
     int64  _iElapsed;                               // Current time of the wheel.
@@ -157,14 +163,18 @@ public:
         return _core.GetTime(h, pOwner);
     }
 
+    // Append the owners of the expired entries to vOut. If it throws (out of memory), nothing changed, vOut neither.
     void CollectExpired(int64 iNow, std::vector<TOwner*>& vOut)
     {
-        _vCollected.clear();
-        _core.CollectExpired(iNow, _vCollected);
-        vOut.reserve(vOut.size() + _vCollected.size());
-        for (void* pOwner : _vCollected)
-            vOut.emplace_back(static_cast<TOwner*>(pOwner));
-        _vCollected.clear();
+        _core.CollectExpired(iNow,
+            [](void* pContext, void* const* ppOwners, size_t uiCount)
+            {
+                auto& vDest = *static_cast<std::vector<TOwner*>*>(pContext);
+                vDest.reserve(vDest.size() + uiCount);  // The only step that can throw.
+                for (size_t i = 0; i < uiCount; ++i)
+                    vDest.emplace_back(static_cast<TOwner*>(ppOwners[i]));
+            },
+            &vOut);
     }
 
     // fnVisit: void(TOwner*).
@@ -181,7 +191,6 @@ public:
 
 private:
     CTickWheelCore _core;
-    std::vector<void*> _vCollected;
 };
 
 #endif // _INC_CTICKWHEEL_H
