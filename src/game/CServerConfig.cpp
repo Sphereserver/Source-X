@@ -4213,19 +4213,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 		// ITEMDEF and MULTIDEF are both RES_ITEMDEF: only here we know which section header was used.
 		const bool fItemDefSection = (restype == RES_ITEMDEF) && !fNewStyleDef;
 		bool fMultiRegion = false;
-		if (fItemDefSection)
-		{
-			pNewLink->ScanSection(restype, [&fMultiRegion](const CScriptKey& key) {
-				if (key.IsKey("MULTIREGION"))
-					fMultiRegion = true;
-			});
-		}
-		else
-		{
-			pNewLink->ScanSection(restype);
-		}
-
-		if (fMultiRegion)
+		pNewLink->ScanSection( restype, fItemDefSection ? &fMultiRegion : nullptr );
+		if (fItemDefSection && fMultiRegion)
 		{
 			g_Log.Event(LOGM_INIT|LOGL_WARN, "Deprecated: multi '%s' is defined in an ITEMDEF section. Multi items should be defined as MULTIDEF.\n",
 				pNewLink->GetResourceName());
