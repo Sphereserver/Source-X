@@ -8,7 +8,33 @@
 
 #include <cstdint>
 
-#define MULTI_QTY	0x2000	// total address space for multis.
+/*
+* MULTI_QTY: total address space for multis (multi indexes 0 .. MULTI_QTY-1).
+*
+* Sphere stores a multi as the item ID (ITEMID_MULTI + multi index). The multi index is the entry number in the client
+*  multi data (multi.idx/multi.mul, read by CUOMulti; the clients also have it packed in MultiCollection.uop), the
+*  same number used by [MULTIDEF n] sections.
+*
+* Historically this was 0x2000, because the multi files had fewer than 0x2000 entries. The formats don't define a
+*  fixed number of entries, though: multi.idx is a flat array of 12-byte records (its size gives the count), and
+*  MultiCollection.uop addresses its entries by number. Newer client data ships multi indexes beyond 0x1FFF, which
+*  Sphere could not use as multis (CItemBase::IsID_Multi refused them).
+* A multi index missing from older client files just fails to load its components (CUOMulti::Load), as any other
+*  missing multi always did.
+*
+* Limits that bound this value:
+*  - Packets: the multi index is sent as a 16-bit graphic. 0xF3 (world object) sends the bare index, so it supports up
+*    to 0xFFFF; the legacy 0x1A (world item) sends ITEMID_MULTI_LEGACY + index, which still fits 16 bits for any index
+*    below 0xC000.
+*  - Sphere's ID space: the IDs from ITEMID_MULTI up are shared. Multis start at ITEMID_MULTI, named ITEMDEFs and
+*    MULTIDEFs get IDs from ITEMID_SCRIPT_NAMED (see CServerConfig::ResourceGetNewID), container templates from
+*    ITEMID_TEMPLATE. Multis must end before ITEMID_SCRIPT_NAMED (checked by the static_assert below the enum), so
+*    0x4000 is the largest value possible without moving the named-ITEMDEF range.
+*
+* Saves and scripts are not affected: the multi item IDs below 0x2000 are unchanged, and numeric MULTIDEF sections
+*  are relative to ITEMID_MULTI.
+*/
+#define MULTI_QTY	0x4000
 
 enum ITEMID_TYPE : uint32_t	// InsideUO or UoFiddler are great for this stuff.
 {
@@ -1281,7 +1307,7 @@ enum ITEMID_TYPE : uint32_t	// InsideUO or UoFiddler are great for this stuff.
 	ITEMID_MULTISTAIRS_SHADOW_NS = ITEMID_MULTI + 0x1dde,
 	ITEMID_MULTISTAIRS_SHADOW_EW = ITEMID_MULTI + 0x1ddf,
 
-	ITEMID_MULTI_MAX = (ITEMID_MULTI + MULTI_QTY - 1),	// ??? this is higher than next !
+	ITEMID_MULTI_MAX = (ITEMID_MULTI + MULTI_QTY - 1),	// Last valid multi ID (inclusive). It's beyond ITEMID_QTY: see MULTI_QTY.
 
 	// These overlap for now damnit !!! fix this.
 	// Special scriptable objects defined after this.
@@ -1289,8 +1315,11 @@ enum ITEMID_TYPE : uint32_t	// InsideUO or UoFiddler are great for this stuff.
 
 	// Put named items here.
 	ITEMID_SCRIPT2 = ITEMID_QTY,				// Safe area for server admins.
+	ITEMID_SCRIPT_NAMED = ITEMID_SCRIPT2 + 0x4000,	// First ID given to named ITEMDEFs and MULTIDEFs: they must stay beyond the multis.
 	ITEMID_TEMPLATE = ITEMID_SCRIPT2 + 0x9FFF	// container item templates are beyond here.
 };
+
+static_assert(ITEMID_MULTI_MAX < ITEMID_SCRIPT_NAMED, "The multi IDs would overlap the IDs of named ITEMDEFs and MULTIDEFs.");
 
 
 #endif //_INC_UOFILES_ENUMS_ITEMID_H
