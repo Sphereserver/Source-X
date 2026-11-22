@@ -7,12 +7,11 @@
 
 #ifndef _WIN32
 #include <sys/wait.h>
-//#include <pthread.h>    // for pthread_exit
 #include <signal.h>
+#include <unistd.h>
 #include <cstring>
 
 #include "../game/CServer.h"
-#include "../game/CWorld.h"
 
 #include <fcntl.h>
 int IsDebuggerPresent(void)
@@ -53,7 +52,6 @@ void NotifyDebugger()
     #ifdef MSVC_COMPILER
         __debugbreak();
     #else
-        SetAbortImmediate(false);
         std::abort();
     #endif
 #else
@@ -63,33 +61,6 @@ void NotifyDebugger()
     }
 }
 
-
-// Is it unrecoverable? Should i exit cleanly or stop immediately?
-// Set this just before calling abort.
-static bool* _GetAbortImmediate() noexcept
-{
-    static bool _fIsAbortImmediate = true;
-    return &_fIsAbortImmediate;
-}
-
-void SetAbortImmediate(bool on) noexcept
-{
-    *_GetAbortImmediate() = on;
-}
-#ifndef _WIN32
-static bool IsAbortImmediate() noexcept
-{
-    return *_GetAbortImmediate();
-}
-#endif
-
-[[noreturn]]
-void RaiseRecoverableAbort()
-{
-    EXC_NOTIFY_DEBUGGER;
-    SetAbortImmediate(false);
-    std::abort();
-}
 
 [[noreturn]]
 void RaiseImmediateAbort(int iErrCode)
@@ -102,10 +73,9 @@ void RaiseImmediateAbort(int iErrCode)
 #endif
 
     EXC_NOTIFY_DEBUGGER;
-    SetAbortImmediate(true);
 
 #if !defined(_WIN32)
-    // The trap raises SIGILL: don't let Signal_Terminate handle it as a shutdown request, just dump the core here.
+    // The trap raises SIGILL: dump the core right here, without going through Signal_Fatal.
     signal(SIGILL, SIG_DFL);
 #endif
 #if defined(__GNUC__) || defined(__clang__)
@@ -290,116 +260,54 @@ void SetWindowsStructuredExceptionTranslator()
 #endif
 
 #ifndef _WIN32
-static void Signal_Hangup(int sig = 0) noexcept // If shutdown is initialized
+// Signal handlers may run on any thread, interrupting any code, also while it holds a lock (e.g. the log one, which isn't
+//  recursive). They do only async-signal-safe operations: set atomic flags (lock-free), write(), signal(), raise().
+// The work requested by a signal is done by the main thread (CServer::_OnTick) or by the normal shutdown sequence.
+
+static void Signal_WriteStderr(const char* ptcMsg) noexcept
+{
+    const ssize_t iRet = write(STDERR_FILENO, ptcMsg, strlen(ptcMsg));
+    UnreferencedParameter(iRet);
+}
+
+static void Signal_Hangup(int sig = 0) noexcept // Save and stop (SIGHUP, e.g. the terminal was closed)
 {
     UnreferencedParameter(sig);
-
-#ifdef THREAD_TRACK_CALLSTACK
-    static thread_local bool _Signal_Hangup_stack_printed = false;
-    if (!_Signal_Hangup_stack_printed)
-    {
-        StackDebugInformation::printStackTrace();
-        _Signal_Hangup_stack_printed = true;
-    }
-#endif
-
-    if (!g_Serv.m_fResyncPause)
-        g_World.Save(true);
-
-    g_Serv.SetExitFlag(SIGHUP);
+    // The main thread saves the world, then sets the exit flag.
+    g_Serv.RequestSaveAndExit();
 }
 
 static void Signal_Stop(int sig = 0) noexcept // Stop request (SIGTERM, e.g. by a service manager)
 {
     // Orderly shutdown, like the SHUTDOWN command or a Windows service stop: the threads end on their own when they see
-    //  the exit flag, then Sphere_ExitServer runs (f_onserver_exit, sockets and world closing).
-    // Do just this here: logging or ending threads from a signal handler isn't safe. The reason is logged at the exit.
+    //  the exit flag, then Sphere_ExitServer runs (f_onserver_exit, sockets and world closing). The reason is logged at the exit.
     g_Serv.SetExitFlag(sig ? sig : SIGTERM);
 }
 
-static void Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
+static void Signal_Fatal(int sig = 0) noexcept // SIGQUIT, SIGABRT, SIGILL
 {
-
-    g_Log.Event(LOGL_FATAL, "Server Unstable: %s signal received\n", strsignal(sig));
-
-#ifdef THREAD_TRACK_CALLSTACK
-    static thread_local bool _Signal_Terminate_stack_printed = false;
-    if (!_Signal_Terminate_stack_printed)
+    // The process can't go on: end it with the default action of the signal, which dumps the core with the stack of the
+    //  thread that got the signal.
+    // Don't log through g_Log or end the threads from here: this thread could be holding a lock they need, and it would hang
+    //  instead of ending. A thread can't be ended safely from a signal handler either (see AbstractThread::terminate).
+    switch (sig)
     {
-        StackDebugInformation::printStackTrace();
-        _Signal_Terminate_stack_printed = true;
-    }
-#endif
-
-    if (sig)
-    {
-        if ((sig == SIGABRT) && IsAbortImmediate())
-        {
-            // No clean ending. Abort right now.
-            reserved_stderr_log("FATAL: Immediate abort requested.");
-
-#if defined(__GNUC__) || defined(__clang__)
-            signal(SIGILL, SIG_DFL);    // Otherwise the trap (SIGILL) gets back to this handler.
-            __builtin_trap();
-#else
-            signal(SIGABRT, SIG_DFL);
-            raise(SIGABRT);
-#endif
-
-            return;
-        }
-
-        if (sig == SIGILL)
-        {
-            // An illegal instruction executed by this thread: returning would execute it again, and this thread can't be
-            //  ended safely from here (see AbstractThread::terminate). Let the default action end the process with a core dump.
-            signal(SIGILL, SIG_DFL);
-            raise(SIGILL);
-            return;
-        }
-
-        sigset_t set;
-        signal(sig, &Signal_Terminate);
-        sigemptyset(&set);
-        sigaddset(&set, sig);
-        //sigprocmask(SIG_UNBLOCK, &set, nullptr);
-        pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
+        case SIGQUIT:   Signal_WriteStderr("FATAL: SIGQUIT received, ending the server with a core dump.\n");        break;
+        case SIGABRT:   Signal_WriteStderr("FATAL: SIGABRT received (abort), ending the server with a core dump.\n"); break;
+        case SIGILL:    Signal_WriteStderr("FATAL: SIGILL received (illegal instruction), ending the server with a core dump.\n"); break;
+        default:        Signal_WriteStderr("FATAL: fatal signal received, ending the server with a core dump.\n");   break;
     }
 
-    g_Serv.SetExitFlag(SIGABRT);
-
-    try
-    {
-        for (size_t i = 0; i < ThreadHolder::get().getActiveThreads(); ++i)
-            ThreadHolder::get().getThreadAt(i)->terminate(false);
-    }
-    catch (...)
-    {
-        RaiseImmediateAbort(1);
-    }
-
-    //exit(EXIT_FAILURE); // Having set the exit flag, all threads "should" terminate cleanly.
+    // The signal is blocked while its handler runs: the raised one is delivered, with its default action, when this returns.
+    // A SIGILL caused by an instruction gets raised again by the instruction itself, now with the default action.
+    signal(sig, SIG_DFL);
+    raise(sig);
 }
 
-static void Signal_Break(int sig = 0)		// signal handler attached when using secure mode
+static void Signal_Break(int sig = 0) noexcept		// signal handler attached when using secure mode
 {
-    // Shouldn't be needed, since gdb consumes the signals itself and this code won't be executed
-    //#ifdef _DEBUG
-    //		if (IsDebuggerPresent())
-    //			return;		// do not block this signal, so that the debugger can catch it
-    //#endif
-
-    g_Log.Event(LOGL_FATAL, "Secure Mode prevents CTRL+C\n");
-
-    if (sig)
-    {
-        sigset_t set;
-        signal(sig, &Signal_Break);
-        sigemptyset(&set);
-        sigaddset(&set, sig);
-        //sigprocmask(SIG_UNBLOCK, &set, nullptr);
-        pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
-    }
+    UnreferencedParameter(sig);
+    Signal_WriteStderr("NOTE: Secure mode prevents CTRL+C.\n");
 }
 
 static void Signal_Illegal_Instruction(int sig = 0)
@@ -456,9 +364,9 @@ void SetUnixSignals( bool fSet )    // Signal handlers are installed only in sec
     {
         signal( SIGHUP,  fSet ? &Signal_Hangup : SIG_DFL );
         signal( SIGTERM, fSet ? &Signal_Stop : SIG_DFL );
-        signal( SIGQUIT, fSet ? &Signal_Terminate : SIG_DFL );
-        signal( SIGABRT, fSet ? &Signal_Terminate : SIG_DFL );
-        signal( SIGILL,  fSet ? &Signal_Terminate : SIG_DFL );
+        signal( SIGQUIT, fSet ? &Signal_Fatal : SIG_DFL );
+        signal( SIGABRT, fSet ? &Signal_Fatal : SIG_DFL );
+        signal( SIGILL,  fSet ? &Signal_Fatal : SIG_DFL );
         signal( SIGINT,  fSet ? &Signal_Break : SIG_DFL );
         signal( SIGSEGV, fSet ? &Signal_Illegal_Instruction : SIG_DFL );
         signal( SIGFPE,  fSet ? &Signal_Illegal_Instruction : SIG_DFL );

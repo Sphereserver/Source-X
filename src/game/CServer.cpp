@@ -5,6 +5,7 @@
 #else
 	#include "../sphere/UnixTerminal.h"
     #include <sys/resource.h>   // for setpriority
+    #include <csignal>          // SIGHUP
 #endif
 
 #if defined(_WIN32) && !defined(_DEBUG)
@@ -481,10 +482,17 @@ int CServer::GetExitFlag() const noexcept
 
 void CServer::SetExitFlag(int iFlag) noexcept
 {
-    ADDTOCALLSTACK("CServer::SetExitFlag");
-    if ( GetExitFlag() )
-        return;
-    m_iExitFlag.store(iFlag, std::memory_order_release);
+    // Called also by signal handlers: only lock-free atomic operations here (no ADDTOCALLSTACK either).
+    static_assert(std::atomic_int::is_always_lock_free);
+    int iExpected = 0;
+    m_iExitFlag.compare_exchange_strong(iExpected, iFlag, std::memory_order_acq_rel);
+}
+
+void CServer::RequestSaveAndExit() noexcept
+{
+    // Called by a signal handler: only lock-free atomic operations here.
+    static_assert(std::atomic_bool::is_always_lock_free);
+    _fSaveAndExitRequested.store(true, std::memory_order_release);
 }
 
 bool CServer::IsStartupLoadingScripts() const noexcept
@@ -2680,6 +2688,18 @@ void CServer::_OnTick()
 		m_fConsoleTextReadyFlag = false;	// ready to use again
 		OnConsoleCmd( sText, this );
 	}
+
+#ifndef _WIN32
+	EXC_SET_BLOCK("SaveAndExitRequest");
+	if (_fSaveAndExitRequested.exchange(false, std::memory_order_acq_rel))
+	{
+		// Requested by SIGHUP (e.g. the terminal was closed).
+		g_Log.Event(LOGL_FATAL, "SIGHUP received: saving the world and shutting down.\n");
+		if (!m_fResyncPause)
+			g_World.Save(true);
+		SetExitFlag(SIGHUP);
+	}
+#endif
 
 	EXC_SET_BLOCK("ResyncCommand");
 	if ( m_fResyncRequested != nullptr )
