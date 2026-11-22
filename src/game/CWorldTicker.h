@@ -78,6 +78,11 @@ public:
     bool DelCharTicking(CChar* pChar, bool fNeedsLock);
     auto IsCharPeriodicTickRegistered(const CChar* pChar) -> std::optional<std::pair<int64, CChar*>>;
 
+    // An object destroyed while waiting for its turn in the current pass (it has kTickFlagTimeoutCollected or
+    //  kTickFlagPeriodicCollected): it's removed from there.
+    void ForgetCollectedTimedObject(const CTimedObject* pTimedObject) noexcept;
+    void ForgetCollectedChar(const CChar* pChar) noexcept;
+
     bool AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);
     bool DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);
     bool IsStatusUpdateTickRegistered(const CObjBase* pObj);
