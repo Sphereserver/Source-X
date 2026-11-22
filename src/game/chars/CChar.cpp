@@ -344,6 +344,13 @@ CChar::~CChar()
 	ADDTOCALLSTACK("CChar::~CChar");
     EXC_TRY("Cleanup in destructor");
 
+    if (_IsPeriodicTickCollected())
+    {
+        // Destroyed while waiting for its periodic tick in the current pass of the world ticker (e.g. by a world save
+        //  done by the tick of another object): it must not be reached there anymore.
+        CWorldTickingList::ForgetCollectedChar(this);
+    }
+
     // Deleting the contents can call Delete() on this char (e.g. removing the SPELL_Summon effect when a sector
     //  closes at shutdown). Mark it first, so that Delete() doesn't delete it a second time.
     _uiInternalStateFlags |= SF_DESTRUCTING;

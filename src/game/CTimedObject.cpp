@@ -7,7 +7,7 @@
 
 
 CTimedObject::CTimedObject(PROFILE_TYPE profile) noexcept :
-    _iTimeout(0), _profileType(profile), _fIsSleeping(true),
+    _iTimeout(0), _profileType(profile), _uiTickFlags(kTickFlagSleeping),
     _hWorldTickWheel(0)
 {
 }
@@ -17,12 +17,16 @@ CTimedObject::~CTimedObject()
     ADDTOCALLSTACK("CTimedObject::~CTimedObject");
     EXC_TRY("Cleanup in destructor");
 
+    if (_uiTickFlags & kTickFlagTimeoutCollected)
+    {
+        // Destroyed while waiting for its turn in the current pass of the world ticker (e.g. by a world save
+        //  done by the tick of another object): it must not be reached there anymore.
+        CWorldTickingList::ForgetCollectedObj(this);
+    }
     if (_IsTimeoutTickingActive())
     {
         CWorldTickingList::DelObjSingle(this);
     }
-    // Otherwise the wheel would keep an entry pointing to a destroyed object.
-    DEBUG_ASSERT(!_IsTimeoutTickingActive());
 
     EXC_CATCH;
 }
@@ -36,7 +40,7 @@ void CTimedObject::_GoAwake()
     {
         CWorldTickingList::AddObjSingle(_GetTimeoutRaw(), this, true);
     }
-    _fIsSleeping = false;
+    _SetAwakeFlagRaw();
 }
 
 bool CTimedObject::OnTick()

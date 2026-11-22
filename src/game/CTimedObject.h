@@ -27,7 +27,11 @@ protected:
 private:
     int64 _iTimeout;
     PROFILE_TYPE _profileType;
-    bool _fIsSleeping;
+    uint8 _uiTickFlags;         // kTickFlag* below.
+
+    static constexpr uint8 kTickFlagSleeping          = 0x01;
+    static constexpr uint8 kTickFlagTimeoutCollected  = 0x02;   // Its timer expired: waiting for its turn in the current pass of the world ticker.
+    static constexpr uint8 kTickFlagPeriodicCollected = 0x04;   // CChar: the same, for its periodic tick.
 
     uint32 _hWorldTickWheel;    // Handle of the entry in the world ticking wheel (CTickWheel), 0 if not registered.
 
@@ -48,6 +52,7 @@ public:
 
 protected:
     inline bool _IsTimeoutTickingActive() noexcept;
+    inline bool _IsPeriodicTickCollected() const noexcept;
 
 protected:  inline  bool _IsSleeping() const noexcept;
 public:             bool IsSleeping() const noexcept;
@@ -177,22 +182,27 @@ void CTimedObject::_ClearTimeoutRaw() noexcept
 
 bool CTimedObject::_IsSleeping() const noexcept
 {
-    return _fIsSleeping;
+    return (_uiTickFlags & kTickFlagSleeping) != 0;
 }
 
 void CTimedObject::_GoSleep()
 {
-    _fIsSleeping = true;
+    _uiTickFlags |= kTickFlagSleeping;
 }
 
 void CTimedObject::_SetAwakeFlagRaw()
 {
-    _fIsSleeping = false;
+    _uiTickFlags &= (uint8)~kTickFlagSleeping;
 }
 
 bool CTimedObject::_IsTimeoutTickingActive() noexcept
 {
     return (_hWorldTickWheel != 0);
+}
+
+bool CTimedObject::_IsPeriodicTickCollected() const noexcept
+{
+    return (_uiTickFlags & kTickFlagPeriodicCollected) != 0;
 }
 
 bool CTimedObject::_IsTimerSet() const noexcept

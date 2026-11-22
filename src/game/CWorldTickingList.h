@@ -24,6 +24,10 @@ public:
     static bool DelCharPeriodic(CChar* pChar, bool fNeedsLock);
     static auto IsCharPeriodicTickRegistered(const CChar* pChar) -> std::optional<std::pair<int64, CChar*>>;
 
+    // Destroyed while waiting for its turn in the current pass of the ticker: removed from there.
+    static void ForgetCollectedObj(const CTimedObject* pObj) noexcept;
+    static void ForgetCollectedChar(const CChar* pChar) noexcept;
+
     static void AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);
     static bool DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);
     static bool IsStatusUpdateTickRegistered(const CObjBase *pObj);

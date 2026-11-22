@@ -299,6 +299,25 @@ bool CWorldTicker::DelCharTicking(CChar* pChar, bool fNeedsLock)
     return false;
 }
 
+// Objects destroyed while waiting for their turn in the current pass.
+// Rare: the tick of an object processed before saved the world or collected the garbage, destroying the objects deleted
+//  until then. A linear search is fine. The entry is nulled, not removed, because the pass is iterating the buffer.
+
+void CWorldTicker::ForgetCollectedTimedObject(const CTimedObject* pTimedObject) noexcept
+{
+    const auto it = std::find(_vTimedObjsTimeoutsBuffer.begin(), _vTimedObjsTimeoutsBuffer.end(), pTimedObject);
+    if (it != _vTimedObjsTimeoutsBuffer.end())
+        *it = nullptr;
+}
+
+void CWorldTicker::ForgetCollectedChar(const CChar* pChar) noexcept
+{
+    const auto it = std::find(_vPeriodicCharsTicksBuffer.begin(), _vPeriodicCharsTicksBuffer.end(), pChar);
+    if (it != _vPeriodicCharsTicksBuffer.end())
+        *it = nullptr;
+}
+
+
 // CObjBase Status Updates.
 
 bool CWorldTicker::IsStatusUpdateTickRegistered(const CObjBase *pObj)
@@ -583,8 +602,12 @@ void CWorldTicker::ProcessTimedObjects()
         EXC_TRYSUB("Selection");
         _wheelTimedObjs.CollectExpired(_iCurTickStartTime, _vTimedObjsTimeoutsBuffer);
         // Their entries were removed from the wheel: the handles aren't valid anymore.
+        // The flag lets the destructor remove the object from the buffer, if something destroys it before its turn.
         for (CTimedObject* pTimedObj : _vTimedObjsTimeoutsBuffer)
+        {
             pTimedObj->_hWorldTickWheel = CTickWheelCore::kNone;
+            pTimedObj->_uiTickFlags |= CTimedObject::kTickFlagTimeoutCollected;
+        }
         EXC_CATCHSUB("");
 
 #ifdef TIMEDOBJS_COUNTER
@@ -604,6 +627,10 @@ void CWorldTicker::ProcessTimedObjects()
     lpctstr ptcSubDesc;
     for (CTimedObject* pTimedObj : _vTimedObjsTimeoutsBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
     {
+        if (pTimedObj == nullptr)
+            continue;   // Destroyed by the tick of an object processed before (ForgetCollectedTimedObject).
+        pTimedObj->_uiTickFlags &= (uint8)~CTimedObject::kTickFlagTimeoutCollected;
+
         // Checked here and not while collecting, so that the wheel doesn't need to read the objects, and the state is the
         //  current one (the tick of a previous object may have changed it).
         // Their entry was removed: a sleeping object is registered again by _GoAwake, if its timer is still set;
@@ -749,10 +776,12 @@ void CWorldTicker::ProcessCharPeriodicTicks()
         EXC_TRYSUB("Selection");
         _wheelPeriodicChars.CollectExpired(_iCurTickStartTime, _vPeriodicCharsTicksBuffer);
         // Their entries were removed from the wheel: the handles aren't valid anymore.
+        // The flag lets the destructor remove the char from the buffer, if something destroys it before its turn.
         for (CChar* pChar : _vPeriodicCharsTicksBuffer)
         {
             pChar->_iTimePeriodicTick = 0;
             pChar->_hPeriodicTickWheel = CTickWheelCore::kNone;
+            pChar->_uiTickFlags |= CTimedObject::kTickFlagPeriodicCollected;
         }
         EXC_CATCHSUB("");
 
@@ -763,6 +792,10 @@ void CWorldTicker::ProcessCharPeriodicTicks()
         EXC_TRYSUB("Char Periodic Ticks Loop");
         for (CChar* pChar : _vPeriodicCharsTicksBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
         {
+            if (pChar == nullptr)
+                continue;   // Destroyed by the tick of a char processed before (ForgetCollectedChar).
+            pChar->_uiTickFlags &= (uint8)~CTimedObject::kTickFlagPeriodicCollected;
+
             // Their entry was removed: a sleeping char is registered again by _GoAwake, one being deleted doesn't need it.
             if (pChar->_IsBeingDeleted() || pChar->_IsSleeping())
             {

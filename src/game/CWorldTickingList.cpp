@@ -36,6 +36,16 @@ auto CWorldTickingList::IsCharPeriodicTickRegistered(const CChar* pChar) -> std:
     return g_World._Ticker.IsCharPeriodicTickRegistered(pChar);
 }
 
+void CWorldTickingList::ForgetCollectedObj(const CTimedObject* pObj) noexcept // static
+{
+    g_World._Ticker.ForgetCollectedTimedObject(pObj);
+}
+
+void CWorldTickingList::ForgetCollectedChar(const CChar* pChar) noexcept // static
+{
+    g_World._Ticker.ForgetCollectedChar(pChar);
+}
+
 void CWorldTickingList::AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
 {
     g_World._Ticker.AddObjStatusUpdate(pObj, fNeedsLock);
