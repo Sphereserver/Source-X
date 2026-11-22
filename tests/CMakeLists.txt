@@ -14,6 +14,12 @@ fetch_github_library(doctest "https://github.com/doctest/doctest.git" "${EXTERNA
 # Enable testing
 enable_testing()
 
+# Clang 21+ with -Wpedantic: the doctest macros use __COUNTER__, a C2y extension.
+include(CheckCXXCompilerFlag)
+if(NOT MSVC)
+    check_cxx_compiler_flag("-Wc2y-extensions" COMP_HAS_WC2Y_EXTENSIONS)
+endif()
+
 function(setup_tests)
     foreach(tgt ${TARGETS})
         target_link_libraries(${tgt} PRIVATE doctest::doctest)
@@ -23,6 +29,9 @@ function(setup_tests)
             target_compile_options(${tgt} PRIVATE /fp:precise)
         else()
             target_compile_options(${tgt} PRIVATE -fno-finite-math-only)
+        endif()
+        if(COMP_HAS_WC2Y_EXTENSIONS)
+            target_compile_options(${tgt} PRIVATE -Wno-c2y-extensions)
         endif()
 
         #[[
