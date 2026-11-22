@@ -129,3 +129,44 @@ jobs:
       run: |
             $env:PATH = "$PWD\lib\_bin\x86_64\mariadb;$env:PATH"   # libmariadb.dll
             ctest --test-dir build -C Debug --output-on-failure --timeout 600
+
+  unit-tests-mingw:
+    name: Windows x86_64 (MinGW GCC)
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+    - name: Install MSYS2 and the MinGW-w64 toolchain
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: true
+        install: >-
+          git
+          mingw-w64-ucrt-x86_64-gcc
+          mingw-w64-ucrt-x86_64-cmake
+          mingw-w64-ucrt-x86_64-ninja
+
+    - name: Pin doctest
+      run:  |
+            mkdir -p external
+            echo "{\"tag_name\": \"$DOCTEST_TAG\"}" > external/doctest_latest.json
+
+    # WIN_SPAWN_CONSOLE: a console application, so that the output of the tests reaches the log.
+    - name: CMake
+      run: |
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Debug" -DUNIT_TESTING=ON -DWIN_SPAWN_CONSOLE=ON \
+              -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Windows-GNU-x86_64.cmake \
+              -S ./ -B ./build
+    - name: Build
+      run: ninja -C build -k 0   # report every file that fails to compile
+    - name: Run the unit tests
+      run: |
+            export PATH="$PWD/lib/_bin/x86_64/mariadb:$PATH"   # libmariadb.dll
+            ctest --test-dir build --output-on-failure --timeout 600
