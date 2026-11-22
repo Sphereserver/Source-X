@@ -462,6 +462,11 @@ public:
 	bool m_fCUOStatus;      // Enable or disable the response to ConnectUO pings
 	bool m_fUOGStatus;      // Enable or disable the response to UOGateway pings
 
+    // Web identity secret from Classic UO Web Shard management (empty = feature disabled).
+    CSString m_sWebIdentity = {false};
+    // Reject clients that didn't send a valid web identity packet (only if m_sWebIdentity is set).
+    bool m_fWebIdentityForce = false;
+
 	int64 m_iWalkBuffer;	// Walk limiting code: buffer size (in tenths of second).
 	int m_iWalkRegen;		// Walk limiting code: regen speed (%)
 
