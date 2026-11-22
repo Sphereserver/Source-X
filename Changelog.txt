@@ -4252,3 +4252,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 20-11-2026, nightNR
 - Fixed: a player could walk through a blocking item (e.g. an energy field) when the terrain on that tile is above the head of the char, like the hidden terrain over a cave floor (e.g. 2558,500 at the Minoc cave entrance): the terrain replaced the item as the tile to stand on. With the item removed on the client (e.g. by a client command or plugin), the server accepted the step.
 - Fixed: chars deleted during their location effects (eg: a summon dispelled by a field @STEP, an NPC killed by a fire field or a trap) could stay in the world as orphans, alive and without the summon memory. The "run away from the threat" step that followed moved the char into a sector and took it out of the deletion queue. Deleted chars are not processed or moved anymore.
+
+22-11-2026, nightNR
+- Fixed: objects deleted, put to sleep or with the timer cleared by another object ticking in the same world tick still ticked once (e.g. an expiring summon deletes the char and its memories: the memories then ticked as plain items, "Timer expired without DECAY flag" with the name of the remembered char). The world ticker now checks them again before ticking each one, as it does when it selects them.

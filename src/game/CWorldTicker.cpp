@@ -1128,6 +1128,21 @@ void CWorldTicker::ProcessTimedObjects()
     lpctstr ptcSubDesc;
     for (CTimedObject* pTimedObj : _vTimedObjsTimeoutsBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
     {
+        // The selection above was done before ticking: an object that ticked earlier in this loop may have deleted this one
+        //  (e.g. an expiring summon deletes the char and its memories), put it to sleep or cleared its timer. Then it must
+        //  not tick. A sleeping object keeps its timer and goes back in the ticking list when it wakes up.
+        if (!pTimedObj->_IsTimerSet() || pTimedObj->_IsSleeping())
+        {
+            continue;
+        }
+        if (auto pObjBase = dynamic_cast<const CObjBase*>(pTimedObj))
+        {
+            if (pObjBase->_IsBeingDeleted())
+            {
+                continue;
+            }
+        }
+
         ptcSubDesc = "Generic";
 
         EXC_TRYSUB("Tick");
