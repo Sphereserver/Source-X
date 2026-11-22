@@ -298,6 +298,7 @@ void Sphere_ExitServer()
 		case 4:		ptcReason = "Service shutdown";					    break;
 		case 5:		ptcReason = "Console window closed";				break;
 		case 6:		ptcReason = "Proccess aborted by SIGABRT signal";	break;
+		case 15:	ptcReason = "Stop requested by SIGTERM signal";	    break;
 		default:	ptcReason = "Server shutdown complete";			    break;
 	}
 
