@@ -67,6 +67,12 @@ private:
     int64        _iCurTickStartTime;
     int64        _iLastTickDone;
 
+#ifdef UNIT_TESTING
+    // The unit tests make it do, in the turn of a char, what its periodic tick can do to the chars after it.
+    friend struct CWorldTestAccess;
+    void (*_pfnUnitTestCharTurn)(CChar* pChar) = nullptr;
+#endif
+
 public:
     void Tick();
 

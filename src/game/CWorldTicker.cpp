@@ -800,6 +800,10 @@ void CWorldTicker::ProcessCharPeriodicTicks()
                 continue;
             }
 
+#ifdef UNIT_TESTING
+            if (_pfnUnitTestCharTurn != nullptr)
+                _pfnUnitTestCharTurn(pChar);
+#endif
             if (pChar->OnTickPeriodic())
             {
                 if (!pChar->IsPeriodicTickPending())
