@@ -82,6 +82,16 @@ TEST_CASE("CResourceRefArray::LoadValStr adds and removes resources")
         CHECK(Load(arr, "-*, +e_unit_test_c"));
         CHECK(Links(arr) == std::vector<CResourceLink*>{pC});
     }
+    SUBCASE("-0 followed by more digits is a resource number, not all")
+    {
+        CHECK(Load(arr, "-0FFF01"));    // The number of e_unit_test_a, in hexadecimal.
+        CHECK(Links(arr) == std::vector<CResourceLink*>{pB});
+    }
+    SUBCASE("Removing all keeps the failure of an argument before it")
+    {
+        CHECK(!Load(arr, "+e_unit_test_unknown, -*"));
+        CHECK(arr.empty());
+    }
     SUBCASE("An unknown name fails, the rest of the line is applied")
     {
         CHECK(!Load(arr, "-e_unit_test_a, +e_unit_test_unknown, +e_unit_test_c"));

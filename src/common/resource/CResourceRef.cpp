@@ -87,13 +87,19 @@ bool CResourceRefArray::LoadValStr( lptstr ptcCmd, RES_TYPE restype )
         ptcCmd = ppBlocks[i];
         if ( ptcCmd[0] == '-' )
         {
-            // remove a frag or all frags.
+            // Remove one, or all of them with -0 or -*.
             ++ptcCmd;
             if ( ptcCmd[0] == '0' || ptcCmd[0] == '*' )
             {
-                clear();
-                fRet = true;
-                continue;
+                // Only 0 or * alone: -0a1 removes the resource number 0a1 (hexadecimal).
+                lpctstr ptcAfter = ptcCmd + 1;
+                GETNONWHITESPACE(ptcAfter);
+                if ( ptcAfter[0] == '\0' )
+                {
+                    // It doesn't fail, but it keeps a failure of an argument before it.
+                    clear();
+                    continue;
+                }
             }
 
             pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.RegisteredResourceGetDefByName( restype, ptcCmd ));
