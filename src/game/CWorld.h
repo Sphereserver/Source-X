@@ -224,6 +224,11 @@ public:
 	void _OnTick();
 
 	void GarbageCollection();
+	// While the objects tick, the garbage collection doesn't destroy the objects deleted or not yet placed.
+	bool IsTickingObjects() const noexcept
+	{
+		return _Ticker.IsTicking();
+	}
 	void Restock();
 	void RespawnDeadNPCs();
 

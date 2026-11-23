@@ -66,6 +66,7 @@ private:
     CWorldClock* _pWorldClock;
     int64        _iCurTickStartTime;
     int64        _iLastTickDone;
+    bool         _fTicking = false;
 
 #ifdef UNIT_TESTING
     // The unit tests make it do, in the turn of a char, what its periodic tick can do to the chars after it.
@@ -75,6 +76,13 @@ private:
 
 public:
     void Tick();
+
+    // True while Tick runs: the code running (the tick of an object, its triggers) may still use the objects deleted or
+    //  not yet placed, the garbage collection doesn't destroy them.
+    bool IsTicking() const noexcept
+    {
+        return _fTicking;
+    }
 
     bool AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject, bool fForce);
     bool DelTimedObject(CTimedObject* pTimedObject);
