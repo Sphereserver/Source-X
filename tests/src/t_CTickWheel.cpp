@@ -693,12 +693,12 @@ TEST_CASE("CTickWheel same expiration time from an upper level and from level 0 
 
 TEST_CASE("CTickWheel same expiration time reached through every level keeps the insertion order")
 {
-    // Due right after a boundary of level 2 (2^24 ms): set long and shortly before it (level 2), then after it (level 0),
-    //  and rescheduled. Their order is the order they were set, whatever the levels they went through.
+    // Set long before (level 2), then shortly before (level 1), then right before (level 0), and rescheduled.
+    //  Their order is the order they were set, whatever the levels they went through.
     Wheel wheel;
-    const int64 iBoundary = 3ll << 24;
-    const int64 iDue = iBoundary + 100;
-    int64 iNow = iBoundary - 5'000'000;
+    const int64 iBoundary = 3ll << 24;  // Start of the slot of level 2 of the due time.
+    const int64 iDue = iBoundary + 5'000;
+    int64 iNow = iDue - 20'000'000;
     CHECK(Collect(wheel, iNow).empty());
 
     std::vector<TestObj> vObjs(8);
@@ -706,16 +706,19 @@ TEST_CASE("CTickWheel same expiration time reached through every level keeps the
         vObjs[(size_t)i].id = i;
     Set(wheel, vObjs[0], iDue);     // Level 2.
     Set(wheel, vObjs[1], iDue);
-    iNow = iBoundary - 2'000;
+    iNow = iDue - 2'000'000;
     CHECK(Collect(wheel, iNow).empty());
-    Set(wheel, vObjs[2], iDue);     // Still level 2: the time is before the boundary.
+    Set(wheel, vObjs[2], iDue);     // Level 1.
     iNow = iBoundary + 1;
-    CHECK(Collect(wheel, iNow).empty());
-    Set(wheel, vObjs[3], iDue);     // Level 0, after the cascades of the others.
+    CHECK(Collect(wheel, iNow).empty());    // The first two cascaded to level 1, before the third one.
+    Set(wheel, vObjs[3], iDue);     // Level 1, after them.
+    iNow = iBoundary + 4'097;
+    CHECK(Collect(wheel, iNow).empty());    // All of them cascaded to level 0.
+    Set(wheel, vObjs[4], iDue);     // Level 0.
     Set(wheel, vObjs[0], iDue);     // Rescheduled: last.
-    Set(wheel, vObjs[4], iDue - 150);   // Already expired: placed in the current slot, they fire first, in time order.
-    Set(wheel, vObjs[5], iDue - 200);
-    CHECK(Collect(wheel, iDue + 1) == std::vector<int>{5, 4, 1, 2, 3, 0});
+    Set(wheel, vObjs[5], iNow - 100);   // Already expired: placed in the current slot, they fire first, in time order.
+    Set(wheel, vObjs[6], iNow - 200);
+    CHECK(Collect(wheel, iDue + 1) == std::vector<int>{6, 5, 1, 2, 3, 4, 0});
 
     // Due after the start of a level 1 slot, set from levels 1 and 0.
     const int64 iDue2 = iDue + 3 * 4'096 + 7;
@@ -725,6 +728,36 @@ TEST_CASE("CTickWheel same expiration time reached through every level keeps the
     Set(wheel, vObjs[1], iDue2);    // Level 0.
     Set(wheel, vObjs[6], iDue2);    // Rescheduled: last.
     CHECK(Collect(wheel, iDue2 + 1) == std::vector<int>{7, 1, 6});
+    CHECK(wheel.size() == 0);
+}
+
+TEST_CASE("CTickWheel same expiration time at the start of a slot of every level keeps the insertion order")
+{
+    // Due at a time that is the start of a slot of every level, set from every level: their slots start at the same
+    //  time, the order of the cascades decides the order of the entries.
+    Wheel wheel;
+    const int64 iDue = 3ll << 36;
+    const int64 iSetAt[] = { iDue - (1ll << 41), iDue - (1ll << 35), iDue - (1ll << 29), iDue - (1ll << 23), iDue - 100 };
+    std::vector<TestObj> vObjs(11);
+    for (int i = 0; i < (int)vObjs.size(); ++i)
+        vObjs[(size_t)i].id = i;
+    for (int iLevel = 0; iLevel < 5; ++iLevel)  // Levels 4 to 0.
+    {
+        CHECK(Collect(wheel, iSetAt[iLevel]).empty());
+        Set(wheel, vObjs[(size_t)iLevel], iDue);
+        Set(wheel, vObjs[(size_t)iLevel + 5], iDue + 1);
+    }
+
+    SUBCASE("Collected together")
+    {
+        CHECK(Collect(wheel, iDue + 2) == std::vector<int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+    }
+    SUBCASE("Cascaded by a collection at their time, then one more set at the same time")
+    {
+        CHECK(Collect(wheel, iDue).empty());
+        Set(wheel, vObjs[10], iDue);
+        CHECK(Collect(wheel, iDue + 2) == std::vector<int>{0, 1, 2, 3, 4, 10, 5, 6, 7, 8, 9});
+    }
     CHECK(wheel.size() == 0);
 }
 

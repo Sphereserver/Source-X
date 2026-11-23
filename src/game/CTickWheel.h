@@ -21,10 +21,13 @@
 * - Level 1 is as wide as level 0 so that the timers of minutes or hours (decay, spawns) are cascaded only once, and
 *   in small groups: every 4096 ms, the entries of the next 4096 ms. With 64 slots, level 2 would start at ~4.4 minutes
 *   instead of ~4.66 hours: every ~4.4 minutes, the entries of the next ~4.4 minutes would be moved all at once.
-* - An entry goes to the level of the highest group of bits where its time differs from the current time of the wheel.
-*   So every entry of a level expires after every entry of the lower levels, and an entry of an upper level is moved
-*   down ("cascaded") when the current time reaches the start of its slot: at most once per level in its life,
-*   never if it expires within the current level 0 revolution.
+* - An entry goes to the lowest level whose revolution is longer than the time left: level 0 if it expires in less than
+*   4096 ms, level 1 if in less than ~4.66 hours, and so on. Its slot is given by its time: every level is a ring,
+*   the slots after the current one are of the current revolution, the ones before it of the next one.
+* - An entry of an upper level is moved down ("cascaded") when the current time reaches the start of its slot:
+*   a timer shorter than 4096 ms is never cascaded, one shorter than ~4.66 hours at most once. The entries cascaded
+*   together are the ones due in the same slot, whatever the current time: no time boundary moves all the entries due
+*   after it at once (as when the level is chosen by the highest bit where the time differs from the current one).
 * - One bit per slot tells if the slot holds entries: the next occupied slot is found with a few bit scans,
 *   whatever the elapsed time.
 *
@@ -41,8 +44,9 @@
 * Collecting
 * - CollectExpired removes every expired entry (time < now) and returns them ordered by expiration time,
 *   then by insertion order (rescheduling counts as a new insertion): the same order of an ordered container.
-* - The slots are lists in insertion order, and every level 0 slot is of a single time (but the current one): taking
-*   the slots in time order gives that order already, only the entries of the current slot may need sorting.
+* - In every slot, the entries of the same time are in insertion order: the ones set directly are appended, the
+*   cascaded ones were set before them and go in front. Every level 0 slot is of a single time (but the current one):
+*   taking the slots in time order gives that order already, only the entries of the current slot may need sorting.
 * - If the time didn't move or went back, nothing is cascaded: only the current level 0 slot is checked.
 * - If it throws (out of memory), no entry is removed: their nodes are freed only after the owners were delivered.
 *
@@ -119,10 +123,11 @@ private:
     void _SetOccupied(uint32 uiSlot) noexcept;
     void _SetEmpty(uint32 uiSlot) noexcept;
     void _Link(Handle h, uint32 uiSlot) noexcept;
+    void _LinkFront(Handle h, uint32 uiSlot) noexcept;
     void _Unlink(Handle h) noexcept;
+    uint32 _SlotFor(int64 iTime) const noexcept;
     void _Place(Handle h) noexcept;
     bool _FindNextSlot(uint32* puiSlot, int64* piSlotStart) const noexcept;
-    Handle _Detach(uint32 uiSlot) noexcept;
     void _TakeL0(uint32 uiSlot, int64 iNow);
     void _Cascade(uint32 uiSlot) noexcept;
     void _ScanInPlace(uint32 uiSlot, int64 iNow);
