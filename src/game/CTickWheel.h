@@ -15,9 +15,12 @@
 * Hierarchical timing wheel with 1 ms resolution. The implementation is in CTickWheel.cpp.
 *
 * Layout
-* - Level 0: 4096 slots of 1 ms (one revolution is ~4.1 s). Levels 1 to 5: 64 slots each, every level 64 times coarser
-*   than the previous one. Together they cover 2^42 ms (~139 years); farther entries are parked at the end of that range
-*   and placed again from there.
+* - Level 0: 4096 slots of 1 ms (one revolution is ~4.1 s). Level 1: 4096 slots of 4096 ms (one revolution is ~4.66 h).
+*   Levels 2 to 4: 64 slots each, every level 64 times coarser than the previous one. Together they cover 2^42 ms
+*   (~139 years); farther entries are parked at the end of that range and placed again from there.
+* - Level 1 is as wide as level 0 so that the timers of minutes or hours (decay, spawns) are cascaded only once, and
+*   in small groups: every 4096 ms, the entries of the next 4096 ms. With 64 slots, level 2 would start at ~4.4 minutes
+*   instead of ~4.66 hours: every ~4.4 minutes, the entries of the next ~4.4 minutes would be moved all at once.
 * - An entry goes to the level of the highest group of bits where its time differs from the current time of the wheel.
 *   So every entry of a level expires after every entry of the lower levels, and an entry of an upper level is moved
 *   down ("cascaded") when the current time reaches the start of its slot: at most once per level in its life,
@@ -38,6 +41,8 @@
 * Collecting
 * - CollectExpired removes every expired entry (time < now) and returns them ordered by expiration time,
 *   then by insertion order (rescheduling counts as a new insertion): the same order of an ordered container.
+* - The slots are lists in insertion order, and every level 0 slot is of a single time (but the current one): taking
+*   the slots in time order gives that order already, only the entries of the current slot may need sorting.
 * - If the time didn't move or went back, nothing is cascaded: only the current level 0 slot is checked.
 * - If it throws (out of memory), no entry is removed: their nodes are freed only after the owners were delivered.
 *
@@ -91,9 +96,20 @@ private:
     struct Node;
     struct Collected;
 
-    static constexpr int    kL0Bits      = 12;
-    static constexpr int    kUpperLevels = 5;
-    static constexpr uint32 kL0Slots     = 1u << kL0Bits;
+    static constexpr int    kWideBits    = 12;      // Levels 0 and 1: 4096 slots each.
+    static constexpr int    kUpperLevels = 3;       // Levels 2 to 4: 64 slots each.
+
+    // One bit per slot of a level of 4096 slots, and one bit for each non zero word.
+    struct SlotBits
+    {
+        uint64 uiWords[(1u << kWideBits) / 64];
+        uint64 uiSummary;
+
+        void Set(uint32 uiIdx) noexcept;
+        void Reset(uint32 uiIdx) noexcept;
+        // The first occupied slot from uiFrom to the end of the level.
+        bool FindFrom(uint32 uiFrom, uint32* puiFound) const noexcept;
+    };
 
     Node& _N(Handle h) noexcept;
     const Node& _N(Handle h) const noexcept;
@@ -113,10 +129,16 @@ private:
     void _Collect(Handle h, const Node& node);
     void _Restore() noexcept;
 
-    std::vector<Handle> _vHeads;                    // First entry of each slot.
-    uint64 _uiOccL0[kL0Slots / 64];                 // Occupied level 0 slots, one bit each...
-    uint64 _uiOccL0Summary;                         // ...and one bit for each non zero word of _uiOccL0.
-    uint64 _uiOccLn[kUpperLevels];                  // Occupied slots of the upper levels.
+    struct SlotList
+    {
+        Handle hHead;                               // Oldest entry...
+        Handle hTail;                               // ...and newest one.
+    };
+
+    std::vector<SlotList> _vSlots;
+    SlotBits _bitsL0;                               // Occupied slots of level 0...
+    SlotBits _bitsL1;                               // ...of level 1...
+    uint64 _uiOccLn[kUpperLevels];                  // ...and of levels 2 to 4.
     std::vector<std::unique_ptr<Node[]>> _vChunks;  // Node pool, in blocks. Handle 0 is never used.
     std::vector<Handle>    _vKeepBuffer;
     std::vector<Collected> _vCollectBuffer;

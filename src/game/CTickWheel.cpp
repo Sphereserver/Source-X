@@ -15,13 +15,19 @@
 
 namespace
 {
-    constexpr int    kL0Bits      = 12;
-    constexpr int    kLnBits      = 6;
-    constexpr int    kUpperLevels = 5;
-    constexpr int    kTotalBits   = kL0Bits + (kLnBits * kUpperLevels);  // 42 bits of ms.
-    constexpr uint32 kL0Slots     = 1u << kL0Bits;
+    // Slots: level 0, then level 1, then levels 2 to 4. Times are split in the same way: bits 0-11 select the slot of
+    //  level 0, bits 12-23 the slot of level 1, bits 24-29, 30-35 and 36-41 the slots of levels 2, 3 and 4.
+    constexpr int    kWideBits    = 12;                                     // Levels 0 and 1.
+    constexpr int    kLnBits      = 6;                                      // Levels 2 to 4.
+    constexpr int    kUpperLevels = 3;
+    constexpr int    kL1Shift     = kWideBits;
+    constexpr int    kLnShift     = 2 * kWideBits;                          // First bit of level 2.
+    constexpr int    kTotalBits   = kLnShift + (kLnBits * kUpperLevels);    // 42 bits of ms.
+    constexpr uint32 kWideSlots   = 1u << kWideBits;
     constexpr uint32 kLnSlots     = 1u << kLnBits;
-    constexpr uint32 kSlotCount   = kL0Slots + (kLnSlots * kUpperLevels);
+    constexpr uint32 kL1First     = kWideSlots;                             // First slot of level 1...
+    constexpr uint32 kLnFirst     = 2 * kWideSlots;                         // ...and of level 2.
+    constexpr uint32 kSlotCount   = kLnFirst + (kLnSlots * kUpperLevels);
     constexpr uint32 kChunkBits   = 12;
     constexpr uint32 kChunkNodes  = 1u << kChunkBits;
 
@@ -48,11 +54,11 @@ struct CTickWheelCore::Collected
 
 
 CTickWheelCore::CTickWheelCore() :
-    _vHeads(kSlotCount, kNone),
-    _uiOccL0{}, _uiOccL0Summary(0), _uiOccLn{},
+    _vSlots(kSlotCount, SlotList{ kNone, kNone }),
+    _bitsL0{}, _bitsL1{}, _uiOccLn{},
     _uiPoolSize(1), _hFree(kNone), _iElapsed(0), _uiCount(0), _uiSeqNext(0)
 {
-    static_assert((kL0Bits == ::kL0Bits) && (kUpperLevels == ::kUpperLevels));
+    static_assert((kWideBits == ::kWideBits) && (kUpperLevels == ::kUpperLevels));
     static_assert((sizeof(void*) != 8) || (sizeof(Node) == 32));
     _vChunks.emplace_back(std::make_unique<Node[]>(kChunkNodes));
 }
@@ -130,25 +136,30 @@ void CTickWheelCore::CollectExpired(const int64 iNow, OutputFn fnOutput, void* p
     //  if anything throws until then, they are placed again (_Restore).
     _vCollectBuffer.clear();
     _vKeepBuffer.clear();
+    size_t uiFromCurrentSlot = 0;   // The first entries collected come from the current slot.
     try
     {
         if (iNow <= _iElapsed)
         {
             // Time didn't move or went back: only the current slot can hold expired entries
             //  (entries already expired when placed go to the current slot).
-            _ScanInPlace((uint32)(_iElapsed & (kL0Slots - 1)), iNow);
+            _ScanInPlace((uint32)(_iElapsed & (kWideSlots - 1)), iNow);
+            uiFromCurrentSlot = _vCollectBuffer.size();
         }
         else
         {
+            const int64 iCurrentSlotStart = _iElapsed;
             uint32 uiSlot;
             int64  iSlotStart;
             while (_FindNextSlot(&uiSlot, &iSlotStart))
             {
-                if (uiSlot < kL0Slots)
+                if (uiSlot < kL1First)
                 {
                     if (iSlotStart >= iNow)
                         break;
                     _TakeL0(uiSlot, iNow);
+                    if (iSlotStart == iCurrentSlotStart)
+                        uiFromCurrentSlot = _vCollectBuffer.size();
                 }
                 else
                 {
@@ -167,11 +178,21 @@ void CTickWheelCore::CollectExpired(const int64 iNow, OutputFn fnOutput, void* p
         if (_vCollectBuffer.empty())
             return;
 
-        std::sort(_vCollectBuffer.begin(), _vCollectBuffer.end(),
-            [](const Collected& a, const Collected& b) noexcept
-            {
-                return (a.iTime != b.iTime) ? (a.iTime < b.iTime) : (a.uiSeq < b.uiSeq);
-            });
+        // Ordered by time, then by insertion order. The slots are lists in insertion order (_Link), and every level 0
+        //  slot is of a single time, except the current one, that also gets the entries already expired when placed.
+        //  So, the slots being collected in time order, only the entries of the current slot need sorting.
+        //  The rare entries placed again out of their insertion order (parked far ones, the ones restored after
+        //  an exception) are found by the check of the whole batch.
+        auto fnLess = [](const Collected& a, const Collected& b) noexcept
+        {
+            return (a.iTime != b.iTime) ? (a.iTime < b.iTime) : (a.uiSeq < b.uiSeq);
+        };
+        const auto itBegin = _vCollectBuffer.begin(), itEnd = _vCollectBuffer.end();
+        const auto itCurrentEnd = itBegin + (ptrdiff_t)uiFromCurrentSlot;
+        if (!std::is_sorted(itBegin, itCurrentEnd, fnLess))
+            std::sort(itBegin, itCurrentEnd, fnLess);
+        if (!std::is_sorted(itBegin, itEnd, fnLess))
+            std::sort(itBegin, itEnd, fnLess);
         _vOwners.clear();
         _vOwners.reserve(_vCollectBuffer.size());
         for (const Collected& entry : _vCollectBuffer)
@@ -196,7 +217,7 @@ void CTickWheelCore::Clear(VisitFn fnVisit, void* pContext)
 {
     for (uint32 uiSlot = 0; uiSlot < kSlotCount; ++uiSlot)
     {
-        for (Handle h = _vHeads[uiSlot]; h != kNone; )
+        for (Handle h = _vSlots[uiSlot].hHead; h != kNone; )
         {
             Node& node = _N(h);
             const Handle hNext = node.uiNext;
@@ -205,11 +226,11 @@ void CTickWheelCore::Clear(VisitFn fnVisit, void* pContext)
             fnVisit(pContext, pOwner);
             h = hNext;
         }
-        _vHeads[uiSlot] = kNone;
+        _vSlots[uiSlot] = SlotList{ kNone, kNone };
     }
-    std::fill(std::begin(_uiOccL0), std::end(_uiOccL0), 0ull);
+    _bitsL0 = {};
+    _bitsL1 = {};
     std::fill(std::begin(_uiOccLn), std::end(_uiOccLn), 0ull);
-    _uiOccL0Summary = 0;
     _vChunks.resize(1);
     _uiPoolSize = 1;
     _hFree = kNone;
@@ -247,62 +268,95 @@ void CTickWheelCore::_Free(Handle h) noexcept
 
 // Slots
 
+void CTickWheelCore::SlotBits::Set(uint32 uiIdx) noexcept
+{
+    uiWords[uiIdx >> 6] |= (1ull << (uiIdx & 63));
+    uiSummary |= (1ull << (uiIdx >> 6));
+}
+
+void CTickWheelCore::SlotBits::Reset(uint32 uiIdx) noexcept
+{
+    uiWords[uiIdx >> 6] &= ~(1ull << (uiIdx & 63));
+    if (uiWords[uiIdx >> 6] == 0)
+        uiSummary &= ~(1ull << (uiIdx >> 6));
+}
+
+bool CTickWheelCore::SlotBits::FindFrom(uint32 uiFrom, uint32* puiFound) const noexcept
+{
+    uint32 uiWord = uiFrom >> 6;
+    uint64 uiBits = uiWords[uiWord] & (~0ull << (uiFrom & 63));
+    if (uiBits == 0)
+    {
+        const uint64 uiNextWords = (uiWord == 63) ? 0 : (uiSummary & (~0ull << (uiWord + 1)));
+        if (uiNextWords == 0)
+            return false;
+        uiWord = (uint32)std::countr_zero(uiNextWords);
+        uiBits = uiWords[uiWord];
+    }
+    *puiFound = (uiWord << 6) + (uint32)std::countr_zero(uiBits);
+    return true;
+}
+
 void CTickWheelCore::_SetOccupied(uint32 uiSlot) noexcept
 {
-    if (uiSlot < kL0Slots)
-    {
-        _uiOccL0[uiSlot >> 6] |= (1ull << (uiSlot & 63));
-        _uiOccL0Summary |= (1ull << (uiSlot >> 6));
-    }
+    if (uiSlot < kL1First)
+        _bitsL0.Set(uiSlot);
+    else if (uiSlot < kLnFirst)
+        _bitsL1.Set(uiSlot - kL1First);
     else
     {
-        const uint32 uiIdx = uiSlot - kL0Slots;
+        const uint32 uiIdx = uiSlot - kLnFirst;
         _uiOccLn[uiIdx >> kLnBits] |= (1ull << (uiIdx & (kLnSlots - 1)));
     }
 }
 
 void CTickWheelCore::_SetEmpty(uint32 uiSlot) noexcept
 {
-    if (uiSlot < kL0Slots)
-    {
-        _uiOccL0[uiSlot >> 6] &= ~(1ull << (uiSlot & 63));
-        if (_uiOccL0[uiSlot >> 6] == 0)
-            _uiOccL0Summary &= ~(1ull << (uiSlot >> 6));
-    }
+    if (uiSlot < kL1First)
+        _bitsL0.Reset(uiSlot);
+    else if (uiSlot < kLnFirst)
+        _bitsL1.Reset(uiSlot - kL1First);
     else
     {
-        const uint32 uiIdx = uiSlot - kL0Slots;
+        const uint32 uiIdx = uiSlot - kLnFirst;
         _uiOccLn[uiIdx >> kLnBits] &= ~(1ull << (uiIdx & (kLnSlots - 1)));
     }
 }
 
+// Appended: every list is in insertion order, oldest first. The entries cascaded to a slot were all placed before
+//  the ones placed there directly (they reach it when the slot starts being in range of its level), and they are
+//  moved in their order: so the order of a list doesn't depend on the levels its entries went through.
 void CTickWheelCore::_Link(Handle h, uint32 uiSlot) noexcept
 {
     Node& node = _N(h);
-    const Handle hHead = _vHeads[uiSlot];
+    SlotList& list = _vSlots[uiSlot];
     node.uiSlot = uiSlot;
-    node.uiPrev = kNone;
-    node.uiNext = hHead;
-    if (hHead != kNone)
-        _N(hHead).uiPrev = h;
+    node.uiPrev = list.hTail;
+    node.uiNext = kNone;
+    if (list.hTail != kNone)
+        _N(list.hTail).uiNext = h;
     else
+    {
+        list.hHead = h;
         _SetOccupied(uiSlot);
-    _vHeads[uiSlot] = h;
+    }
+    list.hTail = h;
 }
 
 void CTickWheelCore::_Unlink(Handle h) noexcept
 {
-    Node& node = _N(h);
+    // The slot is read only if the entry is at one end of its list.
+    const Node& node = _N(h);
     if (node.uiPrev != kNone)
         _N(node.uiPrev).uiNext = node.uiNext;
     else
-    {
-        _vHeads[node.uiSlot] = node.uiNext;
-        if (node.uiNext == kNone)
-            _SetEmpty((uint32)node.uiSlot);
-    }
+        _vSlots[node.uiSlot].hHead = node.uiNext;
     if (node.uiNext != kNone)
         _N(node.uiNext).uiPrev = node.uiPrev;
+    else
+        _vSlots[node.uiSlot].hTail = node.uiPrev;
+    if ((node.uiPrev == kNone) && (node.uiNext == kNone))
+        _SetEmpty((uint32)node.uiSlot);
 }
 
 void CTickWheelCore::_Place(Handle h) noexcept
@@ -317,16 +371,20 @@ void CTickWheelCore::_Place(Handle h) noexcept
 
     const uint64 uiDiff = uiTime ^ uiElapsed;
     uint32 uiSlot;
-    if (uiDiff < kL0Slots)
+    if (uiDiff < (1ull << kL1Shift))
     {
-        uiSlot = (uint32)(uiTime & (kL0Slots - 1));
+        uiSlot = (uint32)(uiTime & (kWideSlots - 1));
+    }
+    else if (uiDiff < (1ull << kLnShift))
+    {
+        uiSlot = kL1First + (uint32)((uiTime >> kL1Shift) & (kWideSlots - 1));
     }
     else
     {
         const int iMsb   = 63 - std::countl_zero(uiDiff);
-        const int iLevel = (iMsb - kL0Bits) / kLnBits;
-        const int iShift = kL0Bits + (iLevel * kLnBits);
-        uiSlot = kL0Slots + ((uint32)iLevel * kLnSlots) + (uint32)((uiTime >> iShift) & (kLnSlots - 1));
+        const int iLevel = (iMsb - kLnShift) / kLnBits;
+        const int iShift = kLnShift + (iLevel * kLnBits);
+        uiSlot = kLnFirst + ((uint32)iLevel * kLnSlots) + (uint32)((uiTime >> iShift) & (kLnSlots - 1));
     }
     _Link(h, uiSlot);
 }
@@ -335,37 +393,35 @@ void CTickWheelCore::_Place(Handle h) noexcept
 bool CTickWheelCore::_FindNextSlot(uint32* puiSlot, int64* piSlotStart) const noexcept
 {
     const uint64 uiElapsed = (uint64)_iElapsed;
+    uint32 uiIdx;
 
     // Level 0: from the current slot to the end of the revolution.
-    const uint32 uiCurL0 = (uint32)(uiElapsed & (kL0Slots - 1));
-    uint32 uiWord = uiCurL0 >> 6;
-    uint64 uiBits = _uiOccL0[uiWord] & (~0ull << (uiCurL0 & 63));
-    if (uiBits == 0)
+    if (_bitsL0.FindFrom((uint32)(uiElapsed & (kWideSlots - 1)), &uiIdx))
     {
-        const uint64 uiSummary = (uiWord == 63) ? 0 : (_uiOccL0Summary & (~0ull << (uiWord + 1)));
-        if (uiSummary != 0)
-        {
-            uiWord = (uint32)std::countr_zero(uiSummary);
-            uiBits = _uiOccL0[uiWord];
-        }
-    }
-    if (uiBits != 0)
-    {
-        *puiSlot = (uiWord << 6) + (uint32)std::countr_zero(uiBits);
-        *piSlotStart = (int64)((uiElapsed & ~(uint64)(kL0Slots - 1)) | *puiSlot);
+        *puiSlot = uiIdx;
+        *piSlotStart = (int64)((uiElapsed & ~(uint64)(kWideSlots - 1)) | uiIdx);
         return true;
     }
 
-    // Upper levels: the slots after the current one of each level.
+    // Level 1: the slots after the current one (the entries of the current one are in level 0).
+    const uint32 uiCurL1 = (uint32)((uiElapsed >> kL1Shift) & (kWideSlots - 1));
+    if ((uiCurL1 != kWideSlots - 1) && _bitsL1.FindFrom(uiCurL1 + 1, &uiIdx))
+    {
+        *puiSlot = kL1First + uiIdx;
+        *piSlotStart = (int64)((uiElapsed & ~((1ull << kLnShift) - 1)) | ((uint64)uiIdx << kL1Shift));
+        return true;
+    }
+
+    // Levels 2 to 4: the slots after the current one of each level.
     for (int iLevel = 0; iLevel < kUpperLevels; ++iLevel)
     {
-        const int iShift = kL0Bits + (iLevel * kLnBits);
+        const int iShift = kLnShift + (iLevel * kLnBits);
         const uint32 uiCur = (uint32)((uiElapsed >> iShift) & (kLnSlots - 1));
         const uint64 uiLevelBits = (uiCur == kLnSlots - 1) ? 0 : (_uiOccLn[iLevel] & (~0ull << (uiCur + 1)));
         if (uiLevelBits != 0)
         {
-            const uint32 uiIdx = (uint32)std::countr_zero(uiLevelBits);
-            *puiSlot = kL0Slots + ((uint32)iLevel * kLnSlots) + uiIdx;
+            uiIdx = (uint32)std::countr_zero(uiLevelBits);
+            *puiSlot = kLnFirst + ((uint32)iLevel * kLnSlots) + uiIdx;
             const uint64 uiHighMask = ~((1ull << (iShift + kLnBits)) - 1);
             *piSlotStart = (int64)((uiElapsed & uiHighMask) | ((uint64)uiIdx << iShift));
             return true;
@@ -376,8 +432,8 @@ bool CTickWheelCore::_FindNextSlot(uint32* puiSlot, int64* piSlotStart) const no
 
 CTickWheelCore::Handle CTickWheelCore::_Detach(uint32 uiSlot) noexcept
 {
-    const Handle h = _vHeads[uiSlot];
-    _vHeads[uiSlot] = kNone;
+    const Handle h = _vSlots[uiSlot].hHead;
+    _vSlots[uiSlot] = SlotList{ kNone, kNone };
     _SetEmpty(uiSlot);
     return h;
 }
@@ -397,7 +453,7 @@ void CTickWheelCore::_Collect(Handle h, const Node& node)
 
 void CTickWheelCore::_TakeL0(uint32 uiSlot, int64 iNow)
 {
-    for (Handle h = _vHeads[uiSlot]; h != kNone; h = _vHeads[uiSlot])
+    for (Handle h = _vSlots[uiSlot].hHead; h != kNone; h = _vSlots[uiSlot].hHead)
     {
         const Node& node = _N(h);
         if (node.iTime < iNow)
@@ -420,7 +476,7 @@ void CTickWheelCore::_Cascade(uint32 uiSlot) noexcept
 
 void CTickWheelCore::_ScanInPlace(uint32 uiSlot, int64 iNow)
 {
-    for (Handle h = _vHeads[uiSlot]; h != kNone; )
+    for (Handle h = _vSlots[uiSlot].hHead; h != kNone; )
     {
         const Node& node = _N(h);
         const Handle hNext = node.uiNext;
