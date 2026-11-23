@@ -353,7 +353,8 @@ TEST_CASE("CTickWheel level boundaries")
 
 TEST_CASE("CTickWheel time jumps around one revolution of each level")
 {
-    for (const int64 iJump : {4'095ll, 4'096ll, 4'097ll, 8'191ll, 262'143ll, 262'144ll, 262'145ll, 16'777'216ll})
+    for (const int64 iJump : {4'095ll, 4'096ll, 4'097ll, 8'191ll, 262'143ll, 262'144ll, 262'145ll,
+                              16'777'215ll, 16'777'216ll, 16'777'217ll})
     {
         CAPTURE(iJump);
         Wheel wheel;
@@ -683,11 +684,48 @@ TEST_CASE("CTickWheel same expiration time from an upper level and from level 0 
     // Same time, so the order is the insertion one: early, late2, late1.
     CHECK(Collect(wheel, iDue + 1) == std::vector<int>{1, 3, 2});
 
-    // Same, but all of them are in an upper level, cascaded together: the slots are lists in reverse insertion order.
+    // Same, but all of them are in an upper level, cascaded together: the order of their list is kept.
     Set(wheel, early, iDue + 100'000);
     Set(wheel, late2, iDue + 100'000);
     Set(wheel, late1, iDue + 100'000);
     CHECK(Collect(wheel, iDue + 100'001) == std::vector<int>{1, 3, 2});
+}
+
+TEST_CASE("CTickWheel same expiration time reached through every level keeps the insertion order")
+{
+    // Due right after a boundary of level 2 (2^24 ms): set long and shortly before it (level 2), then after it (level 0),
+    //  and rescheduled. Their order is the order they were set, whatever the levels they went through.
+    Wheel wheel;
+    const int64 iBoundary = 3ll << 24;
+    const int64 iDue = iBoundary + 100;
+    int64 iNow = iBoundary - 5'000'000;
+    CHECK(Collect(wheel, iNow).empty());
+
+    std::vector<TestObj> vObjs(8);
+    for (int i = 0; i < (int)vObjs.size(); ++i)
+        vObjs[(size_t)i].id = i;
+    Set(wheel, vObjs[0], iDue);     // Level 2.
+    Set(wheel, vObjs[1], iDue);
+    iNow = iBoundary - 2'000;
+    CHECK(Collect(wheel, iNow).empty());
+    Set(wheel, vObjs[2], iDue);     // Still level 2: the time is before the boundary.
+    iNow = iBoundary + 1;
+    CHECK(Collect(wheel, iNow).empty());
+    Set(wheel, vObjs[3], iDue);     // Level 0, after the cascades of the others.
+    Set(wheel, vObjs[0], iDue);     // Rescheduled: last.
+    Set(wheel, vObjs[4], iDue - 150);   // Already expired: placed in the current slot, they fire first, in time order.
+    Set(wheel, vObjs[5], iDue - 200);
+    CHECK(Collect(wheel, iDue + 1) == std::vector<int>{5, 4, 1, 2, 3, 0});
+
+    // Due after the start of a level 1 slot, set from levels 1 and 0.
+    const int64 iDue2 = iDue + 3 * 4'096 + 7;
+    Set(wheel, vObjs[6], iDue2);    // Level 1.
+    Set(wheel, vObjs[7], iDue2);
+    CHECK(Collect(wheel, iDue2 - 50).empty());     // After the start of the slot of level 1: cascaded.
+    Set(wheel, vObjs[1], iDue2);    // Level 0.
+    Set(wheel, vObjs[6], iDue2);    // Rescheduled: last.
+    CHECK(Collect(wheel, iDue2 + 1) == std::vector<int>{7, 1, 6});
+    CHECK(wheel.size() == 0);
 }
 
 TEST_CASE("CTickWheel very far timers")
