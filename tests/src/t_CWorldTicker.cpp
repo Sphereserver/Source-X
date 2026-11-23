@@ -268,6 +268,32 @@ TEST_CASE("CWorldTicker destroyed in its own tick")
     CHECK(iTicksB == 1);
 }
 
+TEST_CASE("CWorldTicker a TIMER set again in its own tick fires once per pass")
+{
+    // As TIMER=0 in @Timer: the object is due again at once, but not in the pass that is ticking it.
+    int iTicks = 0;
+    TestTimer a(&iTicks);
+    CWorldTestAccess::AdvanceTime(1000);
+    a.SetTimeout(10);
+    a.fnOnTick = [&a]() { a.SetTimeout(0); };
+
+    CWorldTestAccess::AdvanceTime(1000);
+    CWorldTestAccess::Tick();
+    CHECK(iTicks == 1);
+    CHECK(IsRegistered(a));
+
+    // Another pass at the same time: the new timer expires at the current time, not before it.
+    CWorldTestAccess::Tick();
+    CHECK(iTicks == 1);
+
+    for (int i = 2; i <= 4; ++i)
+    {
+        CWorldTestAccess::AdvanceTime(1);
+        CWorldTestAccess::Tick();
+        CHECK(iTicks == i);
+    }
+}
+
 TEST_CASE("CWorldTicker a TIMERF stopped by an earlier tick of the same pass")
 {
     // No object has this UID: the function would do nothing, but running deletes it.
@@ -368,4 +394,42 @@ TEST_CASE("CWorldTicker a char put to sleep by the periodic tick of a char befor
 
     delete pA;
     delete pB;
+}
+
+TEST_CASE("CWorldTicker a char destroyed by a TIMER, before its periodic tick in the same server tick")
+{
+    // The timers tick before the periodic ticks of the chars: a world save run by a @Timer destroys the deleted chars,
+    //  and some of them may be due for their periodic tick in the same server tick.
+    CWorldTestAccess::AdvanceTime(1000);
+    TestChar* pA = new TestChar;
+    TestChar* pB = new TestChar;
+    pA->WakeUp();
+    pB->WakeUp();
+    REQUIRE(IsPeriodicRegistered(pA));
+
+    int iTicks = 0;
+    TestTimer timer(&iTicks);
+    timer.SetTimeout(10);
+    TestChar* pNew = nullptr;
+    timer.fnOnTick = [&pA, &pNew]()
+    {
+        delete pA;
+        pA = nullptr;
+        // A char created now, and awake, likely takes the memory of A: if A was still registered, it would tick.
+        //  Its own time doesn't expire in this pass.
+        pNew = new TestChar;
+        pNew->WakeUp();
+    };
+
+    const CharTurnHookScope hook;
+    CWorldTestAccess::AdvanceTime(2000);
+    CWorldTestAccess::Tick();
+    CHECK(iTicks == 1);
+    CHECK(pA == nullptr);
+    CHECK(s_vCharTurns == std::vector<const CChar*>{pB});
+    CHECK(IsPeriodicRegistered(pB));
+    CHECK(IsPeriodicRegistered(pNew));
+
+    delete pB;
+    delete pNew;
 }
