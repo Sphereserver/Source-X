@@ -75,7 +75,10 @@ bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
     if (pTimedObject->_hWorldTickWheel != CTickWheelCore::kNone)
     {
         // Already registered: move it to the new time.
-        return _wheelTimedObjs.Reschedule(pTimedObject->_hWorldTickWheel, pTimedObject, iTimeout);
+        if (_wheelTimedObjs.Reschedule(pTimedObject->_hWorldTickWheel, pTimedObject, iTimeout))
+            return true;
+        // Not expected: the handle isn't of this object anymore. Registered again, else it would never tick.
+        DEBUG_ERR(("CWorldTicker: stale timer handle of a timed object, registered again.\n"));
     }
 
     pTimedObject->_hWorldTickWheel = _wheelTimedObjs.Insert(pTimedObject, iTimeout);
@@ -169,7 +172,10 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
     if (pChar->_hPeriodicTickWheel != CTickWheelCore::kNone)
     {
         // Already registered: move it to the new time.
-        return _wheelPeriodicChars.Reschedule(pChar->_hPeriodicTickWheel, pChar, iTickNext);
+        if (_wheelPeriodicChars.Reschedule(pChar->_hPeriodicTickWheel, pChar, iTickNext))
+            return true;
+        // Not expected: the handle isn't of this char anymore. Registered again, else it would never tick.
+        DEBUG_ERR(("CWorldTicker: stale periodic tick handle of a char, registered again.\n"));
     }
 
     pChar->_hPeriodicTickWheel = _wheelPeriodicChars.Insert(pChar, iTickNext);
@@ -194,6 +200,13 @@ bool CWorldTicker::AddCharTicking(CChar* pChar, bool fNeedsLock)
 {
     // Add CChar to the periodic ticking list.
     EXC_TRY("AddCharTicking");
+
+    if (pChar->_IsBeingDestructed())
+    {
+        // Its destructor already removed it, and the wheel would keep a dangling pointer: the destructor runs triggers
+        //  after that (as @CombatDelete, with the dying char as SRC), and a script setting its STR to 0 would add it.
+        return false;
+    }
 
     const ProfileTask timersTask(PROFILE_TIMERS);
 
@@ -277,20 +290,19 @@ bool CWorldTicker::DelCharTicking(CChar* pChar, bool fNeedsLock)
     }
 
     EXC_SET_BLOCK("Remove");
+    // Not registered afterwards, even if the erase failed (not expected: the handle wasn't of this char anymore).
+    //  Else the char would look registered, and never be registered again.
     const bool fRet = _EraseCharTicking(pChar);
-    if (fRet)
-    {
 #if MT_ENGINES
-        if (fNeedsLock)
-        {
-            std::unique_lock<std::shared_mutex> lock(pChar->MT_CMUTEX);
-            pChar->_iTimePeriodicTick = 0;
-        }
-        else
+    if (fNeedsLock)
+    {
+        std::unique_lock<std::shared_mutex> lock(pChar->MT_CMUTEX);
+        pChar->_iTimePeriodicTick = 0;
+    }
+    else
 #endif
-        {
-            pChar->_iTimePeriodicTick = 0;
-        }
+    {
+        pChar->_iTimePeriodicTick = 0;
     }
 
     return fRet;
@@ -831,6 +843,15 @@ void CWorldTicker::ProcessCharPeriodicTicks()
 void CWorldTicker::Tick()
 {
     ADDTOCALLSTACK("CWorldTicker::Tick");
+
+    // Reset even if an exception goes through (EXC_TRY doesn't catch anything in some builds).
+    struct TickingScope
+    {
+        bool& fTicking;
+        explicit TickingScope(bool& fFlag) noexcept : fTicking(fFlag) { fTicking = true; }
+        ~TickingScope() { fTicking = false; }
+    } const tickingScope(_fTicking);
+
     EXC_TRY("CWorldTicker::Tick");
 
     ProcessServerTickActions();

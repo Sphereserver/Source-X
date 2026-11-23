@@ -544,8 +544,14 @@ void CWorldThread::GarbageCollection_NewObjs()
 {
 	ADDTOCALLSTACK("CWorldThread::GarbageCollection_NewObjs");
 	EXC_TRY("GarbageCollection_NewObjs");
+
+	// Not while the objects tick (a world save or SERV.GARBAGE run by a script in a @Timer): the code running may still use
+	//  the objects deleted (the object ticking, removed by its own script) or not yet placed (a char being spawned, running its
+	//  @Create). The deleted ones are destroyed right after the tick (CWorld::_OnTick), the others by the next collection.
+	const bool fDestroyObjs = !g_World.IsTickingObjects();
+
 	// Clean up new objects that are never placed.
-	size_t iObjCount = m_ObjNew.GetContentCount();
+	size_t iObjCount = fDestroyObjs ? m_ObjNew.GetContentCount() : 0;
 	if (iObjCount > 0 )
 	{
 		g_Log.Event(LOGL_ERROR, "GC: %" PRIuSIZE_T " unplaced objects!\n", iObjCount);
@@ -568,8 +574,11 @@ void CWorldThread::GarbageCollection_NewObjs()
 
 		m_ObjNew.ClearContainer(false);	// empty our list of unplaced objects (and delete the objects in the list)
 	}
-	m_ObjDelete.ClearContainer(false);	// empty our list of objects to delete (and delete the objects in the list)
-	m_ObjSpecialDelete.ClearContainer();
+	if (fDestroyObjs)
+	{
+		m_ObjDelete.ClearContainer(false);	// empty our list of objects to delete (and delete the objects in the list)
+		m_ObjSpecialDelete.ClearContainer();
+	}
 
 
 	// Clean up GM pages not linked to an valid char/account
@@ -602,6 +611,9 @@ void CWorldThread::GarbageCollection_UIDs()
 
 	GarbageCollection_NewObjs();
 
+	// While the objects tick, the objects deleted or not yet placed aren't destroyed: see GarbageCollection_NewObjs.
+	const bool fDestroyObjs = !g_World.IsTickingObjects();
+
 	dword iCount = 0;
 	for (dword i = 1; i < GetUIDCount(); ++i )
 	{
@@ -611,6 +623,10 @@ void CWorldThread::GarbageCollection_UIDs()
 			if ( !pObj || pObj == UID_PLACE_HOLDER )
 				continue;
 
+			// Waiting to be destroyed after the tick, or to be placed: counted below.
+			if (!fDestroyObjs && (pObj->_IsBeingDeleted() || IsScheduledObjDeletion(pObj) || IsObjIdle(pObj)))
+				continue;
+
 			// Look for anomalies and fix them (that might mean delete it.)
 			int iResultCode = FixObj(pObj, i);
 			if ( iResultCode )
@@ -618,8 +634,11 @@ void CWorldThread::GarbageCollection_UIDs()
                 if (pObj->_IsBeingDeleted() || pObj->IsDeleted())
                 {
 					// Do an immediate delete here instead of Delete()
-					delete pObj;
-					FreeUID(i);	// Get rid of junk uid if all fails..
+					if (fDestroyObjs)
+					{
+						delete pObj;
+						FreeUID(i);	// Get rid of junk uid if all fails..
+					}
                 }
                 else
 				{
@@ -646,6 +665,16 @@ void CWorldThread::GarbageCollection_UIDs()
 	}
 
 	GarbageCollection_NewObjs();
+
+	// Still alive only while the objects tick.
+	for (const CSObjCont* pList : { &m_ObjNew, &m_ObjDelete })
+	{
+		for (const CSObjContRec* pRec : *pList)
+		{
+			if (dynamic_cast<const CObjBase*>(pRec))
+				++iCount;
+		}
+	}
 
 	if ( iCount != CObjBase::sm_iCount )	// All objects must be accounted for.
 		g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "Garbage Collection: done. Object memory leak %" PRIu32 "!=%" PRIu32 ".\n", iCount, CObjBase::sm_iCount);

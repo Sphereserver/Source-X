@@ -3,6 +3,7 @@
 #include "../../src/game/CWorldGameTime.h"
 #include "../../src/game/CWorldTickingList.h"
 #include "../../src/game/CWorldTimedFunctions.h"
+#include "../../src/game/CServer.h"
 #include "../../src/game/CServerConfig.h"
 #include "../../src/game/chars/CChar.h"
 #include "../../src/game/chars/CCharBase.h"
@@ -37,6 +38,12 @@ struct CWorldTestAccess
     static void DestroyScheduledDeletions()
     {
         g_World.m_ObjDelete.ClearContainer(false);
+    }
+
+    // What CWorld::GarbageCollection does (a world save too, with SAVEGARBAGECOLLECT), without changing the server mode.
+    static void CollectGarbage()
+    {
+        g_World.GarbageCollection_UIDs();
     }
 
     // Called in the turn of each char in the periodic ticks, before its tick.
@@ -112,6 +119,24 @@ namespace
             GoAwake();
             _SetAwakeFlagRaw();
         }
+
+        // As while ~CChar runs.
+        void SetDestructing(bool fDestructing)
+        {
+            if (fDestructing)
+                _uiInternalStateFlags |= SF_DESTRUCTING;
+            else
+                _uiInternalStateFlags &= (uchar)~SF_DESTRUCTING;
+        }
+    };
+
+    // The server is in a startup mode in the tests: the objects created don't get a UID (IsDeleted is true, Delete refuses
+    //  them, the garbage collection doesn't see them). In this scope they get one, as in a running server.
+    struct RunModeScope
+    {
+        const ServMode prevMode = g_Serv.GetServerMode();
+        RunModeScope()  { g_Serv.SetServerMode(ServMode::Run); }
+        ~RunModeScope() { g_Serv.SetServerMode(prevMode); }
     };
 
     bool IsPeriodicRegistered(const CChar* pChar)
@@ -432,4 +457,64 @@ TEST_CASE("CWorldTicker a char destroyed by a TIMER, before its periodic tick in
 
     delete pB;
     delete pNew;
+}
+
+TEST_CASE("CWorldTicker a char whose destructor runs isn't registered for the periodic ticks")
+{
+    // ~CChar removes the char from the periodic ticks, then runs triggers: @CombatDelete has the dying char as SRC, a script
+    //  setting its STR to 0 would register it again (Stat_SetVal), and the wheel would keep a dangling pointer.
+    TestChar* pA = new TestChar;
+    REQUIRE(!IsPeriodicRegistered(pA));
+
+    pA->SetDestructing(true);
+    pA->Stat_SetVal(STAT_STR, 0);
+    CHECK(!IsPeriodicRegistered(pA));
+
+    // Otherwise it's registered, to tick and die.
+    pA->SetDestructing(false);
+    pA->Stat_SetVal(STAT_STR, 0);
+    CHECK(IsPeriodicRegistered(pA));
+
+    delete pA;
+}
+
+TEST_CASE("CWorldTicker a garbage collection run by a tick doesn't destroy the objects deleted or not yet placed")
+{
+    // As REMOVE then SERV.GARBAGE (or a world save, with SAVEGARBAGECOLLECT) in a @Timer: the code after the script still uses
+    //  the object ticking, deleted by its own script. And the objects created but not yet placed, as a char being spawned.
+    const RunModeScope runMode;
+    CWorldTestAccess::AdvanceTime(1000);
+    TestChar* pDeleted = new TestChar;
+    TestChar* pUnplaced = new TestChar;     // The test chars are never placed in the world.
+    REQUIRE(pDeleted->GetUID().IsValidUID());
+    REQUIRE(g_World.FindUID(pUnplaced->GetUID().GetObjUID()) == pUnplaced);
+    REQUIRE(g_World.IsObjIdle(pUnplaced));
+    const dword uiObjs = CObjBase::sm_iCount;
+
+    int iTicks = 0;
+    TestTimer timer(&iTicks);
+    timer.SetTimeout(10);
+    bool fScheduled = false, fIdle = false;
+    dword uiObjsInTick = 0;
+    timer.fnOnTick = [&]()
+    {
+        pDeleted->Delete();
+        CWorldTestAccess::CollectGarbage();
+        fScheduled = g_World.IsScheduledObjDeletion(pDeleted);
+        fIdle = g_World.IsObjIdle(pUnplaced);
+        uiObjsInTick = CObjBase::sm_iCount;
+    };
+
+    CWorldTestAccess::AdvanceTime(1000);
+    CWorldTestAccess::Tick();
+    CHECK(iTicks == 1);
+    CHECK(uiObjsInTick == uiObjs);      // Nothing destroyed.
+    CHECK(fScheduled);
+    CHECK(fIdle);
+
+    // Destroyed after the tick, as by CWorld::_OnTick.
+    CWorldTestAccess::DestroyScheduledDeletions();
+    CHECK(CObjBase::sm_iCount == uiObjs - 1);
+
+    delete pUnplaced;
 }
