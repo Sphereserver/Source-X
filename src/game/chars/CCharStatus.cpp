@@ -2062,7 +2062,14 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, uint64 *uiBlockFlags, DIR_TYP
         return nullptr;
 
     if (uiBlockFlags)
-        *uiBlockFlags = blockingState.m_Bottom.m_uiBlockFlags;
+    {
+        // Flags of the tile we stand on (CAN_I_CLIMB etc.). CAN_I_ROOF is removed because standing on a roof tile doesn't mean being covered.
+        *uiBlockFlags = blockingState.m_Bottom.m_uiBlockFlags & ~CAN_I_ROOF;
+        // Covered when anything is over our head, as on 56d: a roof, an upper floor (platform), a blocking static or the terrain (char under the ground).
+        // Hover tiles are excluded, they are only routes to follow.
+        if (blockingState.m_Top.m_uiBlockFlags & ~CAN_I_HOVER)
+            *uiBlockFlags |= CAN_I_ROOF;
+    }
     if (pClimbHeight && (blockingState.m_Bottom.m_uiBlockFlags & CAN_I_CLIMB))
         *pClimbHeight = blockingState.m_zClimbHeight;
 
