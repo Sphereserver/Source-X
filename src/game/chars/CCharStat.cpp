@@ -272,39 +272,51 @@ void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 	}
 }
 
+namespace
+{
+    // Stats are stored in ushort, but base + MOD (or max + MODMAX) is computed in int: a negative MOD would otherwise
+    //  wrap the result around to ~65535. The MOD values are kept intact, so adding and removing them in scripts stays
+    //  symmetric: only the effective value is clamped, to [iMin, 65535].
+    inline ushort Stat_ClampToUShort(int iVal, int iMin) noexcept
+    {
+        return (ushort)std::clamp(iVal, iMin, (int)UINT16_MAX);
+    }
+}
+
 ushort CChar::Stat_GetMax( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetMax");
 	ASSERT((i >= 0) && (i < STAT_QTY)); // allow for food
 
-    ushort uiVal;
 	if ( m_Stat[i].m_max < 1 )
 	{
 		if ( i == STAT_FOOD )
 		{
 			const CCharBase * pCharDef = Char_GetDef();
 			ASSERT(pCharDef);
-            uiVal = pCharDef->m_MaxFood;
+            return pCharDef->m_MaxFood;
 		}
-		else
-            uiVal = Stat_GetAdjusted(i);
 
+        // Max hits/mana/stam derived from the adjusted stat: compute in int to avoid ushort overflow,
+        // and never go below 1 (a max of 0 would clamp the current value to 0 and kill the char).
+        int iVal = Stat_GetAdjusted(i);
 		if ( i == STAT_INT )
 		{
 			if ( (g_Cfg.m_iRacialFlags & RACIALF_ELF_WISDOM) && IsElf() )
-                uiVal += 20;		// elves always have +20 max mana (Wisdom racial trait)
+                iVal += 20;		// elves always have +20 max mana (Wisdom racial trait)
 		}
-		return uiVal;
+		return Stat_ClampToUShort(iVal, 1);
 	}
 
-    uiVal = m_Stat[i].m_max;
-	return uiVal;
+	return m_Stat[i].m_max;
 }
 
 ushort CChar::Stat_GetMaxAdjusted( STAT_TYPE i ) const
 {
     ADDTOCALLSTACK("CChar::Stat_GetMaxAdjusted");
-    return ushort(Stat_GetMax(i) + Stat_GetMaxMod(i));
+    // A living char always has at least 1 max hits/mana/stam. Food can be 0.
+    const int iVal = (int)Stat_GetMax(i) + Stat_GetMaxMod(i);
+    return Stat_ClampToUShort(iVal, (i == STAT_FOOD) ? 0 : 1);
 }
 
 uint CChar::Stat_GetSum() const
@@ -320,7 +332,10 @@ uint CChar::Stat_GetSum() const
 ushort CChar::Stat_GetAdjusted( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK_DEBUG("CChar::Stat_GetAdjusted");
-    return ushort(Stat_GetBase(i) + Stat_GetMod(i));
+    // A negative MOD can't take STR/INT/DEX below 1 (a char with a base stat of 0 keeps 0).
+    const ushort uiBase = Stat_GetBase(i);
+    const int iMin = ((i < STAT_BASE_QTY) && (uiBase > 0)) ? 1 : 0;
+    return Stat_ClampToUShort((int)uiBase + Stat_GetMod(i), iMin);
 }
 
 ushort CChar::Stat_GetBase( STAT_TYPE i ) const
