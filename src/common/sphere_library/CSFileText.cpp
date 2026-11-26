@@ -13,6 +13,7 @@ CSFileText::m_sClassName = "CSFileText";
 CSFileText::CSFileText()
 {
     _pStream = nullptr;
+    _fFlushEachWrite = true;
 #ifdef _WIN32
     _fNoBuffer = false;
 #endif
@@ -81,6 +82,7 @@ void CSFileText::_Close()
 
         fclose(_pStream);
         _pStream = nullptr;
+        _fFlushEachWrite = true;
         _fileDescriptor = _kInvalidFD;
     }
 }
@@ -141,6 +143,29 @@ void CSFileText::Flush() const
     ADDTOCALLSTACK("CSFileText::Flush");
     MT_UNIQUE_LOCK_SET(this);
     CSFileText::_Flush();
+}
+
+void CSFileText::_SetBufferedWrite(size_t uiBufferSize)
+{
+    ADDTOCALLSTACK("CSFileText::_SetBufferedWrite");
+
+    if ( !_IsFileOpen() || !_IsWriteMode() )
+        return;
+
+#ifndef _WIN32
+    // setvbuf has to be called before any other operation on the stream.
+    // Without it every line written triggers its own write() syscall: a world save is made of hundreds of thousands of lines.
+    if ( setvbuf(_pStream, nullptr, _IOFBF, uiBufferSize) == 0 )
+        _fFlushEachWrite = false;
+#else
+    (void)uiBufferSize; // Windows keeps its current behaviour (unbuffered stream, see _Write).
+#endif
+}
+void CSFileText::SetBufferedWrite(size_t uiBufferSize)
+{
+    ADDTOCALLSTACK("CSFileText::SetBufferedWrite");
+    MT_UNIQUE_LOCK_SET(this);
+    CSFileText::_SetBufferedWrite(uiBufferSize);
 }
 
 bool CSFileText::_IsEOF() const
@@ -261,7 +286,8 @@ bool CSFileText::_Write( const void * pData, int iLen )
 #endif
     size_t uiStatus = fwrite( pData, iLen, 1, _pStream );
 #ifndef _WIN32	// However, in unix, it works
-    fflush( _pStream );
+    if ( _fFlushEachWrite )
+        fflush( _pStream );
 #endif
     return ( uiStatus == 1 );
 }
