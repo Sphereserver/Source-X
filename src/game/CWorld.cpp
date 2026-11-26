@@ -762,6 +762,10 @@ bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseN
 		return false;
 	}
 
+    // Save files are written in one go and checked through their EOF marker, no need to flush them line by line.
+    s.SetBufferedWrite(1024 * 1024);
+
+
 	return true;
 }
 

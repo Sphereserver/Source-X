@@ -73,6 +73,14 @@ public:     virtual int Seek( int iOffset = 0, int iOrigin = SEEK_SET ) override
 protected:  void _Flush() const;
 public:     void Flush() const;
     /**
+    * @brief Use a full stdio buffer for writing, instead of flushing after each write (Linux).
+    * Must be called right after opening the file in write mode, before writing anything.
+    * The file is flushed when closed. Meant for big files written in one go, like world saves.
+    * @param uiBufferSize size of the write buffer in bytes.
+    */
+protected:  void _SetBufferedWrite(size_t uiBufferSize);
+public:     void SetBufferedWrite(size_t uiBufferSize);
+    /**
     * @brief Check if EOF is reached.
     * @return true if EOF is reached, false otherwise.
     */
@@ -142,6 +150,8 @@ protected:
     ///@}
 public:
     FILE * _pStream;		// The current open script type file.
+protected:
+    bool _fFlushEachWrite;  // Flush the stream after each write. Disabled by SetBufferedWrite, reset on close.
 #ifdef _WIN32
 protected:
     bool _fNoBuffer;		// TODOC.
