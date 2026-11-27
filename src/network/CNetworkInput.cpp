@@ -41,9 +41,16 @@ bool CNetworkInput::processInput()
     ADDTOCALLSTACK("CNetworkInput::processInput");
     ASSERT(m_thread != nullptr);
 
-    // when called from within the thread's context...
-    if ((m_thread->isActive() && m_thread->isCurrentThread()) ||	// check for multi-threaded network
-        !m_thread->isActive())										// check for single-threaded network
+    // when called from within the thread's context (multi-threaded network)...
+    if (m_thread->isActive() && m_thread->isCurrentThread())
+    {
+        // only receive the data here: the packets are handled by the main thread (see CNetworkManager::processAllInput),
+        //  because the packet handlers run the game logic and scripts, which are not thread safe
+        receiveData();
+    }
+
+    // single-threaded network...
+    else if (!m_thread->isActive())
     {
         receiveData();
         processData();
@@ -137,7 +144,7 @@ void CNetworkInput::processData()
 {
     ADDTOCALLSTACK("CNetworkInput::processData");
     ASSERT(m_thread != nullptr);
-    ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
+    // called by the main thread, also when the network thread is active (it only receives the data)
     EXC_TRY("ProcessData");
 
     // check which states have data

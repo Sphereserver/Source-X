@@ -36,7 +36,7 @@ protected:
     CSocket m_socket; // socket
     CClient* m_client; // client
     CSocketAddress m_peerAddress; // client address
-    CNetworkThread* m_parent;
+    std::atomic<CNetworkThread*> m_parent;
     int64 m_iConnectionTimeMs;
 
     volatile std::atomic_bool m_isInUse;		// is currently in use
@@ -46,6 +46,7 @@ protected:
 
     volatile std::atomic_bool m_useAsync;        // is this socket using asynchronous sends
     volatile std::atomic_bool m_isSendingAsync;  // is a packet currently being sent asynchronously?
+    std::atomic_bool _fReleasedByThread;        // closed and no longer used by its network thread (threaded network)
 
     bool m_seeded;	// is seed received
     bool m_newseed; // is the client using new seed
@@ -82,8 +83,8 @@ protected:
     } m_incoming; // incoming data
 
     int m_packetExceptions;     // number of packet exceptions
-    int64 _iInByteCounter;    // number of bytes received by this client since the last legitimacy check
-    int64 _iOutByteCounter;   // number of bytes sent     by this client since the last legitimacy check
+    std::atomic<int64> _iInByteCounter;    // number of bytes received by this client since the last legitimacy check
+    std::atomic<int64> _iOutByteCounter;   // number of bytes sent     by this client since the last legitimacy check
 
 public:
     GAMECLIENT_TYPE m_clientType;	// type of client
@@ -159,6 +160,8 @@ public:
 
     void setParentThread(CNetworkThread* parent) { m_parent = parent; }
     CNetworkThread* getParentThread(void) const { return m_parent; }
+    void markReleasedByThread(void) { _fReleasedByThread = true; }
+    bool isReleasedByThread(void) const { return _fReleasedByThread; }
 
     friend class CClient;
     friend class ClientIterator;

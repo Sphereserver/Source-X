@@ -22,6 +22,7 @@ private:
     CNetworkManager* m_manager;					// parent network manager
     size_t m_id;								// network thread #
     int64 _iTimeLastStateDataCheck;
+    std::atomic_bool _fOutputQueued;			// packets were queued by another thread since the last wake up (threaded network)
 
     typedef std::deque<CNetState*> NetworkStateList;
     NetworkStateList m_states;					// states controlled by this thread
@@ -47,6 +48,8 @@ public:
     void assignNetworkState(CNetState* state);	// assign a network state to this thread
     void queuePacket(PacketSend* packet, bool appendTransaction);
     void queuePacketTransaction(PacketTransaction* transaction);
+    void markOutputQueued(void) noexcept { _fOutputQueued = true; }
+    bool takeOutputQueued(void) noexcept { return _fOutputQueued.exchange(false); }
 
 public:
     void onAsyncSendComplete(CNetState* state, bool success)
@@ -79,6 +82,7 @@ public:
 
     void init();
     void flushAllClients(void);			// flush all output
+    void checkStatesDataQuota(void);	// kick the clients exceeding the network data quota (runs on the main thread when threaded)
 
 private:
     void checkNewStates(void);			// check for states that have been assigned but not moved to our list

@@ -646,6 +646,11 @@ void CNetworkOutput::QueuePacketTransaction(PacketTransaction* transaction)
 
 	// notify thread
 	CNetworkThread* thread = state->getParentThread();
-	if (thread != nullptr && thread->getPriority() == ThreadPriority::Disabled)
-		thread->awaken();
+	if (thread != nullptr)
+	{
+		if (thread->getPriority() == ThreadPriority::Disabled)
+			thread->awaken();
+		else if (thread->isActive())
+			thread->markOutputQueued();	// woken up once by the main thread after its tick (CNetworkManager::processAllOutput)
+	}
 }

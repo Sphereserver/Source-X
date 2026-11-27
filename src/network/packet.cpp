@@ -1293,7 +1293,7 @@ void PacketSend::push(const CClient *client, bool appendTransaction)
 		return;
 	}
 
-	m_target->getParentThread()->queuePacket(this, appendTransaction);
+	CNetworkOutput::QueuePacket(this, appendTransaction);
 }
 
 void PacketSend::target(const CClient* client)
