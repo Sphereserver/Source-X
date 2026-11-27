@@ -41,6 +41,7 @@ class Packet
 protected:
 	byte* m_buffer;				// raw data
 	uint m_bufferSize;		// size of raw data
+	uint m_bufferCapacity;	// allocated size of m_buffer (>= m_bufferSize): grows geometrically, so writing a packet byte by byte doesn't reallocate and copy it every time
 
 	uint m_length;			// length of packet
 	uint m_position;			// current position in packet

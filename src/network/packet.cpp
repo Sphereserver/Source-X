@@ -151,6 +151,7 @@ void Packet::clear(void)
 	}
 
 	m_bufferSize = 0;
+	m_bufferCapacity = 0;
 	m_position = 0;
 }
 
@@ -177,14 +178,21 @@ void Packet::resize(uint newsize)
 	ASSERT(newsize > 0);
 	if ( newsize > m_bufferSize )		// increase buffer, copying the contents
 	{
-		byte* buffer = new byte[newsize];
-		if (m_buffer != nullptr)
+		if ( newsize > m_bufferCapacity )
 		{
-			memcpy(buffer, m_buffer, m_bufferSize);
-			delete[] m_buffer;
-		}
+			// Reallocate at least doubling the allocation: growing it only by the bytes needed (a few at a time when writing)
+			//  copied the whole packet for every few bytes written (O(n^2)). The first allocation is exact.
+			const uint uiCapacity = maximum(newsize, m_bufferCapacity * 2);
+			byte* buffer = new byte[uiCapacity];
+			if (m_buffer != nullptr)
+			{
+				memcpy(buffer, m_buffer, m_bufferSize);
+				delete[] m_buffer;
+			}
 
-		m_buffer = buffer;
+			m_buffer = buffer;
+			m_bufferCapacity = uiCapacity;
+		}
 		m_bufferSize = newsize;
 		m_length = m_bufferSize;
 	}
