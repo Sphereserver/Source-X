@@ -405,18 +405,19 @@ void CChatChannel::Broadcast(CHATMSG_TYPE iType, lpctstr pszName, lpctstr pszTex
 {
     ADDTOCALLSTACK("CChatChannel::Broadcast");
     CSString sName;
-    CChatChanMember *pSendingMember = FindMember(pszName);
+    // pszName is nullptr for messages without a sender (e.g. ToggleDefaultVoice): don't look it up, strcmp can't take it
+    CChatChanMember *pSendingMember = (pszName != nullptr) ? FindMember(pszName) : nullptr;
 
     if (pSendingMember && iType >= CHATMSG_PlayerTalk && iType <= CHATMSG_PlayerPrivate) // Only chat, emote, and privates get a color status number
         g_Serv.m_Chats.FormatName(sName, pSendingMember, fOverride);
-    else
+    else if (pszName != nullptr)
         sName = pszName;
 
     for (size_t i = 0; i < m_Members.size(); i++)
     {
         // Check to see if the recipient is ignoring messages from the sender
         // Just pass over it if it's a regular talk message
-        if (!m_Members[i]->IsIgnoring(pszName))
+        if ((pszName == nullptr) || !m_Members[i]->IsIgnoring(pszName))
         {
             m_Members[i]->SendChatMsg(iType, sName, pszText, lang );
         }
