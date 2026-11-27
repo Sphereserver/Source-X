@@ -298,6 +298,14 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			layer = LAYER_NONE;
 	}
 
+	// If it's equipped on another char, fire @Unequip before removing it from that char.
+	const CItemUnequipGuard unequipGuard(pItem, this);
+	if (unequipGuard.IsItemMoved())
+	{
+		// The script moved or removed it: leave it where it is now.
+		return;
+	}
+
 	CContainer::ContentAddPrivate( pItem );
 	pItem->SetEquipLayer( layer );
 
@@ -392,6 +400,34 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 	pItem->Update();
 }
 
+CItemUnequipGuard::CItemUnequipGuard(CItem* pItem, const CSObjCont* pDest) :
+	_pItem(pItem), _fOwner(false), _fItemMoved(false)
+{
+	ADDTOCALLSTACK("CItemUnequipGuard::CItemUnequipGuard");
+	ASSERT(pItem);
+
+	CChar* pChar = dynamic_cast<CChar*>(pItem->GetParent());
+	if ((pChar == nullptr) || (pChar == pDest))
+		return;	// Not equipped, or not leaving the char.
+	if (pItem->IsUnequipping())
+		return;	// Already fired, by an outer guard: we are in its trigger or in the removal right after it.
+	if ((pItem->GetEquipLayer() == LAYER_DRAGGING) || g_Serv.IsLoadingGeneric())
+		return;
+	if (!IsTrigUsed(TRIGGER_UNEQUIP) && !IsTrigUsed(TRIGGER_ITEMUNEQUIP))
+		return;
+
+	_fOwner = true;
+	pItem->SetUnequipping(true);
+	pItem->OnTrigger(ITRIG_UNEQUIP, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pChar);
+	_fItemMoved = (pItem->GetParent() != pChar);
+}
+
+CItemUnequipGuard::~CItemUnequipGuard() noexcept
+{
+	if (_fOwner)
+		_pItem->SetUnequipping(false);
+}
+
 // Unequip the item.
 // This may be a delete etc. It can not FAIL !
 // Removing 'Equip beneficts' from this item
@@ -404,10 +440,14 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
 	CItem * pItem = static_cast <CItem*>(pObRec);
 
 	LAYER_TYPE layer = pItem->GetEquipLayer();
-	if (( IsTrigUsed(TRIGGER_UNEQUIP) ) || ( IsTrigUsed(TRIGGER_ITEMUNEQUIP) ))
 	{
-		if ( layer != LAYER_DRAGGING && ! g_Serv.IsLoadingGeneric())
-            pItem->OnTrigger( ITRIG_UNEQUIP, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this );
+		// Fire @Unequip, unless the item is being moved by MoveTo, ContentAdd or LayerAdd, which already fired it.
+		const CItemUnequipGuard unequipGuard(pItem, nullptr);
+		if (unequipGuard.IsItemMoved())
+		{
+			// The trigger already moved (or removed) this item, so it has already been fully unequipped by that nested removal.
+			return;
+		}
 	}
 
 	CContainer::OnRemoveObj( pObRec );
@@ -3213,10 +3253,12 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
         // If i have changed the container via scripts, we shouldn't change item's position again here
         if (pItemContPrev == pItem->GetContainer())
         {
-            pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
-            fDisplayMsg = true;
             pItem->RemoveFromView();
-            pItem->MoveToDecay(GetTopPoint(), iDecayTime);	// drop it on ground
+            if (pItem->MoveToDecay(GetTopPoint(), iDecayTime))	// drop it on ground
+            {
+                pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
+                fDisplayMsg = true;
+            }
         }
 	}
 

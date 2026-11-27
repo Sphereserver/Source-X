@@ -675,6 +675,14 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 		}
 	}
 
+	// If it's equipped, fire @Unequip before removing it from the char.
+	const CItemUnequipGuard unequipGuard(pItem, this);
+	if (unequipGuard.IsItemMoved())
+	{
+		// The script moved or removed it: leave it where it is now.
+		return;
+	}
+
 	CContainer::ContentAddPrivate(pItem);
 	pItem->SetContainedPoint(pt);
 	pItem->SetContainedGridIndex(gridIndex);

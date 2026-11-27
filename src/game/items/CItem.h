@@ -105,6 +105,7 @@ protected:
 	uint64	m_CanUse;		// Base attribute flags. can_u_all/male/female..
     uint64	m_Attr;
     uchar m_containedGridIndex;	// Which grid have i been placed in ? (when in a container)
+    bool _fUnequipping;         // Being unequipped: @Unequip was fired, the item is still on the char but is leaving it.
 
 public:
     byte m_speed;
@@ -789,6 +790,13 @@ public:
 		m_containedGridIndex = index;
 	}
 
+	bool IsUnequipping() const noexcept {
+		return _fUnequipping;
+	}
+	void SetUnequipping(bool fUnequipping) noexcept {
+		_fUnequipping = fUnequipping;
+	}
+
 	virtual void Update( const CClient * pClientExclude = nullptr ) override;	// send this new item to everyone.
 	virtual void Flip() override;
 	bool LoadSetContainer( const CUID& uid, LAYER_TYPE layer );
@@ -912,6 +920,37 @@ public:
     bool Plant_SetID(ITEMID_TYPE id);
 
 	CItem * UnStackSplit( word amount, CChar * pCharSrc = nullptr );
+};
+
+/**
+ * @brief Fires @Unequip for an item equipped on a char, before the item is removed from that char.
+ *
+ * The trigger runs while the item is still equipped, before anything is changed, so a script can move or remove the item
+ *  without leaving the removal halfway. The item stays marked as being unequipped until the guard is destroyed: the removal
+ *  that follows doesn't fire @Unequip again, and nothing else removes it in the meanwhile (eg. the STR check of the char).
+ * If the script moved (or removed) the item, IsItemMoved() is true and the caller must stop: the script wins.
+ */
+class CItemUnequipGuard
+{
+public:
+    /**
+     * @param pItem The item that is going to be removed from its container.
+     * @param pDest Where it is moved to, or nullptr. Nothing is fired if it's already there (eg. a layer change on the same char).
+     */
+    CItemUnequipGuard(CItem* pItem, const CSObjCont* pDest);
+    ~CItemUnequipGuard() noexcept;
+
+    CItemUnequipGuard(const CItemUnequipGuard&) = delete;
+    CItemUnequipGuard& operator=(const CItemUnequipGuard&) = delete;
+
+    bool IsItemMoved() const noexcept {
+        return _fItemMoved;
+    }
+
+private:
+    CItem* _pItem;
+    bool _fOwner;       // This guard fired the trigger and marked the item.
+    bool _fItemMoved;   // The trigger moved or removed the item.
 };
 
 #endif // _INC_CITEM_H

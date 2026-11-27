@@ -151,6 +151,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
 	m_CanUse = pItemDef->m_CanUse;
 	m_wAmount = 1;
 	m_containedGridIndex = 0;
+	_fUnequipping = false;
 	m_dwDispIndex = ITEMID_NOTHING;
 
 
@@ -1588,6 +1589,15 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	CSector * pSector = pt.GetSector();
 	ASSERT( pSector );
+
+	// If it's equipped, fire @Unequip before removing it from the char.
+	const CItemUnequipGuard unequipGuard(this, nullptr);
+	if (unequipGuard.IsItemMoved())
+	{
+		// The script moved or removed it: leave it where it is now.
+		return false;
+	}
+
 	pSector->MoveItemToSector(this);	// This also awakes the item
 
 	// Is this area too complex ?
@@ -1677,7 +1687,11 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
     // If i have changed the container via scripts, we shouldn't change item's position again here
     if (pCont == GetContainer())
     {
-        MoveTo(ptNewPlace);
+        if (!MoveTo(ptNewPlace))
+        {
+            // Moved elsewhere (or removed) by its @Unequip trigger.
+            return false;
+        }
     }
 	Update();
 
